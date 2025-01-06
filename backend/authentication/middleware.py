@@ -6,9 +6,8 @@ from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser
 from django.http import parse_cookie
 
-
 class JWTCookieMiddleware:
-
+    
     def __init__(self, get_response) -> None:
         self.get_response = get_response
 
@@ -19,23 +18,25 @@ class JWTCookieMiddleware:
         if jwt_token is not None:
             try:
                 user = self.get_user(request.COOKIES.get("jwt_token"),request=request)
-                request.user = user
-            except Exception as e:
+            except Exception:
                 request.user = AnonymousUser()
-                print(f"JWT Authentication error: {str(e)}")
+                pass
 
         response = self.get_response(request)
         return response
-    
+
     def get_user(self,token,request):
         try:
             t = SlidingToken(token)
             user_id = t["user_id"]
             user = User.objects.get(id=user_id)
             setattr(request, "_auth", [user, token])
-            return 
+            request.user = user
+            return user
         except:
             return AnonymousUser()
+
+
 
 
 class WebSocketJWTAuthMiddleware:
