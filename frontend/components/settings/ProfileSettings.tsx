@@ -1,16 +1,13 @@
 import React from 'react';
 import { User, Upload, Camera } from 'lucide-react';
-
-import { useUser } from '@/app/context/userContext';
 import Image from 'next/image';
+import { UserData } from '@/app/store/store';
 
-export function ProfileSettings() {
-  const { user, loading, error } = useUser();
+export function ProfileSettings( {user}: {user : UserData} ) {
+  // task list
+  // handel file upload
+  // handel form update
 
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!user) return <p>No user found</p>;
   return (
     <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6">
       <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -39,7 +36,7 @@ export function ProfileSettings() {
 
         <div className="relative inline-block">
           <Image
-            src={user?.avatar || "/images/avatar.png"}
+            src={user.avatar}
             className="w-24 h-24 rounded-full object-cover"
             alt="Avatar"
             width={96}
@@ -63,6 +60,7 @@ export function ProfileSettings() {
             <input
               type="text"
               value={user.username}
+              name="username"
               disabled
               placeholder='username'
               className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/40"
@@ -74,7 +72,8 @@ export function ProfileSettings() {
               Email
             </label>
             <input
-              type="email"
+              type="text"
+              name="email"
               value={user.email}
               disabled
               placeholder='email'
@@ -86,7 +85,8 @@ export function ProfileSettings() {
               Firstname
             </label>
             <input
-              type="email"
+              type="text"
+              name="firstname"
               value={user.first_name}
               disabled
               placeholder='email'
@@ -98,7 +98,8 @@ export function ProfileSettings() {
               Lastname
             </label>
             <input
-              type="email"
+              type="text"
+              name="lastname"
               value={user.last_name}
               disabled
               placeholder='email'

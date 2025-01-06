@@ -22,7 +22,7 @@ export function PasswordChangeForm() {
   return (
     <form className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1 text-white">
+        <label className="block text-sm font-medium text-gray-300 mb-1 backdrop-blur-3xl">
           Current Password
         </label>
         <div className="relative">

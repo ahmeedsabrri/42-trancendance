@@ -14,21 +14,28 @@ class JWTCookieMiddleware:
 
     def __call__(self, request):
         # process request
-
         jwt_token = request.COOKIES.get("jwt_token", None)
+        print(jwt_token)
         if jwt_token is not None:
             try:
-                token = SlidingToken(jwt_token)
-                user_id = token["user_id"]
-                user = User.objects.get(id=user_id)
-                setattr(request, "_auth", [user, token])
+                user = self.get_user(request.COOKIES.get("jwt_token"),request=request)
                 request.user = user
-            except Exception:
+            except Exception as e:
                 request.user = AnonymousUser()
-                pass
+                print(f"JWT Authentication error: {str(e)}")
 
         response = self.get_response(request)
         return response
+    
+    def get_user(self,token,request):
+        try:
+            t = SlidingToken(token)
+            user_id = t["user_id"]
+            user = User.objects.get(id=user_id)
+            setattr(request, "_auth", [user, token])
+            return 
+        except:
+            return AnonymousUser()
 
 
 class WebSocketJWTAuthMiddleware:

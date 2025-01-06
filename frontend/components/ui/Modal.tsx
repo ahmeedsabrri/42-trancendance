@@ -10,12 +10,11 @@ interface ModalProps {
 
 export function Modal({ isOpen, onClose, children, title }: ModalProps) {
   if (!isOpen) return null;
-
   return (
     <div className='w-full h-screen flex items-center justify-center'>
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-purple/10" onClick={onClose} />
-      <div className="relative bg-gradient-to-br from-purple-900/90 to-indigo-900/90 backdrop-blur-xl p-6 rounded-lg shadow-xl w-full max-w-md">
+      <div className="absolute inset-0" onClick={onClose} />
+      <div className="relative backdrop-blur-3xl bg-zinc-600/80  p-6 rounded-2xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-white">{title}</h3>
           <button

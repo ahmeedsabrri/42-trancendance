@@ -76,7 +76,12 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class TwoFatorAuthcSerializer(serializers.Serializer):
     otp_code = serializers.CharField(
-        max_length=6, min_length=6, required=True, write_only=True
+        max_length=6, min_length=6, required=True, write_only=True,
+        error_messages={
+            'required': 'OTP code is required.',
+            'max_length': 'OTP code must be exactly 6 characters.',
+            'min_length': 'OTP code must be exactly 6 characters.'
+        }
     )
 
     def validate(self, attrs):

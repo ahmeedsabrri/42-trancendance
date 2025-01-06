@@ -1,6 +1,5 @@
 "use client";
 import "./globals.css";
-import { UserProvider } from "./context/userContext";
 import { usePathname } from "next/navigation";
 
 import SideBar from "@/components/sidebar/Sidebar";
@@ -15,10 +14,10 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
 
-  if (pathname === "/auth" || pathname === "auth/otp") {
+  if (pathname === "/auth") {
     return (
       <html lang="en">
-        <body className="bg-background">
+        <body className="bg-background  bg-background bg-center bg-no-repeat bg-cover">
           {children}
         </body>
       </html>
@@ -27,13 +26,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="w-screen h-screen overflow-hidden flex justify-center items-center bg-background bg-center bg-no-repeat bg-cover" >
-        <UserProvider>
           <SideBar />
           <div className="p-[10px] w-[90%] h-[90%] flex flex-col justify-start items-center mx-8 gap-10">
             <NavBar/>
             { children }
         </div>
-        </UserProvider>
       </body>
     </html>
   );

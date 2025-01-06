@@ -77,8 +77,9 @@ class UserView(APIView):
 class TwoFaBaseView(generics.GenericAPIView):
     serializer_class = TwoFatorAuthcSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     def post(self, request):
+        print(f"Authenticated User: {request.user}")
+        print(f"Authentication Details: {request.auth}")
         self.context["request"] = request
         serializer = self.serializer_class(
             data=request.data,
