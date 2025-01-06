@@ -4,6 +4,57 @@ export interface TwoFAError {
   otp_code?: string[];
   error?: string[];
 }
+
+interface PasswordChangeFormData {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+interface ApiResponse {
+  message: string;
+  status: string;
+}
+
+interface ApiError {
+  current_password?: string[];
+  new_password?: string[];
+  confirm_password?: string[];
+}
+
+// actions.ts
+export async function changePassword(data: PasswordChangeFormData) {
+  try {
+    const response = await axios.put<ApiResponse>(
+      'http://localhost:8000/api/auth/user/change-password/',
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        error: error.response.data as ApiError
+      };
+    }
+    
+    return {
+      success: false,
+      error: { current_password: ['An unexpected error occurred'] }
+    };
+  }
+}
+
 const handleTwoFactorEnable = async (Otpcode:String) => {
   // Call API to enable 2FA
   
@@ -20,7 +71,7 @@ const handleTwoFactorEnable = async (Otpcode:String) => {
         withCredentials: true, // Ensures cookies are sent with the request
       }
     );
-
+    alert(response.data.message);
     return {
       success: true,
       data: response.data
@@ -30,38 +81,14 @@ const handleTwoFactorEnable = async (Otpcode:String) => {
       // Handle specific error cases
       const errorData = error.response.data as TwoFAError;
       
-      if (error.response.status === 403) {
+      if (error.response) {
         return {
           success: false,
-          error: 'Authentication required. Please log in again.'
+          error: error.response.data.otp_code
         };
       }
-
-      if (errorData.otp_code) {
-        return {
-          success: false,
-          error: errorData.otp_code[0]
-        };
-      }
-
-      if (errorData.error) {
-        return {
-          success: false,
-          error: errorData.error[0]
-        };
-      }
-
-      return {
-        success: false,
-        error: 'An unexpected error occurred'
-      };
-    }
-
-    return {
-      success: false,
-      error: 'Network error occurred'
-    };
   }
+}
 }
 const handleTwoFactorDisable = async (Otpcode:string) => {
   // Call API to disable 2FA
@@ -75,10 +102,10 @@ const handleTwoFactorDisable = async (Otpcode:string) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        withCredentials: true, // Ensures cookies are sent with the request
+        withCredentials: true,
       }
     );
-
+    alert(response.data.message);
     return {
       success: true,
       data: response.data
@@ -88,44 +115,20 @@ const handleTwoFactorDisable = async (Otpcode:string) => {
       // Handle specific error cases
       const errorData = error.response.data as TwoFAError;
       
-      if (error.response.status === 403) {
+      if (error.response.status === 400) {
         return {
           success: false,
-          error: 'Authentication required. Please log in again.'
+          error: error.response.data.otp_code
         };
       }
-
-      if (errorData.otp_code) {
-        return {
-          success: false,
-          error: errorData.otp_code[0]
-        };
-      }
-
-      if (errorData.error) {
-        return {
-          success: false,
-          error: errorData.error[0]
-        };
-      }
-
-      return {
-        success: false,
-        error: 'An unexpected error occurred'
-      };
-    }
-
-    return {
-      success: false,
-      error: 'Network error occurred'
-    };
   }
 }
-
+}
 export const handelTwoFactor = () => {
   return {
     handleTwoFactorEnable,
     handleTwoFactorDisable,
+    changePassword,
   };
 }
 

@@ -11,49 +11,6 @@ import { Switch } from '../ui/switch';
 import { handelTwoFactor } from '@/app/dashboard/setting/action';
 
 
-
-
-
-
-// const handelOtpPost = async (otpCode: string, isOtpEnabled:boolean) => {  
-
-//   if (isOtpEnabled){
-//     const response = await fetch("/api/auth/2fa/enable/", {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({otpCode}),
-//     });
-  
-//     if (!response.ok) {
-//       console.log(response);
-//       throw new Error('Network response was not ok');
-//     }
-//     else{
-//         alert('2fa enabled');
-//     }
-//     return response.json();
-//   }else{
-//     const response = await fetch('/api/auth/2fa/disable/', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({otpCode}),
-//     });
-  
-//     if (!response.ok) {
-//       throw new Error('Network response was not ok');
-//     }
-//     else{
-//         alert('2fa disabled');
-//     }
-//     return response.json();
-//   }
-// }
-
-
 export function SecuritySettings({user}: {user : UserData}) {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [openOtpForm, setOpenOtpForm] = useState(false);
@@ -74,7 +31,12 @@ export function SecuritySettings({user}: {user : UserData}) {
     setOtpCode(e.target.value);
   }
   const handleOtpEnable = () => {
+    try{
     setIsOtpEnabled(!isOtpEnabled);
+    }
+    catch (error){
+      console.log(error);
+    }
   }   
 
   const handleOtpSubmit = () => {
@@ -84,7 +46,6 @@ export function SecuritySettings({user}: {user : UserData}) {
       handleTwoFactorEnable(otpCode);
     }
     else{
-
       handleTwoFactorDisable(otpCode);
     }
   }
