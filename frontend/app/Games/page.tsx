@@ -1,10 +1,17 @@
 'use client'
 
-import { useGameStore } from "./store/PannelStore";
+import { useGameStore } from "./store/GameStore";
 import GamePanel from "./components/gamePannel/GamePanel";
+import { useGameStateStore } from "./store/CanvasStore";
+import { useEffect } from "react";
 
-const PongGame = () => {
+const Games = () => {
 	const { isFirstDotLarge } = useGameStore();
+	const { setWinner } = useGameStateStore();
+
+	useEffect(() => {
+		setWinner('');
+	}, []);
 
 	return (
 		<div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2 border border-white/10">
@@ -21,4 +28,4 @@ const PongGame = () => {
 	);
 }
 
-export default PongGame;
+export default Games;

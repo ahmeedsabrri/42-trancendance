@@ -48,7 +48,7 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
     },
     disconnect: () => {
         const { socket } = get();
-        if (socket) {
+        if (socket && socket.readyState) {
             socket.close();
             set({ socket: null, onMessageCallback: undefined });
         }

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # local apps
     "authentication",
+    "game",
     # third party apps
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
