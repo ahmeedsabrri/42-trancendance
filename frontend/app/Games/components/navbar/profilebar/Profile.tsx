@@ -9,13 +9,14 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
 import { AuthActions } from '@/app/auth/utils';
+
 const Profile = () => {
     const { logout} = AuthActions();
     
         const handleLogout = () => {
             logout()
               .then(() => {
-                window.location.href = "/auth/login";
+                window.location.href = "/auth/";
               })
               .catch(() => {
                 console.error("Logout failed");
@@ -32,7 +33,7 @@ const Profile = () => {
             </div>
 
             <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
-                <div className="p-[2px] rounded-2xl border border">
+                <div className="p-[2px] rounded-2xl border">
                     <DropdownMenu>
                     <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between">
                     <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4 text-white">

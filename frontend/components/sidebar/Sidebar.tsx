@@ -2,12 +2,10 @@
 
 import { IMAGES } from "@/public/index";
 import SideBarItem from "./SideBarItems";
-import Link from 'next/link'
-import { link } from "fs";
 
 const Pattern = [
     {src: IMAGES.HomePage, alt: "home page", title: "Home" , link: "/dashboard"},
-    {src: IMAGES.Game, alt: "Game page", title: "Game", link: "/PongGame"},
+    {src: IMAGES.Game, alt: "Game page", title: "Game", link: "/Games"},
     {src: IMAGES.Ranking, alt: "Raking page", title: "Ranking", link: "/ranking"},
     {src: IMAGES.Chat, alt: "Chat page", title: "Chat", link: "/chat"},
     {src: IMAGES.Stats, alt: "Stats page", title: "Stats", link: "/stats"},

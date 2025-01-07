@@ -5,11 +5,13 @@ import Link from "next/link";
 import CustomButton from "../components/utils/CutsomButton";
 import Mode from "../components/game_mode/GameMode";
 import { IMAGES } from "@/public/index";
-import { useGameStore } from "../store/PannelStore";
+import { useGameStore } from "../store/GameStore";
 
 const GameMode = () => {
-    const { selectedMode, currentGame, getGamePath } = useGameStore();
-
+    const { selectedMode, getGamePath } = useGameStore();
+    
+    console.log("gamem mode");
+    
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
             <main className="w-full h-full flex justify-center items-center gap-x-3 p-2 relative">
@@ -23,7 +25,7 @@ const GameMode = () => {
                         priority
                     />
                     <div className="w-full h-full rounded-3xl relative flex justify-center items-center py-2 px-2">
-                        <Link href="/PongGame" className="p-5 bg-gray-500 bg-opacity-30 backdrop-blur-xl self-start rounded-full cursor-pointer hover:bg-white/10">
+                        <Link href="/Games" className="p-5 bg-gray-500 bg-opacity-30 backdrop-blur-xl self-start rounded-full cursor-pointer hover:bg-white/10">
                             <Image
                                 src={IMAGES.BackwardButton}
                                 alt="Backward button"

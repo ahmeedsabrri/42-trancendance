@@ -13,6 +13,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from authentication.middleware import WebSocketJWTAuthMiddleware
 from channels.security.websocket import AllowedHostsOriginValidator
+from game.consumers import LocalGameConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
@@ -27,6 +28,7 @@ application = ProtocolTypeRouter({
         WebSocketJWTAuthMiddleware(
             URLRouter([
                 re_path(r'ws/chat/$', ChatConsumer.as_asgi()),
+                re_path(r"ws/game/localGame/$", LocalGameConsumer.as_asgi()),
                 # re_path(r'ws/notifications/$',)
             ])
         )

@@ -4,8 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import CustomButton from "../utils/CutsomButton";
 import ProfileScroller from "../utils/ProfileScroller";
-import { useGameStore } from "../../store/PannelStore";
-import { useGameStateStore } from "@/app/PongGame/store/CanvasStore";
+import { useGameStore } from "../../store/GameStore";
 
 interface GamePanelProps {
   gameType: 'pingpong' | 'tictactoe';
@@ -13,8 +12,7 @@ interface GamePanelProps {
 
 const GamePanel = ({ gameType }: GamePanelProps) => {
   
-  const { isReversed, showContent, gameContent, handleGameSwitch } = useGameStore();
-  // const resetGame = useGameStateStore((state) => state.resetGame);
+  const { isReversed, showContent, gameContent, handleGameSwitch, handleCurrentState, label } = useGameStore();
 
   const isActive = gameType === 'pingpong' ? !isReversed : isReversed;
   const content = gameContent[gameType];
@@ -56,10 +54,9 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
           <div className="w-full h-full flex justify-between items-end px-[80px] py-[80px]">
             <div className="flex justify-center items-center gap-x-5">
               <Link href={content.gameLink}>
-
                 <CustomButton
                   label="START"
-                  // onClick={() => restart(resetGame)}
+                  onClick={() => { label === "PAUSE" && handleCurrentState(); console.log("start game")}}
                   className="text-white text-4xl font-bold bg-gray-800 bg-opacity-30 backdrop-blur-xl px-16 py-5 hover:bg-opacity-10 rounded-3xl border border-white/10"
                 />
               </Link>

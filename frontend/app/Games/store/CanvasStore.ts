@@ -53,7 +53,7 @@ interface GameState {
   updateBall: (ball: any) => void
   setKeyPressed: (key: string, value: boolean) => void
   setWinner: (winner: string) => void,
-  restartGame: () => void;
+  // restartGame: () => void;
 }
 
 export const useGameStateStore = create<GameState>((set, get) => ({

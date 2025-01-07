@@ -43,13 +43,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       title: "PING PONG",
       description: "Table tennis, also known as ping-pong and whiff-whaff, is a sport in which two or four players hit a lightweight ball, also known as the ping-pong ball, back and forth across a table using small rackets. The game takes place on a hard table divided by a net.",
       image: IMAGES.pongTable,
-      gameLink: '/PongGame/GameMode'
+      gameLink: '/Games/GameMode'
     },
     tictactoe: {
       title: "TIC TAC TOE",
       description: "The game is played on a grid that's 3 squares by 3 squares. You are X, your friend (or the computer in this case) is O. Players take turns putting their marks in empty squares. The first player to get 3 of their marks in a row (up, down, across, or diagonally) is the winner.",
       image: IMAGES.TicTacToe,
-      gameLink: '/PongGame/GameMode'
+      gameLink: '/Games/GameMode'
     }
   },
   switchGame: () => set((state) => ({
@@ -61,7 +61,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setShowContent: (show) => set({ showContent: show }),
   getGamePath: () => {
     const state = get();
-    const gamePath = state.currentGame === 'pingpong' ? '/PongGame/PingPong' : '/PongGame/TicTacToe';
+    const gamePath = state.currentGame === 'pingpong' ? '/Games/PingPong' : '/Games/TicTacToe';
     return `${gamePath}/${state.selectedMode}`;
   },
   handleGameSwitch: () => {
