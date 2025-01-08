@@ -61,3 +61,13 @@ class UserView(APIView):
         user = request.user
         serializer = self.serializer_class(user)
         return Response(serializer.data)
+
+
+class UserListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data)

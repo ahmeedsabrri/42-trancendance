@@ -33,3 +33,33 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
+
+
+class connect(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    )
+    
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connected_user')
+    recevier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_friends')
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('sender', 'recevier')
+    
+    def __str__(self):
+        return f"{self.sender.username} -> {self.receiver.username} ({self.status})"
+    
+    def accept(self):
+        print("accept")
+        self.status = "accepted"
+        self.save()
+    
+    def decline(self):
+        print("decline")
+        self.status = "declined"
+        self.save() 
