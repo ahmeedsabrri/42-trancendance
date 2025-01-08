@@ -8,7 +8,14 @@ interface GameStats {
   total: number;
   winRate: number;
 }
-
+// {
+//   id: 1,
+//   type: 'pingpong',
+//   opponent: { ...mockUser, id: 1, username: 'Jane Smith' },
+//   result: 'win',
+//   date: '2024-03-10',
+//   score: '21-18'
+// },
 interface MonthlyStatsProps {
   games: GameHistory[];
 }
@@ -47,15 +54,15 @@ export function MonthlyStats({ games }: MonthlyStatsProps) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-sm text-gray/90">Wins</p>
-          <p className="text-2xl font-bold text-green/70">{stats.wins}</p>
+          <p className="text-sm text-gray-500/90">Wins</p>
+          <p className="text-2xl font-bold text-green-500/70">{stats.wins}</p>
         </div>
         <div>
-          <p className="text-sm text-gray/90">Losses</p>
-          <p className="text-2xl font-bold text-red/70">{stats.losses}</p>
+          <p className="text-sm text-gray-500/90">Losses</p>
+          <p className="text-2xl font-bold text-red-500/70">{stats.losses}</p>
         </div>
         <div className="col-span-2">
-          <p className="text-sm text-gray/90">Win Rate</p>
+          <p className="text-sm text-gray-500/90">Win Rate</p>
           <p className="text-lg font-semibold text-white">
             {stats.winRate.toFixed(1)}%
           </p>
@@ -71,15 +78,15 @@ export function MonthlyStats({ games }: MonthlyStatsProps) {
         <StatCard 
           title="Ping Pong" 
           stats={pingPongStats} 
-          icon={<Trophy className="w-6 h-6 text-yellow/70" />}
+          icon={<Trophy className="w-6 h-6 text-yellow-500/70" />}
         />
         <StatCard 
           title="Tic Tac Toe" 
           stats={ticTacToeStats} 
           icon={
             <div className="flex">
-              <X className="w-6 h-6 text-blue" />
-              <Circle className="w-6 h-6 text-red/70 -ml-2" />
+              <X className="w-6 h-6 text-blue-500" />
+              <Circle className="w-6 h-6 text-red-500/70 -ml-2" />
             </div>
           }
         />

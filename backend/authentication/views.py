@@ -3,11 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import SlidingToken
 from .serializers import RegisterSerializer, \
-    OuathCallBackSerializer, UserInfoSerializer, TwoFatorAuthcSerializer, PasswordUpdateSerializer
-from rest_framework import status, generics, permissions
-from rest_framework.decorators import api_view
-from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import UpdateModelMixin
+    OuathCallBackSerializer,TwoFatorAuthcSerializer
+from rest_framework import generics, permissions
+
 class TestAuthView(APIView):
 
     def get(self, request):
@@ -65,16 +63,6 @@ class OauthCallBackView(APIView):
         return res
 
 
-class UserView(APIView):
-    serializer_class = UserInfoSerializer
-
-    def get(self, request):
-        user = request.user
-        serializer = self.serializer_class(user)
-        return Response(serializer.data)
-
-
-
 class TwoFaBaseView(generics.GenericAPIView):
     serializer_class = TwoFatorAuthcSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -84,7 +72,6 @@ class TwoFaBaseView(generics.GenericAPIView):
             data=request.data,
             context=self.context,
         )
-        print("hiiiiiiiiiiiiiiiiiiiiiiii")
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)
 
@@ -94,26 +81,3 @@ class Enable2FAView(TwoFaBaseView):
 
 class Disable2FAView(TwoFaBaseView):
     context = {"action": "disable"}
-    
-    
-
-
-class PasswordUpdateView(GenericAPIView):
-    serializer_class = PasswordUpdateSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
-
-    def put(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                'message': 'Password successfully updated.',
-                'status': 'success'
-            }, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

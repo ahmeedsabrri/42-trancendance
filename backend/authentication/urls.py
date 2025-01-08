@@ -11,8 +11,6 @@ urlpatterns = [
     path('auth/42/callback/', views.OauthCallBackView.as_view(), name='oauth2_callback'),
     path('auth/2fa/enable/', views.Enable2FAView.as_view(), name='2fa_enable'),
     path('auth/2fa/disable/', views.Disable2FAView.as_view(), name='2fa_disable'),
-    path('auth/user/me/', views.UserView.as_view(), name='user_info'),
-    path('auth/user/change-password/',views.PasswordUpdateView.as_view(),name='password_update')
     # path('auth/user/me/update/username', views.UpdateUsernameView.as_view(), name='user_update'),
     # logout/
     # register/

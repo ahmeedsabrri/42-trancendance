@@ -19,7 +19,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "users.User"
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # local apps
     "authentication",
+    "users",
     "game",
     # third party apps
     "rest_framework_simplejwt",

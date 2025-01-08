@@ -19,6 +19,7 @@ const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const code = searchParams.get('code');
     const handleCallback = () => {
+      console.log("Code: ", code);
       Oauth42(code as string)
         .then(() => {
           console.log("Logged in successfully");
