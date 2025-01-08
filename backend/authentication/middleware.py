@@ -1,6 +1,6 @@
 from channels.db import database_sync_to_async
 from rest_framework_simplejwt.tokens import SlidingToken
-from authentication.models import User
+from users.models import User
 from rest_framework import authentication, exceptions
 from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser

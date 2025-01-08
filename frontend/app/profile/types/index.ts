@@ -1,23 +1,24 @@
-export interface User {
-  id: string;
-  name: string;
+import { UserData } from '@/app/store/store';
+
+export interface FriendData {
+  id: number;
+  username: string;
   level: number;
   avatar: string;
-  coverImage: string;
-  status: 'online' | 'offline';
+
 }
 
 export interface GameHistory {
-  id: string;
+  id: number;
   type: 'pingpong' | 'tictactoe';
-  opponent: User;
+  opponent: UserData;
   result: 'win' | 'loss' | 'draw';
   date: string;
   score?: string;
 }
 
 export interface Friend {
-  id: string;
-  user: User;
+  id: number;
+  user: FriendData;
   status: 'friend' | 'blocked';
 }

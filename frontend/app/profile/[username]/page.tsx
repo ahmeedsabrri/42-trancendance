@@ -7,8 +7,8 @@ import { FriendCard } from './components/FriendCard';
 import { MonthlyStats } from './components/MonthlyStats';
 import { GameChart } from './components/GameChart';
 import {GameHistory, Friend } from './types';
-import { useUserStore } from '../store/store';
-import { UserData } from '../store/store';
+import { useUserStore } from '../../store/store';
+import { UserData } from '../../store/store';
 // Mock data
 const mockUser: UserData = {
   id: 15,
@@ -80,10 +80,13 @@ const mockGames: GameHistory[] = [
   }
 ];
 
+function App({
+  params,
+}: {
+  params: Promise<{ username: string }>
+}) {
 
-function App() {
-
-  const { fetchUser, user, isInitialized } = useUserStore();
+  const { fetchUser,fetchFriend, user, isInitialized } = useUserStore();
   
   const userRef = React.useRef(user);
   React.useEffect(() => {
@@ -92,7 +95,7 @@ function App() {
   // Only fetch user data once when component mounts
   React.useEffect(() => {
     if (!isInitialized) {
-      fetchUser();
+      fetchFriend((await params).username);
     }
   }, [isInitialized, fetchUser]);
   if (!isInitialized || !user) {

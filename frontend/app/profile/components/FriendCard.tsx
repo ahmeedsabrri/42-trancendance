@@ -1,11 +1,10 @@
 import React from 'react';
-import { Friend } from '../types';
 import { Shield, UserMinus } from 'lucide-react';
-
+import { FriendData } from '@/app/profile/types';
 interface FriendCardProps {
-  friend: Friend;
-  onBlock: (id: string) => void;
-  onUnfriend: (id: string) => void;
+  friend: FriendData;
+  onBlock: (id: number) => void;
+  onUnfriend: (id: number) => void;
 }
 
 export function FriendCard({ friend, onBlock, onUnfriend }: FriendCardProps) {
@@ -14,13 +13,13 @@ export function FriendCard({ friend, onBlock, onUnfriend }: FriendCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
-            src={friend.user.avatar}
-            alt={friend.user.name}
+            src={friend.avatar}
+            alt={friend.username}
             className="w-12 h-12 rounded-full"
           />
           <div>
-            <p className="text-white font-medium">{friend.user.name}</p>
-            <p className="text-sm text-gray/90">Level {friend.user.level}</p>
+            <p className="text-white font-medium">{friend.username}</p>
+            <p className="text-sm text-gray-500/90">Level {friend.level}</p>
           </div>
         </div>
         <div className="flex gap-2">

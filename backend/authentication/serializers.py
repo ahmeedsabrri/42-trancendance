@@ -64,15 +64,6 @@ class OuathCallBackSerializer(serializers.Serializer):
         return user
 
 
-class UserInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["otp_uri"] = instance.get_otp_uri()
-        return data
 
 
 class TwoFatorAuthcSerializer(serializers.Serializer):
