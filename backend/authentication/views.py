@@ -3,11 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import SlidingToken
 from .serializers import RegisterSerializer, \
-    OuathCallBackSerializer, UserInfoSerializer, TwoFatorAuthcSerializer, PasswordUpdateSerializer
+    OuathCallBackSerializer, UserInfoSerializer, TwoFatorAuthcSerializer, PasswordUpdateSerializer,ProfileSerializer
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import UpdateModelMixin
+from .models import User
 class TestAuthView(APIView):
 
     def get(self, request):
@@ -84,7 +85,6 @@ class TwoFaBaseView(generics.GenericAPIView):
             data=request.data,
             context=self.context,
         )
-        print("hiiiiiiiiiiiiiiiiiiiiiiii")
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data)
 
@@ -117,3 +117,29 @@ class PasswordUpdateView(GenericAPIView):
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+    
+    def get(self,request,username):
+        try:
+            user = User.objects.get(username=username)
+            serializer = self.serializer_class(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid username",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

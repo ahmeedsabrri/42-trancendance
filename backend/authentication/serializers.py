@@ -150,3 +150,17 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
         except ValidationError as e:
             raise serializers.ValidationError(list(e.messages))
         return value
+    
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name',
+                  'last_name',
+                  'username',
+                  'email',
+                  'avatar',
+                  'id',
+                  'status',
+                  'level',
+                  'friends',
+                  ]
