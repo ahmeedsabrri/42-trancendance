@@ -6,7 +6,11 @@ from .serializers import UserInfoSerializer, PasswordUpdateSerializer,ProfileSer
 from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
+from django.db.models import Q
+
+
 User = get_user_model()
+
 # Create your views here.
 class PasswordUpdateView(GenericAPIView):
     serializer_class = PasswordUpdateSerializer
@@ -200,18 +204,78 @@ class DeclineRequestView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class BlockRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, username):
+        try:
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            connection = Connection.objects.get(sender=sender, receiver=receiver)
+            if connection.status == "blocked" or connection.status == "rejected":
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "Friend already blocked or request declined."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if connection.status == "accepted":
+                connection.block()
+            return Response(
+                {
+                    "message": "Friend blocked successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid sender",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No friend request found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class ListFrinedsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = FriendsSerializer
+    serializer_class = ProfileSerializer
     
-    def get(self):
+    def get(self, request):
+        friends = self.get_queryset()
+        serializer = self.serializer_class(friends, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
         user = self.request.user
-        friends = Connection.objects.filter(sender=user, status="accepted").values_list('receiver', flat=True)
-        friends |= Connection.objects.filter(receiver=user, status="accepted").values_list('sender', flat=True)
-        return User.objects.filter(id__in=friends)
-    
-    
+        friends = Connection.objects.filter(
+            Q(sender=user, status="accepted") | Q(receiver=user, status="accepted")
+        ).select_related('sender', 'receiver')
+        
+        # Collect the users who are friends (excluding the current user)
+        friend_users = []
+        for connection in friends:
+            if connection.sender != user:
+                friend_users.append(connection.sender)
+            else:
+                friend_users.append(connection.receiver)
+        return friend_users
     
 
 class ListUserNotificationView(generics.ListAPIView):
@@ -224,3 +288,28 @@ class ListUserNotificationView(generics.ListAPIView):
         response = Connection.objects.filter(sender=sender, receiver=user)
         response |= Notification.objects.filter(recipient=user)
         return response
+    
+    
+class ListBlockedUsersView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+    
+    def get(self, request):
+        blocked_users = self.get_queryset()
+        serializer = self.serializer_class(blocked_users, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        user = self.request.user
+        blocked_users = Connection.objects.filter(
+            Q(sender=user, status="blocked") | Q(receiver=user, status="blocked")
+        ).select_related('sender', 'receiver')
+        
+        # Collect the users who are blocked (excluding the current user)
+        blocked_user_list = []
+        for connection in blocked_users:
+            if connection.sender != user:
+                blocked_user_list.append(connection.sender)
+            else:
+                blocked_user_list.append(connection.receiver)
+        return blocked_user_list
