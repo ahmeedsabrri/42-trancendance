@@ -11,8 +11,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     twofa_enabled = models.BooleanField(default=False)
     otp_base32 = models.CharField(max_length=32, default=pyotp.random_base32)
-    friends = models.ManyToManyField(to='User', blank=True)
-    blocked = models.ManyToManyField(to='User', blank=True, related_name='blocked_by')
     level = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=20, default="offline")
 
@@ -41,8 +39,9 @@ class Connection(models.Model):
         ('pending', 'pending'),
         ('accepted', 'accepted'),
         ('rejected', 'rejected'),
+        ('blocked', 'blocked'),
     )
-    
+
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='connected_user')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_friends')
     status = models.CharField(max_length=20,choices=STATUS_CHOICES, default="pending")
@@ -57,14 +56,14 @@ class Connection(models.Model):
 
     def accept(self):
         self.status = "accepted"
-        self.sender.friends.add(self.receiver)
-        self.receiver.friends.add(self.sender)
         self.save()
 
     def decline(self):
         self.status = "rejected"
-        self.sender.remove(self.receiver)
-        self.receiver.remove(self.sender)
+        self.save()
+    
+    def block(self):
+        self.status = "blocked"
         self.save()
         
 class Notification(models.Model):
@@ -80,6 +79,7 @@ class Notification(models.Model):
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='')
+    message = models.TextField(blank=True)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=now)
     
@@ -90,3 +90,10 @@ class Notification(models.Model):
     def read_notification(self):
         self.read = True
         self.save()
+    
+    def create_notification(self, notification_type, message=''):
+        Notification.objects.create(
+            recipient=self.recipient,
+            notification_type=notification_type,
+            message=message
+        )
