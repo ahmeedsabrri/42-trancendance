@@ -51,7 +51,7 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','username','email','avatar','id','status','level','friends',]
+        fields = ['first_name','last_name','username','email','avatar','id','status','level']
         
 
 class FriendRequestSerializer(serializers.ModelSerializer):
@@ -74,4 +74,4 @@ class NotificationSerializer(serializers.ModelSerializer):
 class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','username','email','avatar','id','status','level','friends',]
+        fields = ['first_name','last_name','username','email','avatar','id','status','level']
