@@ -19,11 +19,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-AUTH_USER_MODEL = "users.User"
 # Application definition
 
 INSTALLED_APPS = [
     "daphne",
+    "users",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "corsheaders",
     # local apps
     "authentication",
-    "users",
     "game",
     # third party apps
     "rest_framework_simplejwt",
@@ -98,6 +97,7 @@ ASGI_APPLICATION = "core.asgi.application"
 # }
 
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+AUTH_USER_MODEL = "users.User"
 
 # Database
 # https://docs.djangocore.com/en/4.2/ref/settings/#databases

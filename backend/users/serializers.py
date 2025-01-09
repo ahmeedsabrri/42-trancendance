@@ -1,3 +1,4 @@
+from .models import Connection, Notification
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -50,13 +51,27 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name',
-                  'last_name',
-                  'username',
-                  'email',
-                  'avatar',
-                  'id',
-                  'status',
-                  'level',
-                  'friends',
-                  ]
+        fields = ['first_name','last_name','username','email','avatar','id','status','level','friends',]
+        
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    sender = ProfileSerializer(read_only=True)
+    receiver = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = Connection
+        fields = ['id', 'sender', 'recevier', 'status', 'created_at']
+        
+        
+class NotificationSerializer(serializers.ModelSerializer):
+    recipient = ProfileSerializer(read_only=True)
+    class Meta:
+        model = Notification
+        fields = ['id', 'recipient', 'notification_type', 'read', 'created_at']
+        
+
+
+class FriendsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name','last_name','username','email','avatar','id','status','level','friends',]
