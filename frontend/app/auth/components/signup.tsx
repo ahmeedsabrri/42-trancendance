@@ -47,7 +47,7 @@ export default function SignUpForm() {
             alert("Registered successfully");
           })
           .catch((err) => {
-            setError("root", { type: "manual", message: err.json.detail });
+            setError("root", { type: "manual", message: err.message });
           });
       };
     return (
