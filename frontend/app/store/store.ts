@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { FriendData } from '../profile/types';
-import exp from 'constants';
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: true,
 });
@@ -18,21 +17,27 @@ export interface UserData {
     avatar: string;
     status: string;
     friends?: FriendData[];
+    connection_type: string;
 }
 
 interface UserStore {
+    friends: [] | null;
     user: UserData | null;
+    viewedProfile: UserData| null,
     loading: boolean;
     error: string | null;
     isInitialized: boolean;
     fetchUser: () => Promise<void>;
     fetchFriend: (username:string) => Promise<void>;
+    fetchUserFriends: () => Promise<void>;
     setError: (error: string | null) => void;
     reset: () => void;
 }
 
 const initialState = {
     user: null,
+    friends: null,
+    viewedProfile: null,
     loading: false,
     error: null,
     isInitialized: false,
@@ -43,20 +48,18 @@ let fetchPromise: Promise<void> | null = null;
 
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
-
-    fetchFriend: async (username:string) => {
-        // If there's already a fetch in progress, return that promise
+    fetchUserFriends: async () => {
         if (fetchPromise) {
             return fetchPromise;
         }
 
         set({ loading: true, error: null });
         
-        // Create new promise and store it
-        fetchPromise = api.get<UserData>('/profile/'+username+'/')
+        fetchPromise = api.get<UserData>('/users/me/friends/')
             .then(response => {
+                console.log(response.data)
                 set({ 
-                    user: response.data, 
+                    friends: response.data, 
                     loading: false, 
                     isInitialized: true 
                 });
@@ -77,20 +80,49 @@ export const useUserStore = create<UserStore>((set) => ({
                 }
             })
             .finally(() => {
+                fetchPromise = null;
+            });
+
+        return fetchPromise
+    },
+    fetchFriend: async (username:string) => {
+        set({ loading: true, error: null });
+        
+        fetchPromise = api.get<UserData>(`/user/${username}`)
+        .then(response => {
+                set({ 
+                    viewedProfile: response.data, 
+                    loading: false, 
+                    isInitialized: true 
+                });
+                console.log(response.data)  
+            })
+            .catch(err => {
+                if (axios.isAxiosError(err)) {
+                    set({ 
+                        error: err.response?.data?.message || 'Failed to fetch user', 
+                        loading: false,
+                    });
+                } else {
+                    set({ 
+                        error: 'An unexpected error occurred', 
+                        loading: false,
+                    });
+                }
+            })
+            .finally(() => {
                 fetchPromise = null; // Clear the promise when done
             });
 
         return fetchPromise;
     },
     fetchUser: async () => {
-        // If there's already a fetch in progress, return that promise
         if (fetchPromise) {
             return fetchPromise;
         }
 
         set({ loading: true, error: null });
         
-        // Create new promise and store it
         fetchPromise = api.get<UserData>('/users/me/')
             .then(response => {
                 set({ 
@@ -115,7 +147,7 @@ export const useUserStore = create<UserStore>((set) => ({
                 }
             })
             .finally(() => {
-                fetchPromise = null; // Clear the promise when done
+                fetchPromise = null;
             });
 
         return fetchPromise;
