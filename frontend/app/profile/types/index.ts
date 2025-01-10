@@ -1,10 +1,14 @@
 import { UserData } from '@/app/store/store';
 
 export interface FriendData {
-  id: number;
+  first_name: string;
+  last_name: string;
   username: string;
-  level: number;
+  email: string;
   avatar: string;
+  id: number;
+  status: 'online' | 'offline';
+  level: number;
 
 }
 

@@ -21,7 +21,7 @@ export interface UserData {
 }
 
 interface UserStore {
-    friends: [] | null;
+    Userfriends: UserData[] | null;
     user: UserData | null;
     viewedProfile: UserData| null,
     loading: boolean;
@@ -36,7 +36,7 @@ interface UserStore {
 
 const initialState = {
     user: null,
-    friends: null,
+    Userfriends: null,
     viewedProfile: null,
     loading: false,
     error: null,
@@ -55,11 +55,11 @@ export const useUserStore = create<UserStore>((set) => ({
 
         set({ loading: true, error: null });
         
-        fetchPromise = api.get<UserData>('/users/me/friends/')
+        fetchPromise = api.get('/users/me/friends/')
             .then(response => {
                 console.log(response.data)
                 set({ 
-                    friends: response.data, 
+                    Userfriends: response.data, 
                     loading: false, 
                     isInitialized: true 
                 });
@@ -102,11 +102,13 @@ export const useUserStore = create<UserStore>((set) => ({
                     set({ 
                         error: err.response?.data?.message || 'Failed to fetch user', 
                         loading: false,
+                        isInitialized: true
                     });
                 } else {
                     set({ 
                         error: 'An unexpected error occurred', 
                         loading: false,
+                        isInitialized: true
                     });
                 }
             })
