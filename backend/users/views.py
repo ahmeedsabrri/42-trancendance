@@ -56,9 +56,6 @@ class ProfileView(APIView):
                     "message": str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-
-
-
             )
 class UserView(APIView):
     serializer_class = UserInfoSerializer
@@ -83,7 +80,6 @@ class SendRequestView(APIView):
     def get(self, request, username):
         try:
             sender = request.user
-            print("weeeeeeeeee ====>" + username)
             receiver = User.objects.get(username=username)
             if sender == receiver:
                 return Response(
@@ -93,10 +89,17 @@ class SendRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if Connection.objects.filter(sender=sender, receiver=receiver).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "Friend request already sent."
+                    },status=status.HTTP_400_BAD_REQUEST)
             Connection.objects.create(sender=sender, receiver=receiver)
             Notification.objects.create(
-                recipient=sender,
-                notification_type="friend_request"
+                recipient=receiver,
+                notification_type="friend_request",
+                message=f"{sender} sent Friend request to {receiver.username}"
             )
             return Response(
                 {
@@ -128,8 +131,10 @@ class AcceptRequestView(APIView):
             receiver = request.user
             Connection.objects.get(sender=sender, receiver=receiver).accept()
             Notification.objects.create(
-                recipient=sender,
-                notification_type="friend_accept"
+                recipient=receiver,
+                notification_type="friend_accepted",
+                message=f"{receiver.username} accepted your friend request",
+                read=True
             )
             return Response(
                 {
@@ -166,13 +171,18 @@ class DeclineRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request, username):
         try:
-            sender = User.objects.get(username=username)
-            receiver = request.user
-            Connection.objects.get(sender=sender, receiver=receiver).decline()
-            Notification.objects.create(
-                recipient=sender,
-                notification_type="friend_decline"
-            )
+            sender = request.user
+            receiver = User.objects.get(username=username)
+            
+            if Connection.objects.get(sender=sender, receiver=receiver).status == "blocked" or Connection.objects.get(sender=sender, receiver=receiver).status == "rejected":
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "Friend already blocked or request declined."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             return Response(
                 {
                     "message": "Friend request declined successfully."
@@ -208,8 +218,8 @@ class BlockRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request, username):
         try:
-            sender = User.objects.get(username=username)
-            receiver = request.user
+            receiver = User.objects.get(username=username)
+            sender = request.user
             connection = Connection.objects.get(sender=sender, receiver=receiver)
             if connection.status == "blocked" or connection.status == "rejected":
                 return Response(
@@ -282,12 +292,14 @@ class ListUserNotificationView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = NotificationSerializer
 
-    def get_queryset(self):
+    def get(self, request):
+        notifications = self.get_queryset()
+        serializer = self.serializer_class(notifications, many=True)
+        return Response(serializer.data)
+    def get_queryset(self,):
         user = self.request.user
-        sender = User.objects.get(username=self.kwargs['username'])
-        response = Connection.objects.filter(sender=sender, receiver=user)
-        response |= Notification.objects.filter(recipient=user)
-        return response
+        notifications = Notification.objects.filter(Q(recipient=user))
+        return notifications
     
     
 class ListBlockedUsersView(generics.ListAPIView):
@@ -313,3 +325,27 @@ class ListBlockedUsersView(generics.ListAPIView):
             else:
                 blocked_user_list.append(connection.receiver)
         return blocked_user_list
+    
+    
+class ListConnectionsUsersView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+    
+    def get(self, request):
+        connections = self.get_queryset()
+        serializer = self.serializer_class(connections, many=True)
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        user = self.request.user
+        connections = Connection.objects.filter(
+            Q(sender=user) | Q(receiver=user)
+        ).select_related('sender', 'receiver')
+        
+        connection_users = []
+        for connection in connections:
+            if connection.sender != user:
+                connection_users.append(connection.sender)
+            else:
+                connection_users.append(connection.receiver)
+        return connection_users

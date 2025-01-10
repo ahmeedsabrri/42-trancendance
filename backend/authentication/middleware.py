@@ -14,7 +14,6 @@ class JWTCookieMiddleware:
     def __call__(self, request):
         # process request
         jwt_token = request.COOKIES.get("jwt_token", None)
-        print(jwt_token)
         if jwt_token is not None:
             try:
                 user = self.get_user(request.COOKIES.get("jwt_token"),request=request)
