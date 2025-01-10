@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 
 import SideBar from "@/components/sidebar/Sidebar";
 import NavBar from "./Games/components/navbar/NavBar";
-import { Content } from "@radix-ui/react-tooltip";
 
 // app/layout.tsx
 

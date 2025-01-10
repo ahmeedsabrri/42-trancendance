@@ -13,8 +13,10 @@ class TestAuthView(APIView):
 
 
 class LoginView(TokenObtainSlidingView):
+    permissions_classes = []
     def post(self, request):
         response = super().post(request)
+        
         if response.status_code == 200:
             response.set_cookie(
                 key="jwt_token",

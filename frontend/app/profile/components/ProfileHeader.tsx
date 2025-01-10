@@ -1,14 +1,17 @@
+"use client";
+
 import React from 'react';
-import { Shield, UserMinus } from 'lucide-react';
+import { Shield, UserMinus, UserPlus2, UserPlus2Icon } from 'lucide-react';
 import { UserData } from '@/app/store/store';
-import Image from 'next/image';
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 interface ProfileHeaderProps {
   user: UserData;
   onBlock: () => void;
   onUnfriend: () => void;
+  addFriend: () => void;
 }
 
-export function ProfileHeader({ user, onBlock, onUnfriend }: ProfileHeaderProps) {
+export function ProfileHeader({ user, onBlock, onUnfriend, addFriend}: ProfileHeaderProps) {
 
   return (
     <div className="relative mb-8">
@@ -22,13 +25,7 @@ export function ProfileHeader({ user, onBlock, onUnfriend }: ProfileHeaderProps)
       
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">
         <div className="relative">
-          <Image
-            src={user.avatar}
-            alt={user.username}
-            className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
-            width={96}
-            height={96}
-          />
+          <Avatar width={96} height={96} avatar={user.avatar}/>
           <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${user.status === 'online' ? 'bg-green-500' : 'bg-gray-500'}`} />
         </div>
         
@@ -44,18 +41,18 @@ export function ProfileHeader({ user, onBlock, onUnfriend }: ProfileHeaderProps)
       
       <div className="absolute bottom-0 right-8 flex gap-2">
         <button
-          onClick={onBlock}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md bg-white/10 hover:bg-white/20 transition-all text-white"
+          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+          onClick={addFriend}
         >
-          <Shield size={18} />
-          Block
+          <UserPlus2Icon size={24} />
+          <span className="text-white">Add Friend</span>
         </button>
         <button
-          onClick={onUnfriend}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md bg-white/10 hover:bg-white/20 transition-all text-white"
+          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+          onClick={onBlock}
         >
-          <UserMinus size={18} />
-          Unfriend
+          <Shield size={24} />
+          <span className="text-white">Block</span>
         </button>
       </div>
     </div>

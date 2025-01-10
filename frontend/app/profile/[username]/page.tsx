@@ -1,14 +1,16 @@
 "use client";
 
-import React from 'react';
-import { ProfileHeader } from './components/ProfileHeader';
-import { GameHistoryCard } from './components/GameHistoryCard';
-import { FriendCard } from './components/FriendCard';
-import { MonthlyStats } from './components/MonthlyStats';
-import { GameChart } from './components/GameChart';
-import {GameHistory, Friend } from './types';
+import React, { useEffect, useRef } from 'react';
+import { ProfileHeader } from '../components/ProfileHeader';
+import { GameHistoryCard } from '../components/GameHistoryCard';
+import { FriendCard } from '../components/FriendCard';
+import { MonthlyStats } from '../components/MonthlyStats';
+import { GameChart } from '../components/GameChart';
+import {GameHistory, Friend } from '../types';
 import { useUserStore } from '../../store/store';
 import { UserData } from '../../store/store';
+import { useParams } from 'next/navigation';
+import { api } from '@/app/store/store';
 // Mock data
 const mockUser: UserData = {
   id: 15,
@@ -21,28 +23,64 @@ const mockUser: UserData = {
   status: 'online',
   friends: [
     {
-      id: 12,
-      username: 'jane_smith',
-      level: 30,
-      avatar: 'https://i.pravatar.cc/300'
+        first_name: "Ahmed",
+        last_name: "Sabri",
+        username: "ahmedsabri",
+        email: "ahmedsabri@example.com",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 4,
+        status: "offline",
+        level: 0
     },
     {
-      id: 13,
-      username: 'bob_johnson',
-      level: 25,
-      avatar: 'https://i.pravatar.cc/300'
+        first_name: "John",
+        last_name: "Doe",
+        username: "johndoe",
+        email: "",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 5,
+        status: "offline",
+        level: 0
     },
     {
-      id: 14,
-      username: 'alice_brown',
-      level: 35,
-      avatar: 'https://i.pravatar.cc/300'
+        first_name: "Jane",
+        last_name: "Doe",
+        username: "janedoe",
+        email: "",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 6,
+        status: "offline",
+        level: 0
     },
     {
-      id: 15,
-      username: 'charlie_wilson',
-      level: 40,
-      avatar: 'https://i.pravatar.cc/300'
+        first_name: "Alice",
+        last_name: "Brown",
+        username: "alicebrown",
+        email: "",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 7,
+        status: "offline",
+        level: 0
+    },
+    {
+        first_name: "Bob",
+        last_name: "Johnson",
+        username: "bobjohnson",
+        email: "",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 8,
+        status: "offline",
+        level: 0
+    },
+    {
+        first_name: "Charlie",
+        last_name: "Wilson",
+        username: "charliewilson",
+        email: "",
+        avatar: 'https://i.pravatar.cc/300',
+        id: 9,
+        status: "offline",
+        level: 0
     }
   ]
 };
@@ -79,45 +117,69 @@ const mockGames: GameHistory[] = [
     date: '2024-03-07'
   }
 ];
-
-function App({
-  params,
-}: {
-  params: Promise<{ username: string }>
-}) {
-
-  const { fetchUser,fetchFriend, user, isInitialized } = useUserStore();
-  
-  const userRef = React.useRef(user);
-  React.useEffect(() => {
-    userRef.current = user;    
-  }, [user]);
-  // Only fetch user data once when component mounts
-  React.useEffect(() => {
-    if (!isInitialized) {
-      fetchFriend((await params).username);
-    }
-  }, [isInitialized, fetchUser]);
-  if (!isInitialized || !user) {
-    return <div>Loading...</div>;
+const fetchProfile = async (username: string) => {
+  const response = await api.get(`/user/${username}`);
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch user');
   }
+  return response.data;
+}
+export default function Profile() {
+  const { 
+    fetchUser, 
+    fetchFriend, 
+    user, 
+    viewedProfile, 
+    loading,
+    isInitialized ,
+    Userfriends,
+    fetchUserFriends
+  } = useUserStore();
+  
+  const { username } = useParams();
+
+  useEffect(() => {
+      if (!isInitialized) {
+      // Fetch authenticated user's profile if no username and not initialized
+      fetchFriend(username as string);
+      fetchUser();
+      fetchUserFriends();
+    }
+  }, [username, isInitialized, fetchUser, fetchFriend]);
+
   const handleBlock = () => {
     console.log('Block user');
   };
-
+  const handleSendfriendRequest = () => {
+    console.log('Send friend request');
+  }
   const handleUnfriend = () => {
     console.log('Unfriend user');
   };
-  console.log(user.username); 
+
+  // Show loading state
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  const profileToShow = username !== user?.username ? viewedProfile : user;
+  const profiletype =  username !== user?.username ? viewedProfile?.connection_type : user?.connection_type;
+  
+  console.log(profiletype);
+  console.log(username, viewedProfile?.username, user?.username);
+  if (!profileToShow) {
+    return <div>Profile not found</div>;
+  }
+
   return (
     <div className="w-full overflow-scroll border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-lg">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
-          user={user}
+          user={profileToShow}
           onBlock={handleBlock}
           onUnfriend={handleUnfriend}
+          addFriend={handleSendfriendRequest}
         />
-        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
           <div className="lg:col-span-2 space-y-8">
             <MonthlyStats games={mockGames} />
@@ -162,5 +224,3 @@ function App({
     </div>
   );
 }
-
-export default App;

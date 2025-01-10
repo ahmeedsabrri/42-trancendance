@@ -51,7 +51,8 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','username','email','avatar','id','status','level']
+        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level']
+
         
 
 class FriendRequestSerializer(serializers.ModelSerializer):
@@ -67,11 +68,20 @@ class NotificationSerializer(serializers.ModelSerializer):
     recipient = ProfileSerializer(read_only=True)
     class Meta:
         model = Notification
-        fields = ['id', 'recipient', 'notification_type', 'read', 'created_at']
+        fields = ['id', 'recipient', 'notification_type', 'read', 'created_at', 'message']
         
 
 
 class FriendsSerializer(serializers.ModelSerializer):
+    connection_status = serializers.ChoiceField(
+        choices=[
+            ('pending', 'pending'),
+            ('accepted', 'accepted'),
+            ('rejected', 'rejected'),
+            ('blocked', 'blocked'),
+        ],
+        read_only=True
+    )
     class Meta:
         model = User
-        fields = ['first_name','last_name','username','email','avatar','id','status','level']
+        fields = ['first_name','last_name','username','email','avatar','id','status','level','connection_status']
