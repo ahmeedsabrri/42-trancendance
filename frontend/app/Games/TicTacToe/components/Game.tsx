@@ -14,7 +14,7 @@ const Game: React.FC<GameProps> = ({ mode }) => {
     }, [mode]);
 
     return (
-        // Your TicTacToe game UI
+        console.log('Game component')
     );
 };
 

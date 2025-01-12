@@ -7,6 +7,7 @@ from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 
 User = get_user_model()
@@ -349,3 +350,25 @@ class ListConnectionsUsersView(generics.ListAPIView):
             else:
                 connection_users.append(connection.receiver)
         return connection_users
+    
+
+# list of friends by username
+class FriendsListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FriendsSerializer
+
+    def get_queryset(self):
+        username = self.kwargs.get('username')
+        user = get_object_or_404(User, username=username)
+        friends = Connection.objects.filter(
+            Q(sender=user, status="accepted") | 
+            Q(receiver=user, status="accepted")
+        ).select_related('sender', 'receiver')
+        
+        friend_users = []
+        for connection in friends:
+            if connection.sender != user:
+                friend_users.append(connection.sender)
+            else:
+                friend_users.append(connection.receiver)
+        return friend_users

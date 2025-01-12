@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/me/connections/', views.ListConnectionsUsersView.as_view(), name='connections_list'),
     path('users//me/change-password/',views.PasswordUpdateView.as_view(),name='password_update'),
     path('users/me/friends/', views.ListFrinedsView.as_view(), name='friend_list'),
+    path('users/friends/<str:username>', views.FriendsListView.as_view(), name='friend_user_list'),
     path('users/me/blocked/', views.ListBlockedUsersView.as_view(), name='blocked_user_list'),
     path('users/me/notif/', views.ListUserNotificationView.as_view(), name='list_user_notification'),
     path('users/request/send/<str:username>/', views.SendRequestView.as_view(), name='send_friend_request'),

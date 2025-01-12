@@ -9,8 +9,10 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
 import { AuthActions } from '@/app/auth/utils';
+import { useUserStore } from '@/app/store/store';
 
 const Profile = () => {
+    const {user} = useUserStore();
     const { logout} = AuthActions();
     
         const handleLogout = () => {
@@ -42,7 +44,7 @@ const Profile = () => {
                     </DropdownMenuTrigger>
                         <DropdownMenuContent className="px-[25px] py-[8px]  flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href="/profile">Profile</Link></DropdownMenuItem>
+                            <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href={`/profile/${user?.username}`}>Profile</Link></DropdownMenuItem>
                             <DropdownMenuItem  className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href="/dashboard/setting" >Setting</Link></DropdownMenuItem>
                             <DropdownMenuItem className="w-full text-red flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r  hover:text-red" onClick={handleLogout}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>

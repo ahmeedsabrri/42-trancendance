@@ -8,6 +8,7 @@ import { MonthlyStats } from '../components/MonthlyStats';
 import { GameChart } from '../components/GameChart';
 import {GameHistory, Friend } from '../types';
 import { useUserStore } from '../../store/store';
+import { useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { api } from '@/app/store/store';
@@ -132,18 +133,16 @@ export default function Profile() {
     viewedProfile, 
     loading,
     isInitialized ,
-    Userfriends,
-    fetchUserFriends
   } = useUserStore();
-  
+  const { Userfriends, fetchUserFriends } = useUserFriendsStore();
   const { username } = useParams();
 
   useEffect(() => {
       if (!isInitialized) {
-      // Fetch authenticated user's profile if no username and not initialized
       fetchFriend(username as string);
       fetchUser();
-      fetchUserFriends();
+      fetchUserFriends(username as string);
+
     }
   }, [username, isInitialized, fetchUser, fetchFriend]);
 
@@ -163,10 +162,11 @@ export default function Profile() {
   }
 
   const profileToShow = username !== user?.username ? viewedProfile : user;
-  const profiletype =  username !== user?.username ? viewedProfile?.connection_type : user?.connection_type;
+  // const profiletype =  username !== user?.username ? viewedProfile?.connection_type : user?.connection_type;
   
-  console.log(profiletype);
-  console.log(username, viewedProfile?.username, user?.username);
+  // console.log(profiletype);
+  // console.log(username, viewedProfile?.username, user?.username);
+  console.log(Userfriends);
   if (!profileToShow) {
     return <div>Profile not found</div>;
   }
@@ -194,7 +194,7 @@ export default function Profile() {
           
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-6">Friends</h2>
-            {mockUser.friends?.map((friend) => (
+            {Userfriends?.map((friend) => (
               <FriendCard
                 key={friend.id}
                 friend={friend}
