@@ -10,7 +10,6 @@ interface FriendCardProps {
 }
 
 export function FriendCard({ friend, onBlock, onUnfriend }: FriendCardProps) {
-  console.log("friend", friend);
   return (
     <div className="backdrop-blur-md bg-white/10 rounded-lg p-4 hover:bg-white/20 transition-all">
       <div className="flex items-center justify-between">

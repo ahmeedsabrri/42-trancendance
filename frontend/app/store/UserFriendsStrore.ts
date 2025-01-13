@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-
 export const api = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: true,
@@ -21,36 +20,42 @@ export interface UserFriendsData {
 }
 interface UserFriendsStore {
     Userfriends: UserFriendsData[] | null;
+    UserOwnfriends: UserFriendsData[] | null;
     fetchUserFriends: (username:string) => Promise<void>;
+    fetchOwnFriends: () => Promise<void>;
     loading: boolean;
     error: string | null;
+    isIn: boolean;
 }
 
 const initialState = {
     Userfriends: null,
+    UserOwnfriends: null,
     loading: false,
     error: null,
+    isIn: false,
 };
 
-// For request deduplication
-let fetchPromise: Promise<void> | null = null;
+
+let fetchUserPromise: Promise<void> | null = null;
+let fetchOwnPromise: Promise<void> | null = null;
 
 export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
     ...initialState,
     fetchUserFriends: async (username:string) => {
-        if (fetchPromise) {
-            return fetchPromise;
+        if (fetchUserPromise) {
+            return fetchUserPromise;
         }
 
         set({ loading: true, error: null });
         
         console.log('fetching friends')
-        fetchPromise = api.get<UserFriendsData>(`/users/friends/${username}`)
+        fetchUserPromise = api.get<UserFriendsData[]>(`/users/friends/${username}`)
             .then(response => {
                 set({ 
                     Userfriends: response.data,
-                    initial: true,
-                    
+                    loading: false,
+                    isIn: true,
                 });
             })
             .catch(error => {
@@ -58,9 +63,35 @@ export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
             })
             .finally(() => {
                 set({ loading: false });
-                fetchPromise = null;
+                fetchUserPromise = null;
+            });
+            
+            return fetchUserPromise;
+    },
+    fetchOwnFriends: async () => {
+        console.log('fetching own friends')
+        if (fetchOwnPromise) {
+            return fetchOwnPromise;
+        }
+        
+        set({ loading: true, error: null });
+        
+        fetchOwnPromise = api.get<UserFriendsData[]>('/users/me/friends/')
+        .then(response => {
+            set({ 
+                UserOwnfriends: response.data, 
+                loading: false, 
+                isIn: true 
+            });
+            })
+            .catch(error => {
+                set({ error: error.message });
+            })
+            .finally(() => {
+                set({ loading: false });
+                fetchOwnPromise = null;
             });
 
-        return fetchPromise;
-    },
+        return fetchOwnPromise;
+    }
 }));

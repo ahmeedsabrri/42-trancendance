@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ProfileHeader } from '../components/ProfileHeader';
 import { GameHistoryCard } from '../components/GameHistoryCard';
 import { FriendCard } from '../components/FriendCard';
@@ -12,6 +12,7 @@ import { useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { api } from '@/app/store/store';
+import { set } from 'react-hook-form';
 // Mock data
 const mockUser: UserData = {
   id: 15,
@@ -118,13 +119,7 @@ const mockGames: GameHistory[] = [
     date: '2024-03-07'
   }
 ];
-const fetchProfile = async (username: string) => {
-  const response = await api.get(`/user/${username}`);
-  if (response.status !== 200) {
-    throw new Error('Failed to fetch user');
-  }
-  return response.data;
-}
+
 export default function Profile() {
   const { 
     fetchUser, 
@@ -134,17 +129,32 @@ export default function Profile() {
     loading,
     isInitialized ,
   } = useUserStore();
-  const { Userfriends, fetchUserFriends } = useUserFriendsStore();
+  const { Userfriends, fetchUserFriends, fetchOwnFriends, UserOwnfriends, isIn } = useUserFriendsStore();
   const { username } = useParams();
-
+  const [isaFriend, setIsaFriend] = useState('');
   useEffect(() => {
-      if (!isInitialized) {
+    if (!isInitialized) {
       fetchFriend(username as string);
       fetchUser();
-      fetchUserFriends(username as string);
-
     }
-  }, [username, isInitialized, fetchUser, fetchFriend]);
+    if (!isIn){
+      fetchUserFriends(username as string);
+      fetchOwnFriends();
+    }
+    if (user?.username === username) {
+      setIsaFriend('self');
+    }
+    else {
+      const friend = UserOwnfriends?.find((friend) => friend.username === username);
+      console.log(UserOwnfriends);
+      if (friend) {
+        setIsaFriend('isfriend');
+      }
+      else {
+        setIsaFriend('notfriend');
+      }
+    }
+  }, [username, isInitialized, fetchUser, fetchFriend, user, UserOwnfriends, fetchUserFriends, fetchOwnFriends, isIn]);
 
   const handleBlock = () => {
     console.log('Block user');
@@ -156,29 +166,24 @@ export default function Profile() {
     console.log('Unfriend user');
   };
 
-  // Show loading state
   if (loading) {
     return <div>Loading...</div>;
   }
-
+  console.log(UserOwnfriends);
+  console.log(username);
   const profileToShow = username !== user?.username ? viewedProfile : user;
-  // const profiletype =  username !== user?.username ? viewedProfile?.connection_type : user?.connection_type;
-  
-  // console.log(profiletype);
-  // console.log(username, viewedProfile?.username, user?.username);
-  console.log(Userfriends);
   if (!profileToShow) {
     return <div>Profile not found</div>;
   }
-
   return (
     <div className="w-full overflow-scroll border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-lg">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
-          user={profileToShow}
+          userProfile={profileToShow}
           onBlock={handleBlock}
           onUnfriend={handleUnfriend}
           addFriend={handleSendfriendRequest}
+          friendOrNot={isaFriend}
         />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
           <div className="lg:col-span-2 space-y-8">

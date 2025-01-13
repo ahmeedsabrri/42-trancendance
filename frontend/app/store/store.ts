@@ -21,7 +21,6 @@ export interface UserData {
 }
 
 interface UserStore {
-    Userfriends: UserData[] | null;
     user: UserData | null;
     viewedProfile: UserData| null,
     loading: boolean;
@@ -29,14 +28,12 @@ interface UserStore {
     isInitialized: boolean;
     fetchUser: () => Promise<void>;
     fetchFriend: (username:string) => Promise<void>;
-    fetchUserFriends: () => Promise<void>;
     setError: (error: string | null) => void;
     reset: () => void;
 }
 
 const initialState = {
     user: null,
-    Userfriends: null,
     viewedProfile: null,
     loading: false,
     error: null,
@@ -48,43 +45,6 @@ let fetchPromise: Promise<void> | null = null;
 
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
-    fetchUserFriends: async () => {
-        if (fetchPromise) {
-            return fetchPromise;
-        }
-
-        set({ loading: true, error: null });
-        
-        fetchPromise = api.get('/users/me/friends/')
-            .then(response => {
-                console.log(response.data)
-                set({ 
-                    Userfriends: response.data, 
-                    loading: false, 
-                    isInitialized: true 
-                });
-            })
-            .catch(err => {
-                if (axios.isAxiosError(err)) {
-                    set({ 
-                        error: err.response?.data?.message || 'Failed to fetch user', 
-                        loading: false,
-                        isInitialized: true
-                    });
-                } else {
-                    set({ 
-                        error: 'An unexpected error occurred', 
-                        loading: false,
-                        isInitialized: true
-                    });
-                }
-            })
-            .finally(() => {
-                fetchPromise = null;
-            });
-
-        return fetchPromise
-    },
     fetchFriend: async (username:string) => {
         set({ loading: true, error: null });
         
@@ -95,7 +55,6 @@ export const useUserStore = create<UserStore>((set) => ({
                     loading: false, 
                     isInitialized: true 
                 });
-                console.log(response.data)  
             })
             .catch(err => {
                 if (axios.isAxiosError(err)) {
