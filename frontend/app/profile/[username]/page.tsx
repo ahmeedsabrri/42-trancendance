@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProfileHeader } from '../components/ProfileHeader';
 import { GameHistoryCard } from '../components/GameHistoryCard';
 import { FriendCard } from '../components/FriendCard';
 import { MonthlyStats } from '../components/MonthlyStats';
 import { GameChart } from '../components/GameChart';
-import {GameHistory, Friend } from '../types';
+import {GameHistory} from '../types';
 import { useUserStore } from '../../store/store';
 import { useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { api } from '@/app/store/store';
-import { set } from 'react-hook-form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { UserFriendsActions } from '../utils/actions';
 // Mock data
 const mockUser: UserData = {
   id: 15,
@@ -70,37 +71,82 @@ export default function Profile() {
   } = useUserStore();
   const { Userfriends, fetchUserFriends, fetchOwnFriends, UserOwnfriends, isIn } = useUserFriendsStore();
   const { username } = useParams();
-  const [isaFriend, setIsaFriend] = useState('');
+  const {handleRequest} = UserFriendsActions();
   useEffect(() => {
     if (!isInitialized) {
-      fetchFriend(username as string);
       fetchUser();
     }
+    fetchFriend(username as string);
     fetchUserFriends(username as string);
     fetchOwnFriends();
-    if (user?.username === username) {
-      setIsaFriend('self');
-    }
-    else {
-      const friend = UserOwnfriends?.find((friend) => friend.username === username);
-      console.log(UserOwnfriends);
-      if (friend) {
-        setIsaFriend('isfriend');
-      }
-      else {
-        setIsaFriend('notfriend');
-      }
-    }
   }, [username, isInitialized, fetchUser, fetchFriend, user, UserOwnfriends, fetchUserFriends, fetchOwnFriends, isIn]);
 
-  const handleBlock = () => {
-    console.log('Block user');
+  // handleBlock function
+  const handleBlock =  () => {
+    console.log('Blocked');
+    handleRequest(username as string, 'block')
+    .then((response) => {
+      console.log(response);
+      return (
+        <Alert variant='default'>
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{response.data}</AlertDescription>
+        </Alert> 
+      )
+    })
+    .catch((err) => {
+      console.log(err);
+      return (
+        <Alert variant='destructive'>
+          <AlertTitle>{err.response.data.error}</AlertTitle>
+          <AlertDescription>{err.response.data.message}</AlertDescription>
+        </Alert> 
+      )
+    });
   };
+
+  // handleSendfriendRequest function
   const handleSendfriendRequest = () => {
-    console.log('Send friend request');
+    handleRequest(username as string, 'send')
+    .then((response) => {
+      console.log(response);
+      return (
+        <Alert variant='default'>
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{response.data.message}</AlertDescription>
+        </Alert> 
+      )
+    })
+    .catch((err) => {
+      console.log(err);
+      return (
+        <Alert variant='destructive'>
+          <AlertTitle>{err.response.data.error}</AlertTitle>
+          <AlertDescription>{err.response.data.message}</AlertDescription>
+        </Alert> 
+      )
+    });
   }
+
+  // handleUnfriend function
   const handleUnfriend = () => {
-    console.log('Unfriend user');
+    handleRequest(username as string, 'unfriend')
+    .then((response) => {
+      return (
+        <Alert variant='default'>
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{response.data}</AlertDescription>
+        </Alert> // Add closing tag for Alert element
+      )
+    })
+    .catch((err) => {
+      return (
+        <Alert variant='destructive'>
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{err.message}</AlertDescription>
+        </Alert> // Add closing tag for Alert element
+      )
+    });
   };
 
   if (loading) {
@@ -120,7 +166,6 @@ export default function Profile() {
           onBlock={handleBlock}
           onUnfriend={handleUnfriend}
           addFriend={handleSendfriendRequest}
-          friendOrNot={isaFriend}
         />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
           <div className="lg:col-span-2 space-y-8">

@@ -17,5 +17,6 @@ urlpatterns = [
     path('users/request/accept/<str:username>/', views.AcceptRequestView.as_view(), name='accept_friend_request'),
     path('users/request/decline/<str:username>/', views.DeclineRequestView.as_view(), name='decline_friend_request'),
     path('users/request/block/<str:username>/', views.BlockRequestView.as_view(), name='block_friend_request'),
+    path('users/request/unfriend/<str:username>/', views.UnFriendView.as_view(), name='unblock_friend_request'),
     # update/avatar/
 ]

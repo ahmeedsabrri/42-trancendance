@@ -16,6 +16,7 @@ export interface UserData {
     level: number;
     avatar: string;
     status: string;
+    connection_type: string;
 }
 
 interface UserStore {

@@ -4,16 +4,16 @@ import { UserData} from '@/app/store/store';
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import {AddFriends} from './addFriendsComponent';
 import { IsaFriend } from './isaFriendComponent';
+import { Shield } from 'lucide-react';
 export interface ProfileHeaderProps {
   userProfile: UserData;
   onBlock: () => void;
   onUnfriend: () => void;
   addFriend: () => void;
-  friendOrNot: string;
 }
 
-export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend,friendOrNot}: ProfileHeaderProps) {
-  console.log(friendOrNot);
+export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend}: ProfileHeaderProps) {
+  console.log(userProfile.connection_type + " " + userProfile.username);
   return (
     <div className="relative mb-8">
       <div className="h-48 w-full overflow-hidden rounded-xl">
@@ -39,8 +39,28 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend,frie
           </div>
         </div>
       </div>
-      {friendOrNot === 'isfriend' && <IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
-      {friendOrNot === 'notfriend' && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
+      {userProfile?.connection_type === 'pending' && <div className="absolute bottom-0 right-8 flex gap-2"> 
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+        >
+          <span className="text-white">Cancell</span>
+        </button>
+        <button 
+          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+          onClick={onBlock}
+        >
+          <Shield size={24} />
+          <span className="text-white">Block</span>
+        </button>
+      </div>}
+      {userProfile?.connection_type === 'accepted' && <IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
+      {userProfile?.connection_type === 'not_connected' && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
     </div>
   );
 }
+
+
+// ('pending', 'pending'),
+//         ('accepted', 'accepted'),
+//         ('rejected', 'rejected'),
+//         ('blocked', 'blocked'),

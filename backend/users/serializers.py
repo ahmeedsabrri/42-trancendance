@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 User = get_user_model()
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -51,8 +52,20 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level']
+        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level','connection_type']
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    connection_type = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level','connection_type']
+
+    def get_connection_type(self, obj):
+        request_user = self.context['request'].user
+        if not Connection.objects.filter(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user)).exists():
+            return 'not_connected'
+        connection = Connection.objects.get(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user))
+        return connection.status  
         
 
 class FriendRequestSerializer(serializers.ModelSerializer):
