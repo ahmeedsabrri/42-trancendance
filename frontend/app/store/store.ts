@@ -16,8 +16,6 @@ export interface UserData {
     level: number;
     avatar: string;
     status: string;
-    friends?: FriendData[];
-    connection_type: string;
 }
 
 interface UserStore {

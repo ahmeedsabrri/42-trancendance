@@ -23,68 +23,7 @@ const mockUser: UserData = {
   level: 42,
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
   status: 'online',
-  friends: [
-    {
-        first_name: "Ahmed",
-        last_name: "Sabri",
-        username: "ahmedsabri",
-        email: "ahmedsabri@example.com",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 4,
-        status: "offline",
-        level: 0
-    },
-    {
-        first_name: "John",
-        last_name: "Doe",
-        username: "johndoe",
-        email: "",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 5,
-        status: "offline",
-        level: 0
-    },
-    {
-        first_name: "Jane",
-        last_name: "Doe",
-        username: "janedoe",
-        email: "",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 6,
-        status: "offline",
-        level: 0
-    },
-    {
-        first_name: "Alice",
-        last_name: "Brown",
-        username: "alicebrown",
-        email: "",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 7,
-        status: "offline",
-        level: 0
-    },
-    {
-        first_name: "Bob",
-        last_name: "Johnson",
-        username: "bobjohnson",
-        email: "",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 8,
-        status: "offline",
-        level: 0
-    },
-    {
-        first_name: "Charlie",
-        last_name: "Wilson",
-        username: "charliewilson",
-        email: "",
-        avatar: 'https://i.pravatar.cc/300',
-        id: 9,
-        status: "offline",
-        level: 0
-    }
-  ]
+  
 };
 
 const mockGames: GameHistory[] = [
@@ -137,10 +76,8 @@ export default function Profile() {
       fetchFriend(username as string);
       fetchUser();
     }
-    if (!isIn){
-      fetchUserFriends(username as string);
-      fetchOwnFriends();
-    }
+    fetchUserFriends(username as string);
+    fetchOwnFriends();
     if (user?.username === username) {
       setIsaFriend('self');
     }
