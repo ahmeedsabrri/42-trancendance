@@ -2,7 +2,7 @@ from .models import Connection, Notification
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer
+from .serializers import UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
@@ -35,29 +35,24 @@ class PasswordUpdateView(GenericAPIView):
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    def get(self,request,username):
-        try:
-            user = User.objects.get(username=username)
-            serializer = self.serializer_class(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response(
-                {
-                    "error": "Invalid username",
-                    "message": f"No user found with username: {username}"
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {
-                    "error": "Server error",
-                    "message": str(e)
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+
+        connection = Connection.objects.filter(
+            Q(sender=request.user, receiver=user) | Q(sender=user, receiver=request.user)
+        ).first()
+
+        connection_type = "not_connected"
+        if connection:
+            connection_type = connection.status
+
+        serializer = UserProfileSerializer(user, context={'request': request})
+        user_data = serializer.data
+        user_data["connection_type"] = connection_type
+
+        return Response(user_data)
+
 class UserView(APIView):
     serializer_class = UserInfoSerializer
 
@@ -82,6 +77,8 @@ class SendRequestView(APIView):
         try:
             sender = request.user
             receiver = User.objects.get(username=username)
+            print(username)
+            print(sender)
             if sender == receiver:
                 return Response(
                     {
@@ -372,3 +369,46 @@ class FriendsListView(generics.ListAPIView):
             else:
                 friend_users.append(connection.receiver)
         return friend_users
+
+
+class UnFriendView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, username):
+        try:
+            friend = User.objects.get(username=username)
+            user = request.user
+            connection = Connection.objects.get(
+                Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
+            )
+            connection.delete()
+            return Response(
+                {
+                    "message": "Friend removed successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid friend",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No friend found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

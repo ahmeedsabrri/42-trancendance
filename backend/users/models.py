@@ -69,6 +69,9 @@ class Connection(models.Model):
     def block(self):
         self.status = "blocked"
         self.save()
+    
+    def get_all_connections(user):
+        return Connection.objects.filter(sender=user) | Connection.objects.filter(receiver=user)
         
 class Notification(models.Model):
     TYPE_CHOICES = (
