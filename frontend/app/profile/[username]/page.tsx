@@ -14,9 +14,12 @@ import { useParams } from 'next/navigation';
 import { api } from '@/app/store/store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserFriendsActions } from '../utils/actions';
+// import { useToast } from "@/hooks/use-toast"
+// import { ToastAction } from "@/components/ui/toast"
+import { Bounce, toast } from 'react-toastify';
 // Mock data
 const mockUser: UserData = {
-  id: 15,
+  id: 5,
   username: 'john_doe',
   email: '',
   first_name: 'John',
@@ -61,6 +64,63 @@ const mockGames: GameHistory[] = [
 ];
 
 export default function Profile() {
+
+  const notifyAdd = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifyCancel = (message: string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifyBlock = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifyUnblock = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifyErr = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  // const { toast } = useToast();
   const { 
     fetchUser, 
     fetchFriend, 
@@ -87,44 +147,36 @@ export default function Profile() {
     handleRequest(username as string, 'block')
     .then((response) => {
       console.log(response);
-      return (
-        <Alert variant='default'>
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{response.data}</AlertDescription>
-        </Alert> 
-      )
+      notifyBlock(response.data.message);
     })
     .catch((err) => {
       console.log(err);
-      return (
-        <Alert variant='destructive'>
-          <AlertTitle>{err.response.data.error}</AlertTitle>
-          <AlertDescription>{err.response.data.message}</AlertDescription>
-        </Alert> 
-      )
+      notifyErr(err.response.data.message);
     });
   };
-
+  //hadelUnblock function
+  const handleUnblock = () => {
+    handleRequest(username as string, 'unblock')
+    .then((response) => {
+      console.log(response);
+      notifyUnblock(response.data.message);
+    })
+    .catch((err) => {
+      console.log(err);
+      notifyErr(err.response.data.message);
+    });
+  };
   // handleSendfriendRequest function
   const handleSendfriendRequest = () => {
     handleRequest(username as string, 'send')
     .then((response) => {
       console.log(response);
-      return (
-        <Alert variant='default'>
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{response.data.message}</AlertDescription>
-        </Alert> 
-      )
+      notifyAdd(response.data.message);
+
     })
     .catch((err) => {
       console.log(err);
-      return (
-        <Alert variant='destructive'>
-          <AlertTitle>{err.response.data.error}</AlertTitle>
-          <AlertDescription>{err.response.data.message}</AlertDescription>
-        </Alert> 
-      )
+      notifyErr(err.response.data.message);
     });
   }
 
@@ -132,20 +184,12 @@ export default function Profile() {
   const handleUnfriend = () => {
     handleRequest(username as string, 'unfriend')
     .then((response) => {
-      return (
-        <Alert variant='default'>
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{response.data}</AlertDescription>
-        </Alert> // Add closing tag for Alert element
-      )
+      console.log(response);
+      notifyCancel(response.data.message);
     })
     .catch((err) => {
-      return (
-        <Alert variant='destructive'>
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{err.message}</AlertDescription>
-        </Alert> // Add closing tag for Alert element
-      )
+      console.log(err);
+      notifyErr(err.response.data.message);
     });
   };
 
@@ -160,6 +204,7 @@ export default function Profile() {
   }
   return (
     <div className="w-full overflow-scroll border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-lg">
+      
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
           userProfile={profileToShow}
@@ -167,6 +212,7 @@ export default function Profile() {
           onUnfriend={handleUnfriend}
           addFriend={handleSendfriendRequest}
         />
+       {profileToShow.connection_type != 'blocked' ? <div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
           <div className="lg:col-span-2 space-y-8">
             <MonthlyStats games={mockGames} />
@@ -179,7 +225,7 @@ export default function Profile() {
             </div>
           </div>
           
-          <div className="space-y-4">
+        <div className="space-y-4">
             <h2 className="text-2xl font-bold text-white mb-6">Friends</h2>
             {Userfriends?.map((friend) => (
               <FriendCard
@@ -207,6 +253,17 @@ export default function Profile() {
             />
           </div>
         </div>
+        </div>: <div className="flex flex-col justify-center items-center h-[50vh]">
+          <div className="absolute bottom-50 right-50 flex gap-2">
+          <h1 className="text-2xl font-bold text-white mb-6">You have blocked this user</h1>
+             <button
+          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+          onClick={handleUnblock}
+        >
+          <span className="text-white">UnBlock</span>
+        </button>
+        </div>
+          </div>}
       </div>
     </div>
   );

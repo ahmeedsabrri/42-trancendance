@@ -54,11 +54,21 @@ class Connection(models.Model):
     def __str__(self):
         return f"{self.sender.username} -> {self.receiver.username} ({self.status})"
 
-    def accept(self):
+    
+    def send_request(sender, receiver):
+        Notification.objects.create(
+            recipient=receiver,
+            sender=sender,
+            notification_type="friend_request",
+            message=f"{sender.username} sent you a friend request"
+        )
+        return Connection.objects.create(sender=sender, receiver=receiver)
+    def accept(self,sender):
         self.status = "accepted"
         self.save()
         Notification.objects.create(
-            recipient=self.receiver,
+            recipient=sender,
+            sender=self.receiver,
             notification_type="friend_accept",
             message=f"{self.receiver.username} accepted your friend request"
         )
@@ -83,8 +93,8 @@ class Notification(models.Model):
         ('game_accept', 'game_accept'),
         ('game_decline', 'game_decline'),
     )
-
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='s_notifications', null=True)
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='r_notifications')
     notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='')
     message = models.TextField(blank=True)
     read = models.BooleanField(default=False)
