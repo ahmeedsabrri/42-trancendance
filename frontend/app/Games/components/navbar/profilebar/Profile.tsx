@@ -16,8 +16,10 @@ import { fakeNotifications } from './data/fakeNotifications';
 import type { Notification } from './types/notification';
 import { useState } from 'react';
 import {DropdownPanel}  from './components/DropdownPanel';
-import { redirect } from 'next/dist/server/api-utils';
+
 import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bounce, toast } from 'react-toastify';
 const Profile = () => {
     const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
   const [showPanel, setShowPanel] = useState(false);
@@ -54,16 +56,29 @@ const Profile = () => {
       setNotifications([newNotification, ...notifications]);
     }
   };
+  const logoutToast = (message:string) => { toast(message,{
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    rtl: false,
+    pauseOnFocusLoss: true,
+    draggable: true,
+    pauseOnHover: true,
+    theme: "light",
+    transition: Bounce,
+  }) }
   const {user} = useUserStore();
   const { logout} = AuthActions();
-  
+  const router = useRouter();
       const handleLogout = () => {
           logout()
-            .then(() => {
-              redirect('/auth');
+            .then((res) => {
+              logoutToast(res.data.message);
+              router.push('/auth');
             })
-            .catch(() => {
-              console.error("Logout failed");
+            .catch((err) => {
+              console.error(err.message);
               });
           };
 const handelpanelopen = () => {
