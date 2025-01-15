@@ -91,7 +91,13 @@ class SendRequestView(APIView):
                         "error": "Invalid receiver",
                         "message": "Friend request already sent."
                     },status=status.HTTP_400_BAD_REQUEST)
-            Connection.objects.get(sender=sender, receiver=receiver).send_request(sender, receiver)
+            Connection.objects.create(sender=sender, receiver=receiver)
+            Notification.objects.create(
+                recipient=receiver,
+                sender=sender,
+                notification_type="friend_request",
+                message=f"{sender.username} sent you a friend request"
+            )
             return Response(
                 {
                     "message": "Friend request sent successfully."
@@ -388,6 +394,48 @@ class UnFriendView(APIView):
                 {
                     "error": "Invalid request",
                     "message": "No friend found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+class UnBlockUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, username):
+        try:
+            blocked_user = User.objects.get(username=username)
+            user = request.user
+            connection = Connection.objects.get(
+                Q(sender=user, receiver=blocked_user) | Q(sender=blocked_user, receiver=user)
+            )
+            connection.delete()
+            return Response(
+                {
+                    "message": f"{blocked_user} unblocked successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid user",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No user found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )

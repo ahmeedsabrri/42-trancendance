@@ -15,10 +15,13 @@ import { NotificationPanel } from './components/NotificationPanel';
 import { fakeNotifications } from './data/fakeNotifications';
 import type { Notification } from './types/notification';
 import { useState } from 'react';
+import {DropdownPanel}  from './components/DropdownPanel';
+import { redirect } from 'next/dist/server/api-utils';
+import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
 const Profile = () => {
     const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
   const [showPanel, setShowPanel] = useState(false);
-
+    const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleNotificationClick = () => {
@@ -51,22 +54,26 @@ const Profile = () => {
       setNotifications([newNotification, ...notifications]);
     }
   };
+  const {user} = useUserStore();
+  const { logout} = AuthActions();
+  
+      const handleLogout = () => {
+          logout()
+            .then(() => {
+              redirect('/auth');
+            })
+            .catch(() => {
+              console.error("Logout failed");
+              });
+          };
+const handelpanelopen = () => {
+    console.log('useEffect: adding click event listener');
+    setIsOpen(!isOpen);
 
+}  
   const handleRejectFriend = (userId: string) => {
     console.log(`Rejected friend request from user ${userId}`);
   };
-    const {user} = useUserStore();
-    const { logout} = AuthActions();
-    
-        const handleLogout = () => {
-            logout()
-              .then(() => {
-                window.location.href = "/auth/";
-              })
-              .catch(() => {
-                console.error("Logout failed");
-                });
-            };
     return (
         <>
             <div className="h-full w-full flex items-center justify-end gap-x-[8px]">
@@ -83,21 +90,22 @@ const Profile = () => {
                     )}
                 </div>
                 <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
-                    <div className="p-[2px] rounded-2xl border">
+                    <div className="p-[2px] rounded-2xl">
                         <DropdownMenu>
-                            <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between">
-                                <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-4 text-white">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                </svg>  
+                            <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
+                            onClick={handelpanelopen}>
+                            {!isOpen ? <CircleChevronDown className="w-6 h-6 text-white" /> 
+                                : <CircleChevronUp className="w-6 h-6 text-white" />}
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="px-[25px] py-[8px]  flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href={`/profile/${user?.username}`}>Profile</Link></DropdownMenuItem>
                                 <DropdownMenuItem  className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href="/dashboard/setting" >Setting</Link></DropdownMenuItem>
-                                <DropdownMenuItem className="w-full text-red flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r  hover:text-red" onClick={handleLogout}>Logout</DropdownMenuItem>
+                                <DropdownMenuItem className="w-full text-red flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r  hover:text-red-500" onClick={handleLogout}>Logout</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
+                    {/* <DropdownPanel /> */}
                     <ProfileInfo />
                 </div>
             </div>
