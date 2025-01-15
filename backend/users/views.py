@@ -77,8 +77,6 @@ class SendRequestView(APIView):
         try:
             sender = request.user
             receiver = User.objects.get(username=username)
-            print(username)
-            print(sender)
             if sender == receiver:
                 return Response(
                     {
@@ -93,12 +91,7 @@ class SendRequestView(APIView):
                         "error": "Invalid receiver",
                         "message": "Friend request already sent."
                     },status=status.HTTP_400_BAD_REQUEST)
-            Connection.objects.create(sender=sender, receiver=receiver)
-            Notification.objects.create(
-                recipient=receiver,
-                notification_type="friend_request",
-                message=f"{sender} sent Friend request to {receiver.username}"
-            )
+            Connection.objects.get(sender=sender, receiver=receiver).send_request(sender, receiver)
             return Response(
                 {
                     "message": "Friend request sent successfully."
@@ -127,13 +120,7 @@ class AcceptRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            Connection.objects.get(sender=sender, receiver=receiver).accept()
-            Notification.objects.create(
-                recipient=receiver,
-                notification_type="friend_accepted",
-                message=f"{receiver.username} accepted your friend request",
-                read=True
-            )
+            Connection.objects.get(sender=sender, receiver=receiver).accept(sender)
             return Response(
                 {
                     "message": "Friend request accepted successfully."
@@ -180,7 +167,7 @@ class DeclineRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
+            Connection.objects.get(sender=sender, receiver=receiver).decline()
             return Response(
                 {
                     "message": "Friend request declined successfully."
@@ -289,14 +276,14 @@ class ListFrinedsView(generics.ListAPIView):
 class ListUserNotificationView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = NotificationSerializer
-
+    
     def get(self, request):
         notifications = self.get_queryset()
         serializer = self.serializer_class(notifications, many=True)
         return Response(serializer.data)
-    def get_queryset(self,):
+    def get_queryset(self):
         user = self.request.user
-        notifications = Notification.objects.filter(Q(recipient=user))
+        notifications = Notification.objects.filter(recipient=user).select_related('sender')
         return notifications
     
     
