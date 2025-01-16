@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "channels",
     "corsheaders",
     # local apps
+    "verify_email.apps.VerifyEmailConfig",
     "authentication",
     "game",
     # third party apps
@@ -189,3 +190,12 @@ SIMPLE_JWT = {
 OAUTH_CLIENT_ID = env("42_OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
 OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_ID') 
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PW')
+
+DEFAULT_FROM_EMAIL = 'noreply<no_reply@domain.com>'
