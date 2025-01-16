@@ -14,10 +14,13 @@ import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
 import { fakeNotifications } from './data/fakeNotifications';
 import type { Notification } from './types/notification';
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import {DropdownPanel}  from './components/DropdownPanel';
-import { redirect } from 'next/dist/server/api-utils';
+
 import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { useRouter } from 'next/router';
+
 const Profile = () => {
     const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
   const [showPanel, setShowPanel] = useState(false);
@@ -34,7 +37,7 @@ const Profile = () => {
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
-
+  
   const handleAcceptFriend = (userId: string) => {
     console.log(`Accepted friend request from user ${userId}`);
     
@@ -54,16 +57,17 @@ const Profile = () => {
       setNotifications([newNotification, ...notifications]);
     }
   };
-  const {user} = useUserStore();
+  const { user } = useUserStore();
   const { logout} = AuthActions();
-  
-      const handleLogout = () => {
-          logout()
-            .then(() => {
-              redirect('/auth');
+  const handleLogout = () => {
+    logout()
+    .then((res) => {
+              const route = useRouter();
+              console.log(res.data.message);
+              route.push('/auth');
             })
-            .catch(() => {
-              console.error("Logout failed");
+            .catch((err) => {
+              console.error('Failed to logout:', err);
               });
           };
 const handelpanelopen = () => {

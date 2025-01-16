@@ -55,12 +55,18 @@ class OauthCallBackView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        
+        # Create a sliding token for the user
         token = SlidingToken.for_user(user)
-        res = Response({"message": "you loged in successfully"})
+        
+        # Set the token in an HTTP-only cookie
+        res = Response({"message": "You logged in successfully"})
         res.set_cookie(
             key="jwt_token",
             value=str(token),
             httponly=True,
+            secure=True,  # Ensure this is True in production (requires HTTPS)
+            samesite="Lax",  # Prevent CSRF attacks
         )
         return res
 
