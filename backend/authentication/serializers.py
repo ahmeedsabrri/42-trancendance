@@ -1,3 +1,4 @@
+import logging
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from requests_oauthlib import OAuth2Session
@@ -7,7 +8,7 @@ import pyotp
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 User = get_user_model()
-
+logger = logging.getLogger(__name__)
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,27 +30,35 @@ class OuathCallBackSerializer(serializers.Serializer):
     code = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        oauth = OAuth2Session(
-            client_id=settings.OAUTH_CLIENT_ID,
-            redirect_uri=settings.OAUTH_REDIRECT_URI,
-        )
-        _ = oauth.fetch_token(
-            token_url="https://api.intra.42.fr/oauth/token",
-            code=attrs["code"],
-            client_secret=settings.OAUTH_CLIENT_SECRET,
-        )
+        try:
+            oauth = OAuth2Session(
+                client_id=settings.OAUTH_CLIENT_ID,
+                redirect_uri=settings.OAUTH_REDIRECT_URI,
+            )
+            logger.info("Fetching token with code: %s", attrs["code"])
+            token = oauth.fetch_token(
+                token_url="https://api.intra.42.fr/oauth/token",
+                code=attrs["code"],
+                client_secret=settings.OAUTH_CLIENT_SECRET,
+                include_client_id=True,
+            )
+            logger.info("Token fetched successfully: %s", token)
 
-        user_info = oauth.get("https://api.intra.42.fr/v2/me")
-        user_info.raise_for_status()
-        user_info_json = user_info.json()
+            user_info = oauth.get("https://api.intra.42.fr/v2/me")
+            user_info.raise_for_status()
+            user_info_json = user_info.json()
+            logger.info("User info fetched successfully: %s", user_info_json)
 
-        return {
-            "username": user_info_json["login"],
-            "email": user_info_json["email"],
-            "first_name": user_info_json["first_name"],
-            "last_name": user_info_json["last_name"],
-            "avatar": user_info_json["image"]["link"],
-        }
+            return {
+                "username": user_info_json["login"],
+                "email": user_info_json["email"],
+                "first_name": user_info_json["first_name"],
+                "last_name": user_info_json["last_name"],
+                "avatar": user_info_json["image"]["link"],
+            }
+        except Exception as e:
+            logger.error("OAuth2 error: %s", str(e))
+            raise serializers.ValidationError(str(e))
 
     def unique_unique_username(self, username):
         while User.objects.filter(username=username).exists():
@@ -60,9 +69,9 @@ class OuathCallBackSerializer(serializers.Serializer):
         username = self.unique_unique_username(validated_data["username"])
         validated_data["username"] = username
         email = validated_data.pop("email")
+        
         user, _ = User.objects.get_or_create(email=email, defaults={**validated_data})
         return user
-
 
 
 

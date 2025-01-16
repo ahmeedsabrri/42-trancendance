@@ -21,12 +21,13 @@ const [error, setError] = useState<string | null>(null);
     const handleCallback = () => {
       console.log("Code: ", code);
       Oauth42(code as string)
-        .then(() => {
+        .then((res) => {
+          console.log(res.data.message);
           console.log("Logged in successfully");
           router.push('/dashboard');
         })
         .catch((err) => {
-          setError(err.response);
+          setError(err.response.data.message);
           setIsLoading(false);
         });
       }

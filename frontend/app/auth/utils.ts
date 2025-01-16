@@ -4,7 +4,10 @@ import axios from 'axios';
 
 
 // Base API setup for making HTTP requests
-
+const api = axios.create({
+  baseURL: 'http://localhost:8000/api',
+  withCredentials: true,
+});
 
 // src/app/auth/utils.ts
 interface UserInfo {
@@ -60,11 +63,8 @@ const logout = () => {
 // 42 Oauth 2.0
 
 const Oauth42 = (code: string) => {
-  const res = axios.post("http://localhost:8000/api/auth/42/callback/", {
-    code: code,
-  }, {
-    withCredentials: true,
-  });
+  const res = api.post("/auth/42/callback/ ", { code: code });
+  console.log(res);
   return res;
 };
 

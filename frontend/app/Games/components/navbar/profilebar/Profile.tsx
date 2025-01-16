@@ -14,13 +14,13 @@ import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
 import { fakeNotifications } from './data/fakeNotifications';
 import type { Notification } from './types/notification';
-import { useState } from 'react';
-// import {DropdownPanel}  from './components/DropdownPanel';
+import { use, useEffect, useState } from 'react';
+import {DropdownPanel}  from './components/DropdownPanel';
 
 import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { Bounce, toast } from 'react-toastify';
-import { DropdownPanel } from './components/DropdownPanel';
+import { redirect } from 'next/navigation';
+import { useRouter } from 'next/router';
+
 const Profile = () => {
     const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
   const [showPanel, setShowPanel] = useState(false);
@@ -37,7 +37,7 @@ const Profile = () => {
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
-
+  
   const handleAcceptFriend = (userId: string) => {
     console.log(`Accepted friend request from user ${userId}`);
     
@@ -57,29 +57,17 @@ const Profile = () => {
       setNotifications([newNotification, ...notifications]);
     }
   };
-  const logoutToast = (message:string) => { toast(message,{
-    position: "top-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    rtl: false,
-    pauseOnFocusLoss: true,
-    draggable: true,
-    pauseOnHover: true,
-    theme: "light",
-    transition: Bounce,
-  }) }
-  const {user} = useUserStore();
+  const { user } = useUserStore();
   const { logout} = AuthActions();
-  const router = useRouter();
-      const handleLogout = () => {
-          logout()
-            .then((res) => {
-              logoutToast(res.data.message);
-              router.push('/auth');
+  const handleLogout = () => {
+    logout()
+    .then((res) => {
+              const route = useRouter();
+              console.log(res.data.message);
+              route.push('/auth');
             })
             .catch((err) => {
-              console.error(err.message);
+              console.error('Failed to logout:', err);
               });
           };
 const handelpanelopen = () => {
