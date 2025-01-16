@@ -15,11 +15,12 @@ import { NotificationPanel } from './components/NotificationPanel';
 import { fakeNotifications } from './data/fakeNotifications';
 import type { Notification } from './types/notification';
 import { useState } from 'react';
-import {DropdownPanel}  from './components/DropdownPanel';
+// import {DropdownPanel}  from './components/DropdownPanel';
 
 import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Bounce, toast } from 'react-toastify';
+import { DropdownPanel } from './components/DropdownPanel';
 const Profile = () => {
     const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
   const [showPanel, setShowPanel] = useState(false);
@@ -105,22 +106,22 @@ const handelpanelopen = () => {
                     )}
                 </div>
                 <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
-                    <div className="p-[2px] rounded-2xl">
+                    {/* <div className="w-4 h-4 rounded-2xl">
                         <DropdownMenu>
                             <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
                             onClick={handelpanelopen}>
-                            {!isOpen ? <CircleChevronDown className="w-6 h-6 text-white" /> 
-                                : <CircleChevronUp className="w-6 h-6 text-white" />}
+                            <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" /> 
+                               
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="px-[25px] py-[8px]  flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href={`/profile/${user?.username}`}>Profile</Link></DropdownMenuItem>
-                                <DropdownMenuItem  className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:from-hover_color"><Link href="/dashboard/setting" >Setting</Link></DropdownMenuItem>
-                                <DropdownMenuItem className="w-full text-red flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r  hover:text-red-500" onClick={handleLogout}>Logout</DropdownMenuItem>
+                            <DropdownMenuContent className="px-[20px] py-[8px]  flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
+                                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20"><Link href={`/profile/${user?.username}`}>Profile</Link></DropdownMenuItem>
+                                <DropdownMenuItem  className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20"><Link href="/dashboard/setting" >Setting</Link></DropdownMenuItem>
+                                <DropdownMenuItem className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400" onClick={handleLogout}>Logout</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    </div>
-                    {/* <DropdownPanel /> */}
+                    </div> */}
+
+                    <DropdownPanel />
                     <ProfileInfo />
                 </div>
             </div>

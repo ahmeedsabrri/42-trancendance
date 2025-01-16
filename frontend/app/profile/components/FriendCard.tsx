@@ -3,6 +3,7 @@ import { Shield, UserMinus } from 'lucide-react';
 import { FriendData } from '@/app/profile/types';
 import { UserData } from '@/app/store/store';
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
+import Link from 'next/link';
 interface FriendCardProps {
   friend: UserData;
   onBlock: (id: number) => void;
@@ -10,11 +11,14 @@ interface FriendCardProps {
 }
 
 export function FriendCard({ friend, onBlock, onUnfriend }: FriendCardProps) {
+  console.log(friend.username);
   return (
     <div className="backdrop-blur-md bg-white/10 rounded-lg p-4 hover:bg-white/20 transition-all">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link rel="stylesheet" href={`${friend.username}`} >
           <Avatar width={48} height={48} avatar={friend.avatar} />
+            </Link>
           <div>
             <p className="text-white font-medium">{friend.username}</p>
             <p className="text-sm text-gray-500/90">Level {friend.level}</p>
