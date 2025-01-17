@@ -1,120 +1,187 @@
-'use client'
-import Link from 'next/link'
-import ProfileInfo from "./ProfileInfo";
+'use client';
+import Link from 'next/link';
+import ProfileInfo from './ProfileInfo';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { AuthActions } from '@/app/auth/utils';
 import { useUserStore } from '@/app/store/store';
 import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
-import { fakeNotifications } from './data/fakeNotifications';
-import type { Notification } from './types/notification';
-import { use, useEffect, useState } from 'react';
-import {DropdownPanel}  from './components/DropdownPanel';
-
-import { CircleChevronDown, CircleChevronUp } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { CircleChevronDown } from 'lucide-react';
 import { useRouter } from 'next/router';
+import useNotificationStore from './store/WebsocketNotifStore';
+import { Bounce, toast } from 'react-toastify';
+import { UserFriendsActions } from '@/app/profile/utils/actions';
 
 const Profile = () => {
-    const [notifications, setNotifications] = useState<Notification[]>(fakeNotifications);
+  // const router = useRouter();
+  const { user } = useUserStore();
+  const { logout } = AuthActions();
+  const {
+    notifications,
+    unreadCount,
+    isConnected,
+    fetchNotifications,
+    markAsRead,
+    connectWebSocket,
+    disconnectWebSocket,
+  } = useNotificationStore();
+  const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const [isOpen, setIsOpen] = useState(false);
+  const notifAccept = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifDecilne = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const notifyErr = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  // Fetch notifications and connect to WebSocket on mount
+  useEffect(() => {
+    fetchNotifications();
 
+    const token = localStorage.getItem('jwt_token'); // Get the JWT token
+    const url = `ws://localhost:8000/ws/notifications/?token=${token}`;
+    connectWebSocket(url);
+
+    return () => {
+      disconnectWebSocket(); // Cleanup on unmount
+    };
+  }, [fetchNotifications, connectWebSocket, disconnectWebSocket]);
+
+  // Handle notification click
   const handleNotificationClick = () => {
-    console.log('Notification clicked');
     setShowPanel(!showPanel);
   };
 
+  // Handle marking a notification as read
   const handleMarkAsRead = (id: string) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
+    markAsRead(id);
   };
-  
-  const handleAcceptFriend = (userId: string) => {
-    console.log(`Accepted friend request from user ${userId}`);
-    
-    const user = notifications.find(n => n.userId === userId);
-    if (user) {
-      const newNotification: Notification = {
-        id: Date.now().toString(),
-        title: 'Friend Request Accepted',
-        message: `You are now friends with ${user.userName}`,
-        timestamp: new Date(),
-        read: false,
-        type: 'friendAccepted',
-        userId: user.userId,
-        userName: user.userName,
-        userAvatar: user.userAvatar
-      };
-      setNotifications([newNotification, ...notifications]);
-    }
+
+  // Handle accepting a friend request
+  const handleAcceptFriend = (username: string) => {
+    console.log(`Accepted friend request from user ${username}`);
+    // Add logic to accept friend request (e.g., call an API endpoint)
+    handleRequest(username, 'accept')
+    .then((res) => {
+      console.log(res.data.message);
+      notifAccept(res.data.message);
+    })
+    .catch((err) => {
+      notifyErr(err.response.data.message);
+    });
   };
-  const { user } = useUserStore();
-  const { logout} = AuthActions();
-  
+
+  // Handle rejecting a friend request
+  const handleRejectFriend = (username: string) => {
+    console.log(`Rejected friend request from user ${username}`);
+    // Add logic to reject friend request (e.g., call an API endpoint)
+    handleRequest(username, 'decline')
+    .then((res) => {
+      console.log(res.data.message);
+      notifDecilne(res.data.message);
+    })
+    .catch((err) => {
+      notifyErr(err.response.data.message);
+    });
+  };
+
+  // Handle logout
   const handleLogout = () => {
     logout()
-    .then((res) => {
-              console.log(res.data.message);
-              window.location.href = '/auth';
-            })
-            .catch((err) => {
-              console.error('Failed to logout:', err);
-              });
-          };
-const handelpanelopen = () => {
-    console.log('useEffect: adding click event listener');
-    setIsOpen(!isOpen);
-
-}  
-  const handleRejectFriend = (userId: string) => {
-    console.log(`Rejected friend request from user ${userId}`);
+      .then((res) => {
+        console.log(res.data.message);
+         // Redirect to the auth page
+         window.location.href = '/auth';
+      })
+      .catch((err) => {
+        console.error('Failed to logout:', err);
+      });
   };
-    return (
-        <>
-            <div className="h-full w-full flex items-center justify-end gap-x-[8px]">
-                <div className='relative'> 
-                    <NotificationBell count={unreadCount} onClick={handleNotificationClick} />
-                    {showPanel && (
-                        <NotificationPanel
-                        notifications={notifications}
-                        onClose={() => setShowPanel(false)}
-                        onMarkAsRead={handleMarkAsRead}
-                        onAcceptFriend={handleAcceptFriend}
-                        onRejectFriend={handleRejectFriend}
-                        />
-                    )}
-                </div>
-                <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
-                    <div className="w-4 h-4 rounded-2xl">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
-                            onClick={handelpanelopen}>
-                            <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" /> 
-                               
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="px-[20px] py-[8px]  flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
-                                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20"><Link href={`/profile/${user?.username}`}>Profile</Link></DropdownMenuItem>
-                                <DropdownMenuItem  className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20"><Link href="/dashboard/setting" >Setting</Link></DropdownMenuItem>
-                                <DropdownMenuItem className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400" onClick={handleLogout}>Logout</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
 
-                    {/* <DropdownPanel /> */}
-                    <ProfileInfo />
-                </div>
-            </div>
-        </>
-    )
-}
+  // Handle dropdown panel open/close
+  const handlePanelOpen = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <>
+      <div className="h-full w-full flex items-center justify-end gap-x-[8px]">
+        <div className="relative">
+          <NotificationBell count={unreadCount} onClick={handleNotificationClick} />
+          {showPanel && (
+            <NotificationPanel
+              notifications={notifications}
+              onClose={() => setShowPanel(false)}
+              onMarkAsRead={handleMarkAsRead}
+              onAcceptFriend={handleAcceptFriend}
+              onRejectFriend={handleRejectFriend}
+            />
+          )}
+        </div>
+        <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
+          <div className="w-4 h-4 rounded-2xl">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
+                onClick={handlePanelOpen}
+              >
+                <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
+                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20">
+                  <Link href={`/profile/${user?.username}`}>Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20">
+                  <Link href="/dashboard/setting">Setting</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <ProfileInfo />
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Profile;

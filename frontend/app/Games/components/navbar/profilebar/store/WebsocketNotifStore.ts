@@ -1,31 +1,34 @@
-import create from 'zustand';
+import { create } from "zustand"
 import axios from 'axios';
 
-// BASE API
+// Base API setup
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   withCredentials: true,
 });
-
-
 
 const useNotificationStore = create((set, get) => ({
   notifications: [], // List of notifications
   unreadCount: 0, // Count of unread notifications
   socket: null, // WebSocket instance
   isConnected: false, // WebSocket connection status
+  isLoading: false, // Loading state for API requests
+  error: null, // Error state for API requests
 
   // Fetch notifications from the backend
   fetchNotifications: async () => {
+    set({ isLoading: true, error: null });
     try {
       const response = await api.get('/users/me/notif/');
-      const data = await response.json();
-      set({ notifications: data });
+      console.log(response);
+      const notifications = response.data;
 
       // Calculate unread count
-      const unreadCount = data.filter((n) => !n.read).length;
-      set({ unreadCount });
+      const unreadCount = notifications.filter((n) => !n.read).length;
+
+      set({ notifications, unreadCount, isLoading: false });
     } catch (error) {
+      set({ error: error.message, isLoading: false });
       console.error('Failed to fetch notifications:', error);
     }
   },
@@ -33,9 +36,7 @@ const useNotificationStore = create((set, get) => ({
   // Mark a notification as read
   markAsRead: async (notificationId) => {
     try {
-      await fetch(`/api/notifications/${notificationId}/read/`, {
-        method: 'POST',
-      });
+      await api.get(`/users/notifications/${notificationId}/`);
 
       // Update the notification in the store
       set((state) => ({
@@ -45,6 +46,7 @@ const useNotificationStore = create((set, get) => ({
         unreadCount: state.unreadCount - 1,
       }));
     } catch (error) {
+      set({ error: error.message });
       console.error('Failed to mark notification as read:', error);
     }
   },
@@ -60,6 +62,8 @@ const useNotificationStore = create((set, get) => ({
 
     socket.onmessage = (event) => {
       const newNotification = JSON.parse(event.data);
+
+      // Add the new notification to the list
       set((state) => ({
         notifications: [newNotification, ...state.notifications],
         unreadCount: state.unreadCount + 1,
@@ -73,6 +77,7 @@ const useNotificationStore = create((set, get) => ({
 
     socket.onerror = (error) => {
       console.error('WebSocket error:', error);
+      set({ error: 'WebSocket connection error', isConnected: false });
     };
   },
 

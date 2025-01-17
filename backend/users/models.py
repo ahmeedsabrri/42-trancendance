@@ -66,12 +66,6 @@ class Connection(models.Model):
     def accept(self,sender):
         self.status = "accepted"
         self.save()
-        Notification.objects.create(
-            recipient=sender,
-            sender=self.receiver,
-            notification_type="friend_accept",
-            message=f"{self.receiver.username} accepted your friend request"
-        )
     def decline(self):
         self.status = "rejected"
         self.save()
@@ -108,3 +102,14 @@ class Notification(models.Model):
         self.read = True
         self.save()
     
+    @classmethod
+    def create_notification(cls, sender, recipient, notification_type, message):
+        """
+        Create a new notification.
+        """
+        return cls.objects.create(
+            sender=sender,
+            recipient=recipient,
+            notification_type=notification_type,
+            message=message,
+        )

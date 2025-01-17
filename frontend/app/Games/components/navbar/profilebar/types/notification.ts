@@ -1,13 +1,22 @@
-export type NotificationType = 'message' | 'alert' | 'update' | 'friendRequest' | 'friendAccepted';
+export type NotificationType = 'message' | 'friend_request' | 'friend_accept';
+
+
+export interface userNotif {
+  first_name: string;
+  last_name: string;
+  username: string;
+  email: string;
+  avatar: string;
+  id: number;
+  status: string;
+  level: number;
+}
 
 export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: Date;
+  id: number
+  notification_type: NotificationType;
   read: boolean;
-  type: NotificationType;
-  userId?: string;
-  userName?: string;
-  userAvatar?: string;
+  created_at: string;
+  message: string;
+  sender: userNotif;
 }

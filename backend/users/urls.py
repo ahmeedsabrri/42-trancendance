@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 urlpatterns = [    
@@ -19,5 +18,6 @@ urlpatterns = [
     path('users/request/block/<str:username>/', views.BlockRequestView.as_view(), name='block_friend_request'),
     path('users/request/unfriend/<str:username>/', views.UnFriendView.as_view(), name='unblock_friend_request'),
     path('users/request/unblock/<str:username>/', views.UnBlockUserView.as_view(), name='unblock_friend_request'),
+    path('users/notifications/<int:pk>/', views.MarkNotificationView.as_view(), name='notification_detail'),
     # update/avatar/
 ]
