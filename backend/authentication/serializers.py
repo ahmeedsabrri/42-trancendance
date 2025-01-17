@@ -7,11 +7,12 @@ import random
 import pyotp
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from verify_email.email_handler import ActivationMailManager
+from .utils.utils import send_email_verification_link
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)  # Ensure password is write-only
     class Meta:
         model = User
         fields = ("first_name", "last_name", "username", "email", "password")
@@ -39,7 +40,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             is_active=False,  # User is inactive until email is verified
         )
         if request:
-            ActivationMailManager.send_verification_link(inactive_user=user, request=request) # this not working a need to create send email function
+            send_email_verification_link(user, request)
         return user
 
 

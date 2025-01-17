@@ -59,12 +59,12 @@ const Profile = () => {
   };
   const { user } = useUserStore();
   const { logout} = AuthActions();
+  
   const handleLogout = () => {
     logout()
     .then((res) => {
-              const route = useRouter();
               console.log(res.data.message);
-              route.push('/auth');
+              window.location.href = '/auth';
             })
             .catch((err) => {
               console.error('Failed to logout:', err);
@@ -94,7 +94,7 @@ const handelpanelopen = () => {
                     )}
                 </div>
                 <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
-                    {/* <div className="w-4 h-4 rounded-2xl">
+                    <div className="w-4 h-4 rounded-2xl">
                         <DropdownMenu>
                             <DropdownMenuTrigger className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
                             onClick={handelpanelopen}>
@@ -107,9 +107,9 @@ const handelpanelopen = () => {
                                 <DropdownMenuItem className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400" onClick={handleLogout}>Logout</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    </div> */}
+                    </div>
 
-                    <DropdownPanel />
+                    {/* <DropdownPanel /> */}
                     <ProfileInfo />
                 </div>
             </div>

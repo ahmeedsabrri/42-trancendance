@@ -5,7 +5,38 @@ from rest_framework_simplejwt.tokens import SlidingToken
 from .serializers import RegisterSerializer, \
     OuathCallBackSerializer,TwoFatorAuthcSerializer
 from rest_framework import generics, permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.tokens import default_token_generator
 
+
+User = get_user_model()
+
+class VerifyEmailView(APIView):
+    permission_classes = []
+    def post(self, request):
+        print(request.data)
+        uid = request.data.get('uid')
+        token = request.data.get('token')
+        try:
+            uid = force_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(pk=uid);
+            if default_token_generator.check_token(user, token):
+                user.is_active = True
+                user.save()
+                return Response({"message": "Your email has been verified successfully!"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response({"error": "Invalid verification link."},status=status.HTTP_400_BAD_REQUEST,)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({"error": "Invalid verification link."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 class TestAuthView(APIView):
 
     def get(self, request):
@@ -23,7 +54,7 @@ class LoginView(TokenObtainSlidingView):
                 value=response.data.pop('token'),
                 httponly=True,
             )
-            response.data = {"message": "you loged in successfully"}
+            response.data = {"message": "You logged in successfully"}
         return response
 
 
@@ -44,7 +75,7 @@ class RegisterView(APIView):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"message": "user created successfully"})
+        return Response({"message": "Email verification link sent"}, status=status.HTTP_201_CREATED)
 
 
 class OauthCallBackView(APIView):

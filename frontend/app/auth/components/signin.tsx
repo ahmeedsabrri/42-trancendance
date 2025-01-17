@@ -40,7 +40,7 @@ export default function SignInForm() {
           })
           .catch((err) => {
             console.log(err);
-            setError("root", { type   : "manual", message: err.message }); 
+            setError("root", { type   : "manual", message: err.data.message}); 
           });
       };
     return (

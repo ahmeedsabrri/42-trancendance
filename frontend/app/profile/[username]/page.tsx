@@ -11,11 +11,7 @@ import { useUserStore } from '../../store/store';
 import { useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
-import { api } from '@/app/store/store';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserFriendsActions } from '../utils/actions';
-// import { useToast } from "@/hooks/use-toast"
-// import { ToastAction } from "@/components/ui/toast"
 import { Bounce, toast } from 'react-toastify';
 // Mock data
 const mockUser: UserData = {
@@ -27,6 +23,7 @@ const mockUser: UserData = {
   level: 42,
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
   status: 'online',
+  connection_type: 'friend',
   
 };
 

@@ -13,9 +13,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
-  const content = (pathname !== "/auth" ?
+    const pathname = usePathname();
+    const isAuthRoute = pathname === "/auth";
+  const isCallbackRoute = pathname?.startsWith("/auth/verify-email/[uid]/[token]");
+    const content = !isAuthRoute || isCallbackRoute ? (
     <html lang="en">
       <body className="w-screen h-screen overflow-hidden flex justify-center items-center bg-background bg-center bg-no-repeat bg-cover" >
         <SideBar />
@@ -37,9 +38,21 @@ export default function RootLayout({
         </div>
       </body>
     </html>
-    :
+     ) : (
     <html lang="en">
       <body className="bg-background bg-center bg-no-repeat bg-cover">
+      <ToastContainer 
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick={false}
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="light"
+      transition={Bounce}/>
         {children}
       </body>
     </html>
