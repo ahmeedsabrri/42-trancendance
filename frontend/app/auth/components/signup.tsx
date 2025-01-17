@@ -3,8 +3,7 @@ import React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthActions } from "../utils";
-import { useRouter } from "next/navigation";
-
+import { Bounce, toast } from 'react-toastify';
 type FormData = {
     firstName: string;
     lastName: string;
@@ -36,15 +35,24 @@ export default function SignUpForm() {
         setError,
       } = useForm<FormData>();
     
-      const router = useRouter();
-    
+      const toastup = (message:string) => toast(message,{
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
       const { register: registerUser } = AuthActions(); // Note: Renamed to avoid naming conflict with useForm's register
     
       const onSubmit = () => {
         registerUser(formData.firstName, formData.lastName, formData.email, formData.username, formData.password)
-          .then(() => {
+          .then((res) => {
             console.log("Registered successfully");
-            alert("Registered successfully");
+            toastup(res.data.message);
           })
           .catch((err) => {
             setError("root", { type: "manual", message: err.message });

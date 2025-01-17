@@ -71,7 +71,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -103,20 +103,20 @@ AUTH_USER_MODEL = "users.User"
 # Database
 # https://docs.djangocore.com/en/4.2/ref/settings/#databases
 
-DATABASES = {"default": env.db("DB_URL", default="sqlite:///db.sqlite3")}
+# DATABASES = {"default": env.db("DB_URL", default="sqlite:///db.sqlite3")}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('SQL_DB'),
-#         'USER': os.environ.get('SQL_USER'),
-#         'PASSWORD': os.environ.get('SQL_PASSWORD'),
-#         'HOST': os.environ.get('SQL_HOST'),
-#         'PORT': os.environ.get('SQL_PORT'),
-#     }
-# }
+DATABASES = {
+    'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('SQL_DB'),
+        'USER': os.environ.get('SQL_USER'),
+        'PASSWORD': os.environ.get('SQL_PASSWORD'),
+        'HOST': os.environ.get('SQL_HOST'),
+        'PORT': os.environ.get('SQL_PORT'),
+    }
+}
 # Password validation
 # https://docs.djangocore.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -185,17 +185,19 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "authentication.serializers.MyTokenObtainSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
+# Frontend URL for verification link
+FRONTEND_URL = 'http://localhost:3000'
 
 OAUTH_CLIENT_ID = env("42_OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
 OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
 
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_ID') 
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PW')
+EMAIL_HOST_USER = 'sabriahmeed1@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'kmoudscyrfclewus'  # Use the generated App Password here
+DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Default sender email
 
-DEFAULT_FROM_EMAIL = 'noreply<no_reply@domain.com>'
