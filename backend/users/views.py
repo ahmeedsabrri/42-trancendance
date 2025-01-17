@@ -8,11 +8,27 @@ from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-
+from .utils.utils import send_notification 
 
 User = get_user_model()
 
 # Create your views here.
+
+class MarkNotificationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        notification = get_object_or_404(Notification, id=pk)
+        notification.read = True
+        notification.save()
+        return Response(
+            {
+                "message": "Notification marked as read."
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class PasswordUpdateView(GenericAPIView):
     serializer_class = PasswordUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -92,12 +108,24 @@ class SendRequestView(APIView):
                         "message": "Friend request already sent."
                     },status=status.HTTP_400_BAD_REQUEST)
             Connection.objects.create(sender=sender, receiver=receiver)
-            Notification.objects.create(
-                recipient=receiver,
+             # Create a notification using the `create_notification` method
+            notification = Notification.create_notification(
                 sender=sender,
-                notification_type="friend_request",
-                message=f"{sender.username} sent you a friend request"
+                recipient=receiver,
+                notification_type='friend_request',
+                message=f'{sender.username} sent you a friend request.',
             )
+
+            # Send the notification via WebSocket
+            send_notification(receiver.id, {
+                'id': notification.id,
+                'sender': sender.username,
+                'recipient': receiver.username,
+                'notification_type': notification.notification_type,
+                'message': notification.message,
+                'read': notification.read,
+                'created_at': notification.created_at.isoformat(),
+            })  
             return Response(
                 {
                     "message": "Friend request sent successfully."
@@ -127,6 +155,22 @@ class AcceptRequestView(APIView):
             sender = User.objects.get(username=username)
             receiver = request.user
             Connection.objects.get(sender=sender, receiver=receiver).accept(sender)
+            
+            notification = Notification.create_notification(
+                sender=receiver,
+                recipient=sender,
+                notification_type='friend_accept',
+                message=f'{receiver.username} accepted your friend request.',
+            )
+            send_notification(sender.id, {
+                'id': notification.id,
+                'sender': receiver.username,
+                'recipient': sender.username,
+                'notification_type': notification.notification_type,
+                'message': notification.message,
+                'read': notification.read,
+                'created_at': notification.created_at.isoformat(),
+            })
             return Response(
                 {
                     "message": "Friend request accepted successfully."
