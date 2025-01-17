@@ -71,7 +71,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -192,10 +192,14 @@ OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
 OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_ID') 
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PW')
+EMAIL_HOST_USER = env('EMAIL_ID') 
+EMAIL_HOST_PASSWORD = env('EMAIL_PW')
 
-DEFAULT_FROM_EMAIL = 'noreply<no_reply@domain.com>'
+DEFAULT_FROM_EMAIL = 'transcendence'
+
+HTML_MESSAGE_TEMPLATE = 'verification_email.html'  # Path to your email template
+SUBJECT = 'Verify Your Email Address'  # Email subject
+FROM_ALIAS = 'noreply@example.com'  # Sender alias

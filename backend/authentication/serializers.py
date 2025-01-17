@@ -7,6 +7,7 @@ import random
 import pyotp
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from verify_email.email_handler import ActivationMailManager
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -18,11 +19,27 @@ class RegisterSerializer(serializers.ModelSerializer):
             "first_name": {"required": True},
             "last_name": {"required": True},
             "email": {"required": True},
+            "password": {"write_only": True},
         }
 
     def create(self, validated_data):
+        # Access the request object
+        request = self.context.get('request')
+
+        # Generate OTP
         otp_base32 = pyotp.random_base32()
-        user = User.objects.create_user(**validated_data)
+
+        # Create the user
+        user = User.objects.create_user(
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            is_active=False,  # User is inactive until email is verified
+        )
+        if request:
+            ActivationMailManager.send_verification_link(inactive_user=user, request=request) # this not working a need to create send email function
         return user
 
 
@@ -68,6 +85,7 @@ class OuathCallBackSerializer(serializers.Serializer):
     def create(self, validated_data):
         username = self.unique_unique_username(validated_data["username"])
         validated_data["username"] = username
+        
         email = validated_data.pop("email")
         
         user, _ = User.objects.get_or_create(email=email, defaults={**validated_data})

@@ -41,7 +41,7 @@ class RegisterView(APIView):
     serializer_class = RegisterSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "user created successfully"})
