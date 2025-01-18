@@ -30,7 +30,6 @@ export default function Settings() {
           <SecuritySettings user={user}/>
         </div>
       </div>
-        <h2>{userRef.current?.username}</h2>
     </div>
   );
 }

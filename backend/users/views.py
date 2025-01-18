@@ -1,8 +1,9 @@
+from .filters import UserFilter
 from .models import Connection, Notification
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
+from .serializers import SearchUserSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
@@ -49,9 +50,11 @@ class PasswordUpdateView(GenericAPIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    
     def get(self, request, username):
         user = get_object_or_404(User, username=username)
 
@@ -66,8 +69,12 @@ class ProfileView(APIView):
         serializer = UserProfileSerializer(user, context={'request': request})
         user_data = serializer.data
         user_data["connection_type"] = connection_type
+        user_data["sender"] = connection.sender.username if connection else None
 
         return Response(user_data)
+
+
+
 
 class UserView(APIView):
     serializer_class = UserInfoSerializer
@@ -101,13 +108,21 @@ class SendRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if Connection.objects.filter(sender=sender, receiver=receiver).exists():
-                return Response(
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                if connection.status == "accepted" or connection.status == "pending":
+                    return Response(
                     {
-                        "error": "Invalid receiver",
-                        "message": "Friend request already sent."
-                    },status=status.HTTP_400_BAD_REQUEST)
-            Connection.objects.create(sender=sender, receiver=receiver)
+                        "error": "Invalid request",
+                        "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+                if connection.status == "blocked" or connection.status == "rejected":
+                    connection.status = "pending"
+                    connection.save()
+            else:
+                Connection.objects.create(sender=sender, receiver=receiver)
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
                 sender=sender,
@@ -154,8 +169,9 @@ class AcceptRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            Connection.objects.get(sender=sender, receiver=receiver).accept(sender)
-            
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.accept(sender)
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -206,24 +222,25 @@ class DeclineRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request, username):
         try:
-            sender = request.user
-            receiver = User.objects.get(username=username)
-            
-            if Connection.objects.get(sender=sender, receiver=receiver).status == "blocked" or Connection.objects.get(sender=sender, receiver=receiver).status == "rejected":
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                if connection.status == "blocked":
+                    return Response(
+                        {
+                            "error": "Invalid request",
+                            "message": "Friend already blocked or request declined."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                connection.decline()
                 return Response(
                     {
-                        "error": "Invalid request",
-                        "message": "Friend already blocked or request declined."
+                        "message": "Friend request declined successfully."
                     },
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_200_OK
                 )
-            Connection.objects.get(sender=sender, receiver=receiver).decline()
-            return Response(
-                {
-                    "message": "Friend request declined successfully."
-                },
-                status=status.HTTP_200_OK
-            )
         except User.DoesNotExist:
             return Response(
                 {
@@ -414,6 +431,7 @@ class UnFriendView(APIView):
     def get(self, request, username):
         try:
             friend = User.objects.get(username=username)
+            print(friend)
             user = request.user
             connection = Connection.objects.get(
                 Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
@@ -491,3 +509,39 @@ class UnBlockUserView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+
+class UserSearchView(generics.ListAPIView):
+    serializer_class = SearchUserSerializer
+    filterset_class = UserFilter
+    
+    def get_queryset(self):
+        queryset = User.objects.all()
+        filtered_queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
+        return filtered_queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response(
+                {
+                    "message": "No users found with the given search parameters."
+                },
+                status=status.HTTP_200_OK
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+
+class DeleteNotificationView(APIView):
+    permissions_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        notification = get_object_or_404(Notification, id=pk)
+        notification.delete()
+        return Response(
+            {
+                "message": "Notification deleted successfully."
+            },
+            status=status.HTTP_200_OK
+        )

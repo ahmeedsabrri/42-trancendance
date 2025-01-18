@@ -119,7 +119,6 @@ export default function Profile() {
   });
   // const { toast } = useToast();
   const { 
-    fetchUser, 
     fetchFriend, 
     user, 
     viewedProfile, 
@@ -130,14 +129,37 @@ export default function Profile() {
   const { username } = useParams();
   const {handleRequest} = UserFriendsActions();
   useEffect(() => {
-    if (!isInitialized) {
-      fetchUser();
-    }
     fetchFriend(username as string);
     fetchUserFriends(username as string);
     fetchOwnFriends();
-  }, [username, isInitialized, fetchUser, fetchFriend, user, UserOwnfriends, fetchUserFriends, fetchOwnFriends, isIn]);
+  }, [username, isInitialized, fetchFriend, UserOwnfriends, fetchUserFriends, fetchOwnFriends]);
 
+  // handleRequest Accepte function
+
+  const handleAccept = () => {
+    handleRequest(username as string, 'accept')
+    .then((response) => {
+      console.log(response);
+      notifyAdd(response.data.message);
+    })
+    .catch((err) => {
+      console.log(err);
+      notifyErr(err.response.data.message);
+    });
+  };
+  // handelDecline function
+
+  const handleDecline = () => {
+    handleRequest(username as string, 'decline')
+    .then((response) => {
+      console.log(response);
+      notifyCancel(response.data.message);
+    })
+    .catch((err) => {
+      console.log(err);
+      notifyErr(err.response.data.message);
+    });
+  };
   // handleBlock function
   const handleBlock =  () => {
     console.log('Blocked');
@@ -193,8 +215,6 @@ export default function Profile() {
   if (loading) {
     return <div>Loading...</div>;
   }
-  console.log(UserOwnfriends);
-  console.log(username);
   const profileToShow = username !== user?.username ? viewedProfile : user;
   if (!profileToShow) {
     return <div>Profile not found</div>;
@@ -208,6 +228,8 @@ export default function Profile() {
           onBlock={handleBlock}
           onUnfriend={handleUnfriend}
           addFriend={handleSendfriendRequest}
+          onAccepte={handleAccept}
+          onDecline={handleDecline}
         />
        {profileToShow.connection_type != 'blocked' ? <div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
@@ -250,16 +272,19 @@ export default function Profile() {
             />
           </div>
         </div>
-        </div>: <div className="flex flex-col justify-center items-center h-[50vh]">
-          <div className="absolute bottom-50 right-50 flex gap-2">
-          <h1 className="text-2xl font-bold text-white mb-6">You have blocked this user</h1>
-             <button
-          className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
-          onClick={handleUnblock}
-        >
-          <span className="text-white">UnBlock</span>
-        </button>
         </div>
+        : 
+        <div className="flex justify-center items-center h-[50vh]">
+          {profileToShow.sender == user?.username ? 
+          <div className="absolute bottom-50 right-50 flex gap-2 flex-col items-center justify-center">
+            <h1 className="text-2xl font-bold text-white mb-6">You have blocked this user</h1>
+             <button
+                className="flex items-center gap-2 px-4 py-4 bg-white/20 rounded-lg"
+                onClick={handleUnblock}
+              >
+              <span className="text-white">UnBlock</span>
+            </button>
+        </div> : <h1 className="text-2xl font-bold text-white mb-6">You have been blocked by this user</h1>}
           </div>}
       </div>
     </div>

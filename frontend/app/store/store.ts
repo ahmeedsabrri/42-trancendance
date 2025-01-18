@@ -17,6 +17,8 @@ export interface UserData {
     avatar: string;
     status: string;
     connection_type: string;
+    sender: string;
+    is_online: boolean;
 }
 
 interface UserStore {

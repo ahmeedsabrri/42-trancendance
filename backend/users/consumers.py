@@ -3,21 +3,24 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Notification
 from asgiref.sync import sync_to_async
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Check if the user is authenticated
         if self.scope['user'].is_anonymous:
-            await self.close()  # Reject connection for anonymous users
+            await self.close()
         else:
-            # Add the user to a group for notifications
             self.group_name = f'user_{self.scope["user"].id}'
             await self.channel_layer.group_add(
                 self.group_name,
                 self.channel_name
             )
+             # Mark the user as online
+            self.user = self.scope['user']
+            await self.update_user_status(self.user.id, True)
             await self.accept()
-
+            
     async def disconnect(self, close_code):
         # Remove the user from the group
         if hasattr(self, 'group_name'):
@@ -25,6 +28,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 self.group_name,
                 self.channel_name
             )
+            # Mark the user as offline
+            await self.update_user_status(self.user.id, False)
 
     async def receive(self, text_data):
         # Handle incoming WebSocket messages (optional)
@@ -39,7 +44,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # Send the notification to the WebSocket
         notification = event['notification']
         await self.send(text_data=json.dumps({
-            'type': 'notification',
+            'type': 'send_notification',
             'notification': notification,
         }))
 
@@ -51,3 +56,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             notification.read_notification()
         except Notification.DoesNotExist:
             pass
+    @sync_to_async
+    def update_user_status(self, user_id, is_online):
+        User.objects.filter(id=user_id).update(is_online=is_online)

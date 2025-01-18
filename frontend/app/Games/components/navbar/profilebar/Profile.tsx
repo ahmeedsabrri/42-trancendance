@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import ProfileInfo from './ProfileInfo';
+import Cookies from 'js-cookie';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,23 +19,18 @@ import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
 import { Bounce, toast } from 'react-toastify';
 import { UserFriendsActions } from '@/app/profile/utils/actions';
+import useWebSocket from 'react-use-websocket';
+import useNotificationWebSocket from './components/useNotificationWebSocket';
 
 const Profile = () => {
-  // const router = useRouter();
+  const {readyState} = useNotificationWebSocket("ws://localhost:8000/ws/notifications/");
   const { user } = useUserStore();
   const { logout } = AuthActions();
-  const {
-    notifications,
-    unreadCount,
-    isConnected,
-    fetchNotifications,
-    markAsRead,
-    connectWebSocket,
-    disconnectWebSocket,
-  } = useNotificationStore();
+  const {notifications,markAsRead,unreadCount,removeNotification} = useNotificationStore();
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
   const notifAccept = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -68,18 +64,6 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
-  // Fetch notifications and connect to WebSocket on mount
-  useEffect(() => {
-    fetchNotifications();
-
-    const token = localStorage.getItem('jwt_token'); // Get the JWT token
-    const url = `ws://localhost:8000/ws/notifications/?token=${token}`;
-    connectWebSocket(url);
-
-    return () => {
-      disconnectWebSocket(); // Cleanup on unmount
-    };
-  }, [fetchNotifications, connectWebSocket, disconnectWebSocket]);
 
   // Handle notification click
   const handleNotificationClick = () => {
@@ -87,14 +71,13 @@ const Profile = () => {
   };
 
   // Handle marking a notification as read
-  const handleMarkAsRead = (id: string) => {
+  const handleMarkAsRead = (id: number) => {
     markAsRead(id);
   };
 
   // Handle accepting a friend request
   const handleAcceptFriend = (username: string) => {
     console.log(`Accepted friend request from user ${username}`);
-    // Add logic to accept friend request (e.g., call an API endpoint)
     handleRequest(username, 'accept')
     .then((res) => {
       console.log(res.data.message);
@@ -108,7 +91,6 @@ const Profile = () => {
   // Handle rejecting a friend request
   const handleRejectFriend = (username: string) => {
     console.log(`Rejected friend request from user ${username}`);
-    // Add logic to reject friend request (e.g., call an API endpoint)
     handleRequest(username, 'decline')
     .then((res) => {
       console.log(res.data.message);
@@ -124,15 +106,17 @@ const Profile = () => {
     logout()
       .then((res) => {
         console.log(res.data.message);
-         // Redirect to the auth page
          window.location.href = '/auth';
       })
       .catch((err) => {
-        console.error('Failed to logout:', err);
+        notifyErr(err.response.data.message);
       });
   };
+  const handelRmoveNotification = (id:number) => {
+    console.log(`Remove notification with id ${id}`);
+    // notifications.pop(id);
+  }
 
-  // Handle dropdown panel open/close
   const handlePanelOpen = () => {
     setIsOpen(!isOpen);
   };
@@ -149,6 +133,7 @@ const Profile = () => {
               onMarkAsRead={handleMarkAsRead}
               onAcceptFriend={handleAcceptFriend}
               onRejectFriend={handleRejectFriend}
+              onRemoveNotification={removeNotification}
             />
           )}
         </div>
@@ -169,7 +154,7 @@ const Profile = () => {
                   <Link href="/dashboard/setting">Setting</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400"
+                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:border-r-red-500"
                   onClick={handleLogout}
                 >
                   Logout

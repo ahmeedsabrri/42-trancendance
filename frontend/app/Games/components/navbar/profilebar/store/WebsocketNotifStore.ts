@@ -1,26 +1,40 @@
-import { create } from "zustand"
+import { create } from "zustand";
 import axios from 'axios';
-
+import useWebSocket from 'react-use-websocket';
+import type { Notificationdata } from '../types/notification';
 // Base API setup
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   withCredentials: true,
 });
 
-const useNotificationStore = create((set, get) => ({
-  notifications: [], // List of notifications
-  unreadCount: 0, // Count of unread notifications
-  socket: null, // WebSocket instance
-  isConnected: false, // WebSocket connection status
-  isLoading: false, // Loading state for API requests
-  error: null, // Error state for API requests
+interface NotificationStore {
+  notifications: Notificationdata[];
+  unreadCount: number;
+  isLoading: boolean;
+  error: string | null;
+  onlineUsers: Record<string, string>;
+
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (notificationId: number) => Promise<void>;
+  addNotification: (newNotification: Notificationdata) => void;
+  removeNotification: (notificationId: number) => Promise<void>;
+  clearError: () => void;
+}
+
+
+const useNotificationStore = create<NotificationStore>((set, get) => ({
+  notifications: [],
+  unreadCount: 0, 
+  isLoading: false,
+  error: null,
+  onlineUsers: {},
 
   // Fetch notifications from the backend
   fetchNotifications: async () => {
     set({ isLoading: true, error: null });
     try {
       const response = await api.get('/users/me/notif/');
-      console.log(response);
       const notifications = response.data;
 
       // Calculate unread count
@@ -28,7 +42,7 @@ const useNotificationStore = create((set, get) => ({
 
       set({ notifications, unreadCount, isLoading: false });
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      set({ error: error.response?.data?.message || 'Failed to fetch notifications', isLoading: false });
       console.error('Failed to fetch notifications:', error);
     }
   },
@@ -46,49 +60,34 @@ const useNotificationStore = create((set, get) => ({
         unreadCount: state.unreadCount - 1,
       }));
     } catch (error) {
-      set({ error: error.message });
+      set({ error: error.data.message });
       console.error('Failed to mark notification as read:', error);
     }
   },
-
-  // Initialize WebSocket connection
-  connectWebSocket: (url) => {
-    const socket = new WebSocket(url);
-
-    socket.onopen = () => {
-      console.log('WebSocket connected');
-      set({ isConnected: true, socket });
-    };
-
-    socket.onmessage = (event) => {
-      const newNotification = JSON.parse(event.data);
-
-      // Add the new notification to the list
+  addNotification: (newNotification) =>
+    set((state) => ({
+      notifications: [newNotification, ...state.notifications],
+      unreadCount: state.unreadCount + 1,
+    })),
+  // Remove a notification
+  removeNotification: async (notificationId: number) => {
+    try {
+      await api.get(`/users/notifications/delete/${notificationId}/`);  // This line is commented out to prevent deletion of notifications
+      // Remove the notification from the store
       set((state) => ({
-        notifications: [newNotification, ...state.notifications],
-        unreadCount: state.unreadCount + 1,
+        notifications: state.notifications.filter((n) => n.id !== notificationId),
+        unreadCount: state.notifications.some((n) => n.id === notificationId && !n.read)
+          ? state.unreadCount - 1
+          : state.unreadCount,
       }));
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket disconnected');
-      set({ isConnected: false, socket: null });
-    };
-
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      set({ error: 'WebSocket connection error', isConnected: false });
-    };
-  },
-
-  // Close WebSocket connection
-  disconnectWebSocket: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.close();
-      set({ isConnected: false, socket: null });
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to remove notification' });
+      console.error('Failed to remove notification:', error);
     }
   },
+
+  // Clear error state
+  clearError: () => set({ error: null }),
 }));
 
-export default useNotificationStore;
+export default useNotificationStore;  

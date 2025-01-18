@@ -1,6 +1,7 @@
 'use client'
 
 import SearchBar from "./SeachBar";
+import SearchList from "./SearchList";
 import Profile from "./profilebar/Profile";
 
 const NavBar = () => {
@@ -12,7 +13,9 @@ const NavBar = () => {
                 </h1>
             </div>
 
+            <div className="h-full w-full flex items-center justify-center">
             <SearchBar />
+            </div>
             <Profile />
         </div>
     )

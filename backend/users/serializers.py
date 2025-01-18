@@ -52,20 +52,32 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level']
+        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level','is_online']
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    connection_type = serializers.SerializerMethodField()
+
+class SenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level','connection_type']
+        fields = ['username', 'email', 'id']
+class UserProfileSerializer(serializers.ModelSerializer):
+    connection_type = serializers.SerializerMethodField()
+    sender = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'id', 'status', 'level','connection_type','sender','is_online']
 
     def get_connection_type(self, obj):
         request_user = self.context['request'].user
         if not Connection.objects.filter(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user)).exists():
             return 'not_connected'
         connection = Connection.objects.get(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user))
-        return connection.status  
+        return connection.status 
+    def get_sender(self, obj):
+        request_user = self.context['request'].user
+        if not Connection.objects.filter(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user)).exists():
+            return None
+        connection = Connection.objects.get(Q(sender=request_user, receiver=obj) | Q(sender=obj, receiver=request_user))
+        return SenderSerializer(connection.sender).data
         
 
 class FriendRequestSerializer(serializers.ModelSerializer):
@@ -96,3 +108,10 @@ class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name','last_name','username','email','avatar','id','status','level','connection_status']
+        
+
+
+class SearchUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [ 'username', 'avatar', 'id']
