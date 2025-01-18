@@ -161,8 +161,11 @@ class AcceptRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            Connection.objects.get(sender=sender, receiver=receiver).accept(sender)
-            
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.accept()
+            else:
+                Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).accept()
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -213,8 +216,8 @@ class DeclineRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request, username):
         try:
-            sender = request.user
-            receiver = User.objects.get(username=username)
+            sender = User.objects.get(username=username)
+            receiver = request.user
             
             if Connection.objects.get(sender=sender, receiver=receiver).status == "blocked" or Connection.objects.get(sender=sender, receiver=receiver).status == "rejected":
                 return Response(
@@ -224,13 +227,14 @@ class DeclineRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            Connection.objects.get(sender=sender, receiver=receiver).decline()
-            return Response(
-                {
-                    "message": "Friend request declined successfully."
-                },
-                status=status.HTTP_200_OK
-            )
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                Connection.objects.get(sender=sender, receiver=receiver).decline()
+                return Response(
+                    {
+                        "message": "Friend request declined successfully."
+                    },
+                    status=status.HTTP_200_OK
+                )
         except User.DoesNotExist:
             return Response(
                 {
@@ -424,7 +428,7 @@ class UnFriendView(APIView):
             print(friend)
             user = request.user
             connection = Connection.objects.get(
-                Q(sender=user, receiver=friend, status='accept') | Q(sender=friend, receiver=user, status='accept')
+                Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
             )
             connection.delete()
             return Response(
