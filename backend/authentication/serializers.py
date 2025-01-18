@@ -1,13 +1,14 @@
-import logging
 from rest_framework import serializers
+import logging
+import random
 from django.contrib.auth import get_user_model
 from requests_oauthlib import OAuth2Session
 from django.conf import settings
-import random
-import pyotp
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .utils.utils import send_email_verification_link
+from django.db import IntegrityError
+
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -23,25 +24,30 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
         }
 
+    def validate(self, data):
+        if User.objects.filter(username=data.get('username')).exists():
+            raise serializers.ValidationError({"message": "A user with that username already exists."})
+        if User.objects.filter(email=data.get('email')).exists():
+            raise serializers.ValidationError({"message": "A user with that email already exists."})
+        return data
+
     def create(self, validated_data):
-        # Access the request object
         request = self.context.get('request')
+        try:
+            user = User.objects.create_user(
+                first_name=validated_data['first_name'],
+                last_name=validated_data['last_name'],
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password'],
+                is_active=False,  # User is inactive until email is verified
+            )
+            if request:
+                send_email_verification_link(user, request)
+            return user
+        except Exception as e:
+            raise serializers.ValidationError({"message": "An unexpected error occurred during registration."})
 
-        # Generate OTP
-        otp_base32 = pyotp.random_base32()
-
-        # Create the user
-        user = User.objects.create_user(
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            is_active=False,  # User is inactive until email is verified
-        )
-        if request:
-            send_email_verification_link(user, request)
-        return user
 
 
 class OuathCallBackSerializer(serializers.Serializer):

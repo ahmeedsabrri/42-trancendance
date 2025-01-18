@@ -1,7 +1,6 @@
 import { Shield, UserMinus2Icon} from "lucide-react";
 import { ProfileHeaderProps } from "./ProfileHeader";
 
-
 export function IsaFriend({onBlock, onUnfriend}:ProfileHeaderProps) {   
     return (
         <div className="absolute bottom-0 right-8 flex gap-2">

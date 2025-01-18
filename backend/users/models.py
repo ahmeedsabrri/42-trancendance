@@ -13,7 +13,8 @@ class User(AbstractUser):
     otp_base32 = models.CharField(max_length=32, default=pyotp.random_base32)
     level = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=20, default="offline")
-
+    is_online = models.BooleanField(default=False)
+    
     def enable_2fa(self) -> None:
         self.twofa_enabled = True
         self.save()

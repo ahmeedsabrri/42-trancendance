@@ -7,6 +7,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
+
+
 const useNotificationStore = create((set, get) => ({
   notifications: [], // List of notifications
   unreadCount: 0, // Count of unread notifications
@@ -14,7 +16,7 @@ const useNotificationStore = create((set, get) => ({
   isConnected: false, // WebSocket connection status
   isLoading: false, // Loading state for API requests
   error: null, // Error state for API requests
-
+  onlineUsers: {},
   // Fetch notifications from the backend
   fetchNotifications: async () => {
     set({ isLoading: true, error: null });
@@ -28,7 +30,7 @@ const useNotificationStore = create((set, get) => ({
 
       set({ notifications, unreadCount, isLoading: false });
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      set({ error: error.data.message, isLoading: false });
       console.error('Failed to fetch notifications:', error);
     }
   },
@@ -46,7 +48,7 @@ const useNotificationStore = create((set, get) => ({
         unreadCount: state.unreadCount - 1,
       }));
     } catch (error) {
-      set({ error: error.message });
+      set({ error: error.data.message });
       console.error('Failed to mark notification as read:', error);
     }
   },
@@ -77,6 +79,8 @@ const useNotificationStore = create((set, get) => ({
 
     socket.onerror = (error) => {
       console.error('WebSocket error:', error);
+      console.error('WebSocket URL:', url); // Log the WebSocket URL
+      console.error('WebSocket readyState:', socket.readyState); // Log the WebSocket state
       set({ error: 'WebSocket connection error', isConnected: false });
     };
   },

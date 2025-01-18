@@ -49,9 +49,11 @@ class PasswordUpdateView(GenericAPIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    
     def get(self, request, username):
         user = get_object_or_404(User, username=username)
 
@@ -66,8 +68,12 @@ class ProfileView(APIView):
         serializer = UserProfileSerializer(user, context={'request': request})
         user_data = serializer.data
         user_data["connection_type"] = connection_type
+        user_data["sender"] = connection.sender.username if connection else None
 
         return Response(user_data)
+
+
+
 
 class UserView(APIView):
     serializer_class = UserInfoSerializer
@@ -414,9 +420,10 @@ class UnFriendView(APIView):
     def get(self, request, username):
         try:
             friend = User.objects.get(username=username)
+            print(friend)
             user = request.user
             connection = Connection.objects.get(
-                Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
+                Q(sender=user, receiver=friend, status='accept') | Q(sender=friend, receiver=user, status='accept')
             )
             connection.delete()
             return Response(

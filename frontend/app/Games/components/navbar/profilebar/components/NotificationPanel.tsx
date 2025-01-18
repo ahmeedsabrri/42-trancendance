@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, AlertTriangle, RefreshCw, X, UserPlus, UserCheck } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { Notification } from '../types/notification';
 import Avatar from "../Avatar";
 interface NotificationPanelProps {
@@ -29,80 +29,73 @@ export function NotificationPanel({
 
       {/* Notification List */}
       <div className="overflow-y-auto divide-y divide-white/10">
-        {notifications.length === 0 ? (
-          <div className="p-4 text-white/60 text-center">No notifications</div>
-        ) : (
-          notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`p-4 transition-colors hover:bg-white/5 ${notification.read ? 'opacity-60' : ''}`}
-            >
-              <div className="flex items-start gap-3">
-                {/* Notification Icon */}
-                <Avatar width={40} height={40} avatar={notification.sender?.avatar}/>
-                {/* Notification Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white">
-                      {notification.sender?.username || 'System'}
-                    </p>
-                    <p className="text-xs text-white/50">{formatTime(notification.created_at)}</p>
-                  </div>
-                  <p className="text-sm text-white/70 mt-0.5">{notification.message}</p>
+  {notifications.length === 0 ? (
+    <div className="p-4 text-white/60 text-center">No notifications</div>
+  ) : (
+    notifications.map((notification) => (
+      <div
+        key={notification.id}
+        className={`p-4 transition-colors cursor-pointer hover:bg-white/5 ${notification.read ? 'opacity-60' : ''}`}
+        onClick={() => {
+          if (notification.notification_type !== 'friend_request') {
+            onMarkAsRead(notification.id);
+            // redirect(`/profile/${notification.sender?.username}`);
+          }
 
-                  {/* Friend Request Actions */}
-                  {notification.notification_type === 'friend_request' && !notification.read && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAcceptFriend(notification.sender?.username|| '');
-                          onMarkAsRead(notification.id);
-                        }}
-                        className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRejectFriend(notification.sender?.username|| '');
-                          onMarkAsRead(notification.id);
-                        }}
-                        className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Unread Indicator */}
-                {!notification.read && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-                )}
-              </div>
+        }}
+      >
+        <div className="flex items-start gap-3">
+          {/* Notification Icon */}
+          <Avatar width={40} height={40} avatar={notification.sender?.avatar} />
+          {/* Notification Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-white">
+                {notification.sender?.username || 'System'}
+              </p>
+              <p className="text-xs text-white/50">{formatTime(notification.created_at)}</p>
             </div>
-          ))
-        )}
+            <p className="text-sm text-white/70 mt-0.5">{notification.message}</p>
+
+            {/* Friend Request Actions */}
+            {notification.notification_type === 'friend_request' && !notification.read && (
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAcceptFriend(notification.sender?.username || '');
+                    onMarkAsRead(notification.id);
+                  }}
+                  className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRejectFriend(notification.sender?.username || '');
+                    onMarkAsRead(notification.id);
+                  }}
+                  className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
+                >
+                  Decline
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Unread Indicator */}
+          {!notification.read && (
+            <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
+          )}
+        </div>
       </div>
-    </div>
+    ))
+  )}
+</div>
+</div>
   );
 }
-
-// Helper function to get the appropriate icon for the notification type
-const getIcon = (type: Notification['type']) => {
-  switch (type) {
-    case 'message':
-      return <MessageSquare className="w-5 h-5 text-blue-500" />;
-    case 'friend_request':
-      return <UserPlus className="w-5 h-5 text-purple-500" />;
-    case 'friend_accept':
-      return <UserCheck className="w-5 h-5 text-green-500" />;
-    default:
-      return null;
-  }
-};
 
 // Helper function to format the timestamp
 const formatTime = (dateString: string) => {

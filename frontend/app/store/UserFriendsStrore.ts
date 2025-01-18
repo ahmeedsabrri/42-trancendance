@@ -10,13 +10,13 @@ export const api = axios.create({
 
 export interface UserFriendsData {
     first_name: string;
-        last_name: string;
-        username: string; 
-        email: string;
-        avatar: string;
-        id: number;
-        status: string;
-        level: number;
+    last_name: string;
+    username: string; 
+    email: string;
+    avatar: string;
+    id: number;
+    status: string;
+    level: number;
 }
 interface UserFriendsStore {
     Userfriends: UserFriendsData[] | null;

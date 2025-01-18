@@ -55,7 +55,8 @@ export default function SignUpForm() {
             toastup(res.data.message);
           })
           .catch((err) => {
-            setError("root", { type: "manual", message: err.message });
+            console.log("Error registering user", err.response?.data);
+            setError("root", { type: "manual", message: err.response?.data.message});
           });
       };
     return (

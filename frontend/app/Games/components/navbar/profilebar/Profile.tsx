@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import ProfileInfo from './ProfileInfo';
+import Cookies from 'js-cookie';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,12 +69,11 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
-  // Fetch notifications and connect to WebSocket on mount
+
+
   useEffect(() => {
     fetchNotifications();
-
-    const token = localStorage.getItem('jwt_token'); // Get the JWT token
-    const url = `ws://localhost:8000/ws/notifications/?token=${token}`;
+    const url = "ws://localhost:8000/ws/notifications/";
     connectWebSocket(url);
 
     return () => {
@@ -94,7 +94,6 @@ const Profile = () => {
   // Handle accepting a friend request
   const handleAcceptFriend = (username: string) => {
     console.log(`Accepted friend request from user ${username}`);
-    // Add logic to accept friend request (e.g., call an API endpoint)
     handleRequest(username, 'accept')
     .then((res) => {
       console.log(res.data.message);
@@ -108,7 +107,6 @@ const Profile = () => {
   // Handle rejecting a friend request
   const handleRejectFriend = (username: string) => {
     console.log(`Rejected friend request from user ${username}`);
-    // Add logic to reject friend request (e.g., call an API endpoint)
     handleRequest(username, 'decline')
     .then((res) => {
       console.log(res.data.message);
@@ -124,15 +122,14 @@ const Profile = () => {
     logout()
       .then((res) => {
         console.log(res.data.message);
-         // Redirect to the auth page
+        disconnectWebSocket();
          window.location.href = '/auth';
       })
       .catch((err) => {
-        console.error('Failed to logout:', err);
+        notifyErr(err.response.data.message);
       });
   };
 
-  // Handle dropdown panel open/close
   const handlePanelOpen = () => {
     setIsOpen(!isOpen);
   };
