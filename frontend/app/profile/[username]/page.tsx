@@ -119,7 +119,6 @@ export default function Profile() {
   });
   // const { toast } = useToast();
   const { 
-    fetchUser, 
     fetchFriend, 
     user, 
     viewedProfile, 
@@ -130,13 +129,10 @@ export default function Profile() {
   const { username } = useParams();
   const {handleRequest} = UserFriendsActions();
   useEffect(() => {
-    if (!isInitialized) {
-      fetchUser();
-    }
     fetchFriend(username as string);
     fetchUserFriends(username as string);
     fetchOwnFriends();
-  }, [username, isInitialized, fetchUser, fetchFriend, user, UserOwnfriends, fetchUserFriends, fetchOwnFriends, isIn]);
+  }, [username, isInitialized, fetchFriend, UserOwnfriends, fetchUserFriends, fetchOwnFriends]);
 
   // handleRequest Accepte function
 
@@ -219,8 +215,6 @@ export default function Profile() {
   if (loading) {
     return <div>Loading...</div>;
   }
-  console.log(UserOwnfriends);
-  console.log(username);
   const profileToShow = username !== user?.username ? viewedProfile : user;
   if (!profileToShow) {
     return <div>Profile not found</div>;

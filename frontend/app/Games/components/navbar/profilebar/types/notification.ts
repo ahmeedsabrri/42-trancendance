@@ -12,7 +12,7 @@ export interface userNotif {
   level: number;
 }
 
-export interface Notification {
+export interface Notificationdata {
   id: number
   notification_type: NotificationType;
   read: boolean;

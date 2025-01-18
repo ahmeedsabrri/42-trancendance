@@ -19,24 +19,18 @@ import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
 import { Bounce, toast } from 'react-toastify';
 import { UserFriendsActions } from '@/app/profile/utils/actions';
-import { DropdownPanel } from './components/DropdownPanel';
+import useWebSocket from 'react-use-websocket';
+import useNotificationWebSocket from './components/useNotificationWebSocket';
 
 const Profile = () => {
-  // const router = useRouter();
+  const {readyState} = useNotificationWebSocket("ws://localhost:8000/ws/notifications/");
   const { user } = useUserStore();
   const { logout } = AuthActions();
-  const {
-    notifications,
-    unreadCount,
-    isConnected,
-    fetchNotifications,
-    markAsRead,
-    connectWebSocket,
-    disconnectWebSocket,
-  } = useNotificationStore();
+  const {notifications,markAsRead,unreadCount,removeNotification} = useNotificationStore();
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
   const notifAccept = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -70,17 +64,6 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
-
-
-  useEffect(() => {
-    fetchNotifications();
-    const url = "ws://localhost:8000/ws/notifications/";
-    connectWebSocket(url);
-
-    return () => {
-      disconnectWebSocket(); // Cleanup on unmount
-    };
-  }, [fetchNotifications, connectWebSocket, disconnectWebSocket]);
 
   // Handle notification click
   const handleNotificationClick = () => {
@@ -123,13 +106,16 @@ const Profile = () => {
     logout()
       .then((res) => {
         console.log(res.data.message);
-        disconnectWebSocket();
          window.location.href = '/auth';
       })
       .catch((err) => {
         notifyErr(err.response.data.message);
       });
   };
+  const handelRmoveNotification = (id:number) => {
+    console.log(`Remove notification with id ${id}`);
+    // notifications.pop(id);
+  }
 
   const handlePanelOpen = () => {
     setIsOpen(!isOpen);
@@ -147,6 +133,7 @@ const Profile = () => {
               onMarkAsRead={handleMarkAsRead}
               onAcceptFriend={handleAcceptFriend}
               onRejectFriend={handleRejectFriend}
+              onRemoveNotification={removeNotification}
             />
           )}
         </div>

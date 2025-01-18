@@ -2,6 +2,7 @@ import React from 'react';
 import { User, Upload, Camera } from 'lucide-react';
 import Image from 'next/image';
 import { UserData } from '@/app/store/store';
+import  Avatar  from '../../app/Games/components/navbar/profilebar/Avatar';
 
 export function ProfileSettings( {user}: {user : UserData} ) {
   // task list
@@ -35,13 +36,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
         </div>
 
         <div className="relative inline-block">
-          <Image
-            src={user.avatar}
-            className="w-24 h-24 rounded-full object-cover"
-            alt="Avatar"
-            width={96}
-            height={96}
-          />
+          <Avatar width={100} height={100} avatar={user?.avatar}/>
           <label className="absolute bottom-0 right-0 p-2 rounded-full bg-black/50 hover:bg-black/70 cursor-pointer transition-all">
             <Camera className="w-4 h-4 text-white" />
             <input

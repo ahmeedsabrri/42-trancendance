@@ -69,7 +69,7 @@ class Connection(models.Model):
         self.save()
     def decline(self):
         self.status = "rejected"
-        self.save()
+        self.delete()
     
     def block(self):
         self.status = "blocked"

@@ -63,7 +63,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
           </div> }
       </div>}
       {userProfile?.connection_type === 'accepted' &&<IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
-      {userProfile?.connection_type === 'not_connected' && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
+      {(userProfile?.connection_type === 'not_connected' || userProfile?.connection_type == 'rejected')  && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
     </div>
   );
 }

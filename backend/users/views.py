@@ -108,13 +108,21 @@ class SendRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if Connection.objects.filter(sender=sender, receiver=receiver).exists():
-                return Response(
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                if connection.status == "accepted" or connection.status == "pending":
+                    return Response(
                     {
-                        "error": "Invalid receiver",
-                        "message": "Friend request already sent."
-                    },status=status.HTTP_400_BAD_REQUEST)
-            Connection.objects.create(sender=sender, receiver=receiver)
+                        "error": "Invalid request",
+                        "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+                if connection.status == "blocked" or connection.status == "rejected":
+                    connection.status = "pending"
+                    connection.save()
+            else:
+                Connection.objects.create(sender=sender, receiver=receiver)
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
                 sender=sender,
@@ -163,9 +171,7 @@ class AcceptRequestView(APIView):
             receiver = request.user
             if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
                 connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.accept()
-            else:
-                Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).accept()
+                connection.accept(sender)
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -218,17 +224,17 @@ class DeclineRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            
-            if Connection.objects.get(sender=sender, receiver=receiver).status == "blocked" or Connection.objects.get(sender=sender, receiver=receiver).status == "rejected":
-                return Response(
-                    {
-                        "error": "Invalid request",
-                        "message": "Friend already blocked or request declined."
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                Connection.objects.get(sender=sender, receiver=receiver).decline()
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                if connection.status == "blocked":
+                    return Response(
+                        {
+                            "error": "Invalid request",
+                            "message": "Friend already blocked or request declined."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                connection.decline()
                 return Response(
                     {
                         "message": "Friend request declined successfully."
@@ -525,3 +531,17 @@ class UserSearchView(generics.ListAPIView):
             )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+
+class DeleteNotificationView(APIView):
+    permissions_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, pk):
+        notification = get_object_or_404(Notification, id=pk)
+        notification.delete()
+        return Response(
+            {
+                "message": "Notification deleted successfully."
+            },
+            status=status.HTTP_200_OK
+        )
