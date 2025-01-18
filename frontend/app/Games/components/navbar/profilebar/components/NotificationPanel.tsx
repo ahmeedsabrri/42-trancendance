@@ -49,11 +49,18 @@ export function NotificationPanel({
           <Avatar width={40} height={40} avatar={notification.sender?.avatar} />
           {/* Notification Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-white">
-                {notification.sender?.username || 'System'}
-              </p>
-              <p className="text-xs text-white/50">{formatTime(notification.created_at)}</p>
+            <div className="flex items-center gap-2 justify-between">
+              <div className='flex items-center gap-1'>
+                <p className="text-sm font-medium text-white flex items-center gap-1">
+                  {notification.sender?.username || 'System'}
+                </p>
+                <p className="text-xs text-white/50">{formatTime(notification.created_at)}</p>
+              </div>
+                
+                {/* remove notifications by clicking on the X button */}
+              <button onClick={onClose} className="text-white/60 hover:text-white">
+                <X className="w-3 h-3" />
+              </button>
             </div>
             <p className="text-sm text-white/70 mt-0.5">{notification.message}</p>
 

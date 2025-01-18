@@ -30,7 +30,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             )
             # Mark the user as offline
             await self.update_user_status(self.user.id, False)
-            print(f"User {self.user.id} disconnected")
 
     async def receive(self, text_data):
         # Handle incoming WebSocket messages (optional)

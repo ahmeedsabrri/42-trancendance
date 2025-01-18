@@ -1,8 +1,9 @@
+from .filters import UserFilter
 from .models import Connection, Notification
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
+from .serializers import SearchUserSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
@@ -498,3 +499,25 @@ class UnBlockUserView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+
+class UserSearchView(generics.ListAPIView):
+    serializer_class = SearchUserSerializer
+    filterset_class = UserFilter
+    
+    def get_queryset(self):
+        queryset = User.objects.all()
+        filtered_queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
+        return filtered_queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response(
+                {
+                    "message": "No users found with the given search parameters."
+                },
+                status=status.HTTP_200_OK
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

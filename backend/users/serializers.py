@@ -108,3 +108,10 @@ class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name','last_name','username','email','avatar','id','status','level','connection_status']
+        
+
+
+class SearchUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [ 'username', 'avatar', 'id']

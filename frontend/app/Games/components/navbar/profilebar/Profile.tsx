@@ -19,6 +19,7 @@ import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
 import { Bounce, toast } from 'react-toastify';
 import { UserFriendsActions } from '@/app/profile/utils/actions';
+import { DropdownPanel } from './components/DropdownPanel';
 
 const Profile = () => {
   // const router = useRouter();
@@ -87,7 +88,7 @@ const Profile = () => {
   };
 
   // Handle marking a notification as read
-  const handleMarkAsRead = (id: string) => {
+  const handleMarkAsRead = (id: number) => {
     markAsRead(id);
   };
 
@@ -166,7 +167,7 @@ const Profile = () => {
                   <Link href="/dashboard/setting">Setting</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:text-red-400"
+                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:border-r-red-500"
                   onClick={handleLogout}
                 >
                   Logout
