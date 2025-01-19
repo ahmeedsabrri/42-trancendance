@@ -4,10 +4,15 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Notification
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
+from collections import defaultdict
 
 User = get_user_model()
+
+online_users = defaultdict(int)
+
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        global online_users
         if self.scope['user'].is_anonymous:
             await self.close()
         else:
@@ -16,12 +21,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 self.group_name,
                 self.channel_name
             )
+            self.user = self.scope['user']
+            online_users[self.user.id] += 1
              # Mark the user as online
             self.user = self.scope['user']
             await self.update_user_status(self.user.id, True)
             await self.accept()
             
     async def disconnect(self, close_code):
+        global online_users
         # Remove the user from the group
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(
@@ -29,7 +37,10 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
             # Mark the user as offline
-            await self.update_user_status(self.user.id, False)
+            online_users[self.user.id] -= 1
+            if online_users[self.user.id] == 0:
+                await self.update_user_status(self.user.id, False)
+
 
     async def receive(self, text_data):
         # Handle incoming WebSocket messages (optional)

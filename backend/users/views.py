@@ -96,6 +96,7 @@ class UserListView(generics.ListAPIView):
 
 class SendRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
     def get(self, request, username):
         try:
             sender = request.user
@@ -118,7 +119,7 @@ class SendRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                     )
-                if connection.status == "blocked" or connection.status == "rejected":
+                if connection.status == "rejected":
                     connection.status = "pending"
                     connection.save()
             else:
@@ -132,15 +133,8 @@ class SendRequestView(APIView):
             )
 
             # Send the notification via WebSocket
-            send_notification(receiver.id, {
-                'id': notification.id,
-                'sender': sender.username,
-                'recipient': receiver.username,
-                'notification_type': notification.notification_type,
-                'message': notification.message,
-                'read': notification.read,
-                'created_at': notification.created_at.isoformat(),
-            })  
+            notification_data  = self.serialiser_class(notification).data
+            send_notification(receiver.id, notification_data)
             return Response(
                 {
                     "message": "Friend request sent successfully."
@@ -165,6 +159,7 @@ class SendRequestView(APIView):
             )
 class AcceptRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
     def get(self, request, username):
         try:
             sender = User.objects.get(username=username)
@@ -178,15 +173,9 @@ class AcceptRequestView(APIView):
                 notification_type='friend_accept',
                 message=f'{receiver.username} accepted your friend request.',
             )
-            send_notification(sender.id, {
-                'id': notification.id,
-                'sender': receiver.username,
-                'recipient': sender.username,
-                'notification_type': notification.notification_type,
-                'message': notification.message,
-                'read': notification.read,
-                'created_at': notification.created_at.isoformat(),
-            })
+            notification_data  = self.serialiser_class(notification).data
+            notification_data['sender'] = ProfileSerializer(sender).data
+            send_notification(sender.id, notification_data)
             return Response(
                 {
                     "message": "Friend request accepted successfully."
