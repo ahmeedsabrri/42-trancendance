@@ -3,7 +3,7 @@ from .models import Connection, Notification
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import SearchUserSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
+from .serializers import SearchUserSerializer, UpdateUsernameSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework import generics
@@ -534,3 +534,16 @@ class DeleteNotificationView(APIView):
             },
             status=status.HTTP_200_OK
         )
+        
+
+
+class UpdateUserView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UpdateUsernameSerializer
+    
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+        

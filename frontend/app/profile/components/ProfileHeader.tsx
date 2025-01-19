@@ -48,7 +48,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
             className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
             onClick={onUnfriend}
           >
-            <span className="text-white">Cancell friend request</span>
+            <span className="text-white">Cancell</span>
           </button> 
           : 
           <div className='flex gap-2'>
