@@ -10,6 +10,7 @@ export interface userNotif {
   id: number;
   status: string;
   level: number;
+  is_online: boolean;
 }
 
 export interface Notificationdata {

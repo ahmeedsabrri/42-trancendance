@@ -9,7 +9,7 @@ const useNotificationWebSocket = (url:string) => {
   const { lastMessage, readyState } = useWebSocket(url, {
     onOpen: () => console.log('WebSocket connected'),
     onClose: () => console.log('WebSocket disconnected'),
-    shouldReconnect: () => true, // Automatically reconnect
+    shouldReconnect: () => true,
     reconnectInterval: 50000, 
   });
 
@@ -17,9 +17,11 @@ const useNotificationWebSocket = (url:string) => {
   useEffect(() => {
     if (lastMessage !== null) {
       console.log('Received message:', lastMessage.data);
+
       const newNotification = JSON.parse(lastMessage.data);
+      const data = newNotification.notification
       console.log('New notification:', newNotification);
-      addNotification(newNotification);
+      addNotification(data);
     }
   }, [lastMessage, addNotification]);
 
