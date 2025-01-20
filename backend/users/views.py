@@ -551,48 +551,84 @@ class UpdateUserView(generics.UpdateAPIView):
 
 
 # views.py
-import requests
+from rest_framework.generics import UpdateAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.conf import settings
+from PIL import Image as PilImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import requests
 
-
-class ImageUploadView(APIView):
-    parser_classes = (MultiPartParser, FormParser)  # Allow file uploads
+class ImageUploadView(UpdateAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     permission_classes = [permissions.IsAuthenticated]
+    def get_object(self):
+        return self.request.user
     
-    def post(self, request, *args, **kwargs):
-        uploaded_file = request.FILES.get('avatar')  # 'image' is the field name in the request
-        user = request.user  
+    def update(self, request, *args, **kwargs):
+        uploaded_file = request.FILES.get('avatar')
+        user = self.get_object() 
 
         if not uploaded_file:
             return Response({'error': 'No file uploaded'}, status=400)
-
-        # Read the file and encode it in base64
-        file_data = uploaded_file.read()
-        import base64
-        encoded_file = base64.b64encode(file_data).decode('utf-8')
-
-        # Upload the file to ImgBB
+        print(f"Uploaded file: {uploaded_file.name}, Size: {uploaded_file.size} bytes")
         try:
+            resized_file = self.resize_image(uploaded_file, 128, 128)
+            print("Image resized successfully")
+            image_url = self.upload_to_imgbb(resized_file)
+            user.avatar = image_url
+            user.save()
+            return Response({'message': 'Upload happened successfully'}, status=200)
+        except Exception as e:
+            print(f"Error: {e}")
+            return Response({'error': str(e)}, status=500)
+
+    def resize_image(self, file, width, height):
+        """Resize the uploaded image to the specified dimensions."""
+        try:
+            img = PilImage.open(file)
+
+            if img.mode in ('RGBA', 'LA'):
+                background = PilImage.new('RGB', img.size, (255, 255, 255))  # White background
+                background.paste(img, mask=img.split()[-1])  # Paste the image with transparency
+                img = background
+            img.thumbnail((width, height), PilImage.Resampling.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
+            output = BytesIO()
+            img.save(output, format='JPEG', quality=90)
+            output.seek(0)
+            resized_file = InMemoryUploadedFile(
+                output,
+                'ImageField',
+                file.name,
+                'image/jpeg',
+                output.getbuffer().nbytes,
+                None
+            )
+
+            return resized_file
+
+        except Exception as e:
+            print(f"Error resizing image: {e}")
+            raise
+
+    def upload_to_imgbb(self, file):
+        """Upload the file to ImgBB and return the image URL."""
+        try:
+            file_data = file.read()
+            import base64
+            encoded_file = base64.b64encode(file_data).decode('utf-8')
             response = requests.post(
                 'https://api.imgbb.com/1/upload',
                 data={
-                    'key': settings.IMGBB_API_KEY,  # Your ImgBB API key
+                    'key': settings.IMGBB_API_KEY,
                     'image': encoded_file,
                 }
             )
-            response.raise_for_status()  # Raise an error for bad status codes
+            response.raise_for_status() 
             imgbb_data = response.json()
+            return imgbb_data['data']['url']
 
-            # Get the image URL from the response
-            image_url = imgbb_data['data']['url']
-
-            # Save the image URL to the user's avatar field
-            user.avatar = image_url
-            user.save()
-            return Response({'message':'seccess'}, status=200)
-
-        except requests.exceptions.RequestException as e:
-            return Response({'error': str(e)}, status=500)
+        except Exception as e:
+            print(f"Error uploading to ImgBB: {e}")
+            raise

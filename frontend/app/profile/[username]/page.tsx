@@ -117,22 +117,20 @@ export default function Profile() {
     theme: "dark",
     transition: Bounce,
   });
-  // const { toast } = useToast();
   const { 
     fetchFriend, 
     user, 
     viewedProfile, 
     loading,
-    isInitialized ,
   } = useUserStore();
-  const { Userfriends, fetchUserFriends, fetchOwnFriends, UserOwnfriends, isIn } = useUserFriendsStore();
+  const { Userfriends, fetchUserFriends, fetchOwnFriends, UserOwnfriends} = useUserFriendsStore();
   const { username } = useParams();
   const {handleRequest} = UserFriendsActions();
   useEffect(() => {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
     fetchOwnFriends();
-  }, [username, isInitialized, fetchFriend, UserOwnfriends, fetchUserFriends, fetchOwnFriends]);
+  }, [username, fetchFriend, UserOwnfriends, fetchUserFriends, fetchOwnFriends]);
 
   // handleRequest Accepte function
 

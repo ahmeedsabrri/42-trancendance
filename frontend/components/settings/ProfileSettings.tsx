@@ -6,6 +6,7 @@ import  Avatar  from '../../app/Games/components/navbar/profilebar/Avatar';
 import { useForm } from 'react-hook-form';
 import { handelTwoFactor } from '@/app/dashboard/setting/action';
 import { Bounce, toast } from 'react-toastify';
+import axios from 'axios';
 type FormData = {
   username: string;
   password: string;
@@ -69,6 +70,33 @@ export function ProfileSettings( {user}: {user : UserData} ) {
 
       };
         // handel file upload
+        const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+          console.log('File input changed'); 
+      
+          if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0];
+            console.log('Selected file:', file.name); 
+      
+            const formData = new FormData();
+            formData.append('avatar', file); 
+      
+            try {
+              console.log('Uploading file...'); 
+              const response = await axios.put(
+                'http://localhost:8000/api/users/me/upload-avatar/',
+                formData,
+                { withCredentials: true }
+              );
+              console.log('Upload response:', response.data); 
+              tostNotify('Avatar updated successfully');
+            } catch (error) {
+              console.error('Error uploading avatar:', error); 
+              // Errotoast(error);
+            }
+          } else {
+            console.log('No file selected'); 
+          }
+        };
         
   return (
     <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6">
@@ -91,8 +119,8 @@ export function ProfileSettings( {user}: {user : UserData} ) {
             <input
               type="file"
               className="hidden"
-              onChange={}
               accept="image/*"
+              // onChange={handleFileChange}
             />
           </label>
         </div>
@@ -105,6 +133,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
               type="file"
               className="hidden"
               accept="image/*"
+              onChange={handleFileChange}
             />
           </label>
         </div>
@@ -170,3 +199,6 @@ export function ProfileSettings( {user}: {user : UserData} ) {
     </div>
   );
 }
+
+
+
