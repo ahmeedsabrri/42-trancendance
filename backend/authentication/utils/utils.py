@@ -8,6 +8,88 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 
 
+# send email user login
+
+def get_email_login_content(user):
+    # we notice a login to your account @username
+    email_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Login</title>
+    </head>
+    <body>
+        <h1>Login</h1>
+        <p>Hello {user.first_name},</p>
+        <p>We notice a login to your account.</p>
+        <p>If it was you, you can ignore this email.</p>
+        
+    </body>
+    </html>
+    """
+    return email_content
+
+def send_email_login(user):
+    msg = get_email_login_content(user)
+    _send_email_login(msg, user.email)
+    return user
+def _send_email_login(msg, recipient_email):
+    """
+    Send an email.
+
+    Args:
+        msg (str): The email message (HTML content).
+        recipient_email (str): The recipient's email address.
+    """
+    subject = "Login"
+    send_mail(
+        subject,
+        strip_tags(msg), 
+        settings.DEFAULT_FROM_EMAIL,  
+        [recipient_email], 
+        html_message=msg,  
+    )
+# send_email_verified function
+def get_email_verificated_content(inactive_user):
+    email_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Email Verified</title>
+    </head>
+    <body>
+        <h1>Email Verified</h1>
+        <p>Hello {inactive_user.first_name},</p>
+        <p>Your email has been verified successfully.</p>
+        <p>You can now log in to your account.</p>
+    </body>
+    </html>
+    """
+    return email_content
+
+def send_email_verified(inactive_user):
+    msg = get_email_verificated_content(inactive_user)
+    _send_email_verified(msg, inactive_user.email)
+    return inactive_user
+
+
+def _send_email_verified(msg, recipient_email):
+    """
+    Send an email.
+
+    Args:
+        msg (str): The email message (HTML content).
+        recipient_email (str): The recipient's email address.
+    """
+    subject = "Email Verified"
+    send_mail(
+        subject,
+        strip_tags(msg), 
+        settings.DEFAULT_FROM_EMAIL,  
+        [recipient_email], 
+        html_message=msg,  
+    )
+# send_email_verification_link function
 def get_email_content(verification_url, inactive_user):
     """
     Generate the email content as an HTML string.
