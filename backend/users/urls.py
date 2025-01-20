@@ -24,4 +24,5 @@ urlpatterns = [
     # apdate user uername path
     path('users/me/update/username/', views.UpdateUserView.as_view(), name='update_username'),
     # update/avatar/
+    path('users/me/upload-avatar/', views.ImageUploadView.as_view(), name='upload-avatar'),
 ]

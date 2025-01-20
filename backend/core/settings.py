@@ -202,3 +202,6 @@ EMAIL_HOST_USER = 'sabriahmeed1@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'kmoudscyrfclewus'  # Use the generated App Password here
 DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Default sender email
 
+
+
+IMGBB_API_KEY = '053f132b8b449609833ef0da83ad84fa'

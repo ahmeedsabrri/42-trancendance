@@ -547,3 +547,52 @@ class UpdateUserView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
         
+        
+
+
+# views.py
+import requests
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.conf import settings
+
+
+class ImageUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)  # Allow file uploads
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        uploaded_file = request.FILES.get('avatar')  # 'image' is the field name in the request
+        user = request.user  
+
+        if not uploaded_file:
+            return Response({'error': 'No file uploaded'}, status=400)
+
+        # Read the file and encode it in base64
+        file_data = uploaded_file.read()
+        import base64
+        encoded_file = base64.b64encode(file_data).decode('utf-8')
+
+        # Upload the file to ImgBB
+        try:
+            response = requests.post(
+                'https://api.imgbb.com/1/upload',
+                data={
+                    'key': settings.IMGBB_API_KEY,  # Your ImgBB API key
+                    'image': encoded_file,
+                }
+            )
+            response.raise_for_status()  # Raise an error for bad status codes
+            imgbb_data = response.json()
+
+            # Get the image URL from the response
+            image_url = imgbb_data['data']['url']
+
+            # Save the image URL to the user's avatar field
+            user.avatar = image_url
+            user.save()
+            return Response({'message':'seccess'}, status=200)
+
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)}, status=500)

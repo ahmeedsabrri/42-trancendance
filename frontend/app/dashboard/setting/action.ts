@@ -108,27 +108,21 @@ const handleTwoFactorDisable = async (otpCode: string) => {
 
 // Update username function
 const handelUpdateUsername = async (username: string, password: string) => {
-  try {
-    const response = await api.put<ApiResponse>('/users/me/update/username/', {
+    const response = await api.put('/users/me/update/username/', {
       username: username,
       password: password,
     });
-    return {
-      success: true,
-      data: response.data.message,
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
+    if (response.data.status === 'success') {
+      alert(response.data.message);
       return {
-        success: false,
-        error: error.response.data as ApiError,
+        success: true,
+        data: response.data,
       };
     }
     return {
       success: false,
-      error: { username: ['An unexpected error occurred'] },
-    };
-  }
+      error: response.data,
+};
 };
 
 // Export all functions

@@ -28,10 +28,14 @@ class UpdateUsernameSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         username = data.get('username')
         if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError('Username is already taken.')
+            raise serializers.ValidationError({
+                'message': 'This username is already taken.'
+            })
         password = data.get('password')
         if not user.check_password(password):
-            raise serializers.ValidationError('Password is incorrect.')
+            raise serializers.ValidationError({
+                'message': 'Password is incorrect.'
+            })
         
         return data
 

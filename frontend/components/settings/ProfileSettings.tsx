@@ -5,39 +5,71 @@ import { UserData } from '@/app/store/store';
 import  Avatar  from '../../app/Games/components/navbar/profilebar/Avatar';
 import { useForm } from 'react-hook-form';
 import { handelTwoFactor } from '@/app/dashboard/setting/action';
+import { Bounce, toast } from 'react-toastify';
 type FormData = {
   username: string;
   password: string;
 };
 export function ProfileSettings( {user}: {user : UserData} ) {
   // task list
-  // handel file upload
   // handel form update
+  const tostNotify = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const Errotoast = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "",
+    transition: Bounce,
+  });
   const [formData, setFormData] = useState<FormData>({
     username: user.username,
     password: "",
   });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
-          setFormData((prevState: FormData) => ({
+    const { name, value } = e.target;
+    setFormData((prevState: FormData) => ({
             ...prevState,
             [name]: value,
           }));
       };
-      const {
-          handleSubmit,
-          formState: { errors },
-          setError,
-        } = useForm<FormData>();
+    const {
+      handleSubmit,
+      formState: { errors },
+      setError,
+    } = useForm<FormData>();
       
       
         
-        const {handelUpdateUsername} = handelTwoFactor();
-        const onSubmit = () => {
-         const res = handelUpdateUsername(formData.username, formData.password)
-          console.log(res)
+    const {handelUpdateUsername} = handelTwoFactor();
+    const onSubmit = () => {
+      handelUpdateUsername(formData.username, formData.password)
+        .then((res) => {
+          console.log("Logged in successfully");
+          tostNotify('Profile updated successfully');
+        })
+        .catch((err) => {
+          console.log(err);
+          Errotoast(err.error);
+          setError("root", { type   : "manual", message: err.error}); 
+        });
+
+      };
+        // handel file upload
         
-        };
   return (
     <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6">
       <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -59,6 +91,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
             <input
               type="file"
               className="hidden"
+              onChange={}
               accept="image/*"
             />
           </label>
@@ -76,7 +109,10 @@ export function ProfileSettings( {user}: {user : UserData} ) {
           </label>
         </div>
 
-        <div className="space-y-4">
+        <form  
+          className="space-y-4"
+          onSubmit={handleSubmit(onSubmit)}
+          >
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">
               Display Username
@@ -129,7 +165,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
               save changes
             </label>
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
