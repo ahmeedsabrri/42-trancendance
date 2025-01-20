@@ -16,6 +16,38 @@ class UserInfoSerializer(serializers.ModelSerializer):
         data["otp_uri"] = instance.get_otp_uri()
         return data
 
+class UpdateUsernameSerializer(serializers.ModelSerializer):
+    
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        username = data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({
+                'message': 'This username is already taken.'
+            })
+        password = data.get('password')
+        if not user.check_password(password):
+            raise serializers.ValidationError({
+                'message': 'Password is incorrect.'
+            })
+        
+        return data
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.save()
+        return instance
+    def to_representation(self, instance):
+        return { 'message': 'Username updated successfully' } 
+
+
+    
 class PasswordUpdateSerializer(serializers.ModelSerializer):
     current_password = serializers.CharField(
         required=True,

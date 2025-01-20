@@ -20,143 +20,117 @@ interface ApiError {
   current_password?: string[];
   new_password?: string[];
   confirm_password?: string[];
+  username?: string[];
 }
 
-// actions.ts
+interface TwoFAResponse {
+  message: string;
+  status: string;
+}
+
+// Base API instance
+const api = axios.create({
+  baseURL: 'http://localhost:8000/api',
+  withCredentials: true,
+});
+
+// Change password function
 export async function changePassword(data: PasswordChangeFormData) {
   try {
-    const response = await axios.put<ApiResponse>(
-      'http://localhost:8000/api/auth/user/change-password/',
-      data,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-      }
-    );
-
+    const response = await api.put<ApiResponse>('/auth/user/change-password/', data);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {
         success: false,
-        error: error.response.data as ApiError
+        error: error.response.data as ApiError,
       };
     }
-    
     return {
       success: false,
-      error: { current_password: ['An unexpected error occurred'] }
+      error: { current_password: ['An unexpected error occurred'] },
     };
   }
 }
 
-const handleTwoFactorEnable = async (Otpcode:String) => {
-  // Call API to enable 2FA
-  
+// Enable 2FA function
+const handleTwoFactorEnable = async (otpCode: string) => {
   try {
-    const response = await axios.post<TwoFAResponse>(
-      'http://localhost:8000/api/auth/2fa/enable/',
-      {
-        otp_code: Otpcode
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true, // Ensures cookies are sent with the request
-      }
-    );
+    const response = await api.post<TwoFAResponse>('/auth/2fa/enable/', {
+      otp_code: otpCode,
+    });
     alert(response.data.message);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      // Handle specific error cases
-      const errorData = error.response.data as TwoFAError;
-      
-      if (error.response) {
-        return {
-          success: false,
-          error: error.response.data.otp_code
-        };
-      }
+      return {
+        success: false,
+        error: error.response.data as TwoFAError,
+      };
+    }
+    return {
+      success: false,
+      error: { otp_code: ['An unexpected error occurred'] },
+    };
   }
-}
-}
-const handleTwoFactorDisable = async (Otpcode:string) => {
-  // Call API to disable 2FA
+};
+
+// Disable 2FA function
+const handleTwoFactorDisable = async (otpCode: string) => {
   try {
-    const response = await axios.post<TwoFAResponse>(
-      'http://localhost:8000/api/auth/2fa/disable/',
-      {
-        otp_code: Otpcode
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-      }
-    );
+    const response = await api.post<TwoFAResponse>('/auth/2fa/disable/', {
+      otp_code: otpCode,
+    });
     alert(response.data.message);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      // Handle specific error cases
-      const errorData = error.response.data as TwoFAError;
-      
-      if (error.response.status === 400) {
-        return {
-          success: false,
-          error: error.response.data.otp_code
-        };
-      }
+      return {
+        success: false,
+        error: error.response.data as TwoFAError,
+      };
+    }
+    return {
+      success: false,
+      error: { otp_code: ['An unexpected error occurred'] },
+    };
   }
-}
-}
+};
+
+// Update username function
+const handelUpdateUsername = async (username: string, password: string) => {
+    const response = await api.put('/users/me/update/username/', {
+      username: username,
+      password: password,
+    });
+    if (response.data.status === 'success') {
+      alert(response.data.message);
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+    return {
+      success: false,
+      error: response.data,
+};
+};
+
+// Export all functions
 export const handelTwoFactor = () => {
   return {
     handleTwoFactorEnable,
     handleTwoFactorDisable,
     changePassword,
+    handelUpdateUsername,
   };
-}
-
-// const UpdateUser = async (first_name: string, last_name: string, username: string, password: string) => {
-//   try {
-//     const updateData = {
-//       ...(first_name && { First_name: first_name }),
-//       ...(last_name && { Last_name: last_name }),
-//       ...(username && { Username: username }),
-//       ...(password && { Password: password }),
-//     };
-//     console.log(updateData);
-
-//     const res = await fetch("http://localhost:8000/api/auth/user/me/update/",{body: JSON.stringify(updateData) , method: 'PUT', headers: {  'Content-Type': 'application/json',}});
-
-//     return res; // Return the response data
-//   } catch (error) {
-//     console.error(error); // Log the error for debugging
-//     throw error; // Re-throw the error for further handling
-//   }
-// };
-
-// export const settingAction = () => {
-//     return {
-//         UpdateUser,
-//       };
-// };
-
-
-
-
+};
