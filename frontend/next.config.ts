@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
         search: '',
       },
     ],
+    domains: ['i.ibb.co'], // Add the domain(s) you want to allow
   },
 };
 
