@@ -61,7 +61,7 @@ export default function SignInForm() {
     loginWithOtp(formData.username, formData.password, otp_code)
       .then(() => {
         console.log("Logged in successfully");
-          router.push("/"); // Redirect on successful login
+        router.push("/"); // Redirect on successful login
       })
       .catch((error) => {
         // console.log(error);
@@ -92,7 +92,12 @@ export default function SignInForm() {
   return (
     <div className="space-y-4 flex flex-col items-center justify-center">
       {otpFormOpen ? (
-        <OTP user_id={userId!} onSubmit={onOtpSubmit} />
+       <div className='space-y-4 flex flex-col items-center justify-center'>
+       <div className="mt-1 flex justify-center items-center">
+         <h2 className="text-3xl font-bold text-white mb-6">OTP Code Requried</h2>
+       </div>
+       <OTP onSubmit={onOtpSubmit}/>
+       </div> 
       ) : (
         <>
           <h2 className="text-3xl font-bold text-white mb-6">Sign In</h2>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, redirect } from 'next/navigation';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AuthActions } from "../utils";
@@ -13,7 +13,6 @@ export default function CallbackPage() {
 const router = useRouter();
 const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
   const { Oauth42 } = AuthActions();
   const searchParams = useSearchParams();
   useEffect(() => {
@@ -26,9 +25,16 @@ const [error, setError] = useState<string | null>(null);
           console.log("Logged in successfully");
           router.push('/dashboard');
         })
-        .catch((err) => {
-          setError(err.response.data.message);
-          setIsLoading(false);
+        .catch((error) => {
+          if (error.response && error.response.status === 400) {
+            const errorData = error.response.data;
+            if (errorData.otp_code) {
+              redirect(`/auth?otp_code=requried`); 
+            } else {
+              setError("An error occurred");
+              setIsLoading(false);
+            }
+          }
         });
       }
       if (code) {

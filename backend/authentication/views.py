@@ -14,6 +14,9 @@ from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.exceptions import ValidationError
 from .utils.utils import send_email_verified
+from django.core import signing
+from django.conf import settings
+
 User = get_user_model()
 
 class VerifyEmailView(APIView):
@@ -39,7 +42,6 @@ class VerifyEmailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 class TestAuthView(APIView):
-
     def get(self, request):
         return Response({"message": "success"})
 
@@ -47,7 +49,18 @@ class TestAuthView(APIView):
 class LoginView(TokenObtainSlidingView):
     permissions_classes = []
     def post(self, request):
-        response = super().post(request)
+        if "tmp_token" in request.COOKIES and 'otp_code' in request.data:
+            pp = signing.loads(request.COOKIES["tmp_token"], settings.SECRET_KEY)
+            print(pp)
+            user = User.objects.get(id=pp["user"])
+            if user.verify_otp(request.data["otp_code"]):
+                token = SlidingToken.for_user(user)
+                response = Response({"message": "You logged in successfully", "token": str(token)}, status=200)
+                response.delete_cookie("tmp_token")
+            else:
+                raise ValidationError("Invalid OTP code")
+        else:
+            response = super().post(request)
         
         if response.status_code == 200:
             response.set_cookie(
@@ -99,18 +112,21 @@ class OauthCallBackView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        
-        # Create a sliding token for the user
+        if user.twofa_enabled:
+            rsp = Response({"otp_code": "this field is required"}, status=400)
+            token = signing.dumps({'user' : user.id}, settings.SECRET_KEY)
+            rsp.set_cookie("tmp_token", token, httponly=True, max_age=60)
+            
+            return rsp
+            
         token = SlidingToken.for_user(user)
-        
-        # Set the token in an HTTP-only cookie
         res = Response({"message": "You logged in successfully"})
         res.set_cookie(
             key="jwt_token",
             value=str(token),
             httponly=True,
-            secure=True,  # Ensure this is True in production (requires HTTPS)
-            samesite="Lax",  # Prevent CSRF attacks
+            secure=True,  
+            samesite="Lax",  
         )
         return res
 
