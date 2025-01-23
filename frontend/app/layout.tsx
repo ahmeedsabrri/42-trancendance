@@ -17,9 +17,10 @@ export default function RootLayout({
   const isAuthRoute = pathname === "/auth";
   const isCallbackRoute = pathname?.startsWith("/auth/callback");
   const isVerifyEmailRoute = pathname?.startsWith("/auth/verify-email");
+  const isOtpRoute = pathname?.startsWith("/auth/otp");
 
   // Determine if NavBar and SideBar should be rendered
-  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute);
+  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute || isOtpRoute);
 
   return (
     <html lang="en">

@@ -51,6 +51,16 @@ const login = async (username: string, password: string) => {
   return res;
 };
 
+const loginWithOtp = async (username: string, password: string, otpCode: string) => {
+  const res = axios.post("http://localhost:8000/api/auth/login/", {
+    username: username,
+    password: password,
+    otp_code: otpCode,
+  }, {
+    withCredentials: true,
+  });   
+  return res;
+};
 
 const logout = () => {
   const res = axios.get("http://localhost:8000/api/auth/logout/", { withCredentials: true });
@@ -71,6 +81,7 @@ const Oauth42 = (code: string) => {
   export const AuthActions = () => {
     return {
       login,
+      loginWithOtp,
       register,
       getToken,
       logout,

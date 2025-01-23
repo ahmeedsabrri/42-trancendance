@@ -4,7 +4,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { useParams } from 'next/navigation';
+import { redirect, useParams } from 'next/navigation';
 
 
 const api = axios.create({
@@ -37,11 +37,12 @@ export default function VerifyEmail({
                 });
 
                 window.location.href = '/auth'; // Redirect to the login page
+                // redirect('/auth');
                 setMessage(response.data.message);
             } catch (err: any) {
                 // Display the error message
-                console.error(err.response?.data);
-                setError(err.response?.data?.error || 'An error occurred during verification.');
+                console.log(err.error);
+                setError(err.error || 'An error occurred during verification.');
             } finally {
                 setIsLoading(false); // Stop loading
             }
@@ -53,7 +54,7 @@ export default function VerifyEmail({
     }, [uid, token]);
 
     return (
-            <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="flex flex-col items-center justify-center space-y-4 w-full h-screen">
         <h1 className="text-2xl font-bold mb-4 text-white/70">Email Verification</h1>
         {isLoading ? (
             <p className="text-gray-600">Loading...</p>

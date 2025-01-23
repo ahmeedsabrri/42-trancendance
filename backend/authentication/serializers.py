@@ -136,7 +136,9 @@ class MyTokenObtainSerializer(TokenObtainSlidingSerializer):
         if self.user.twofa_enabled:
             if not otp_code:
                 raise serializers.ValidationError(
-                    {"otp_code": "this field is required"}
+                    {
+                        "otp_code": "this field is required",
+                    }
                 )
             elif not self.user.verify_otp(otp_code):
                 raise serializers.ValidationError({"otp_code": "OTPCode is not valid"})

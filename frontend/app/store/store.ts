@@ -19,6 +19,8 @@ export interface UserData {
     connection_type: string;
     sender: string;
     is_online: boolean;
+    otp_uri: string;
+    twofa_enabled: boolean;
 }
 
 interface UserStore {
