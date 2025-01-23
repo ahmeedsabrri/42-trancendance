@@ -10,13 +10,24 @@ import {redirect, useSearchParams } from 'next/navigation'
 import OTP from './otp/page'
 import { AuthActions } from './utils'
 import { useRouter } from 'next/router'
-
+import { LuArrowRight } from "react-icons/lu";
+import { Bounce, toast } from 'react-toastify'
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [otpRequired, setOtpRequired] = useState(false);
 
   const searchParams = useSearchParams();
-
+  const notifToast = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
   useEffect(() => {
     const otpRequiredParam = searchParams.get('otp_code');
     if (otpRequiredParam === 'requried') {
@@ -27,13 +38,14 @@ export default function AuthPage() {
   const {loginWithOtp } = AuthActions();
   const onOtpSubmit = (otp_code: string) => {
     loginWithOtp('', '', otp_code)
-    .then(() => {
+    .then((res) => {
       console.log("Logged in successfully");
-      // Redirect on successful login
+      notifToast(res.data.message);
       window.location.href = '/';
     })
     .catch((error) => {
       console.log(error);
+      notifToast(error.response.data[0]);
     });
   };
   const toggleForm = () => {
@@ -51,15 +63,15 @@ export default function AuthPage() {
             className="absolute inset-0 z-0 bg-cover bg-no-repeat"
           />
           <div className="relative z-10 flex flex-col items-center justify-center h-full pt-8 backdrop-blur-[5px]">
+            
+            <div className='w-full absolute top-0 p-4 rounded-full flex justify-end items-center'> 
+              {!otpRequired && <button className='p-2 rounded-full  transition ease-in-out delay-150 text-white font-bold border-white/20 border  backdrop-blur-lg shadow-2xl bg-black/20 hover:bg-black/30' onClick={toggleForm}> 
+                <LuArrowRight />
+              </button>}
+            </div>
             <h1 className="text-4xl font-extrabold text-white/80 mb-6 text-center">
-              Welcome to ft_trancendance
+              Welcome to Trancendance
             </h1>
-              <button
-                onClick={toggleForm}
-                className="transition ease-in-out delay-150 text-white font-bold border-white/20 shadow-2xl bg-transparent border  backdrop-blur-lg rounded-full p-2 my-2 w-[250px] h-[50px] hover:bg-white/40 "
-              >
-                {isSignUp ? 'Switch to Sign In' : 'Switch to Sign Up'}
-              </button>
             <Oauthbutton/>
           </div>
         </div>

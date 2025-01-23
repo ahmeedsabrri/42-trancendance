@@ -91,15 +91,16 @@ export function SecuritySettings({user}: {user : UserData}) {
         title="Two Factor Authentication"
       >
         <div className='flex flex-col items-center justify-center px-5'>
-        <QRCode
+        
+        {!user.twofa_enabled && <QRCode
           size={256}
           style={{ height: "auto", maxWidth: "50%", width: "50%" }}
           value={user.otp_uri}
           viewBox={`0 0 256 256`}
-        />
+        />}
         <div className="flex flex-col items-center justify-between py-4">
           <label className="text-white">  
-            Enable Two-Factor Authentication
+            {!user.twofa_enabled ? `Switch Enable Two-Factor Authentication` : `Switch Disable Two-Factor Authentication`}
           </label>
           <Switch
             checked={isOtpEnabled}

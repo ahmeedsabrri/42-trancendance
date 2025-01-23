@@ -183,7 +183,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
             />
           </div>
           <button 
-            className='w-full px-4 py-2 bg-black/20 rounded-lg text-white hover:bg-black/30 transition-all' 
+            className='w-full px-4 py-2 bg-black/20 hover:bg-black/30 rounded-lg text-white transition-all' 
             onClick={handleSubmit(onSubmit)}
             >
 

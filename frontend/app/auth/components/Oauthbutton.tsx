@@ -7,7 +7,7 @@ export default function Oauthbutton() {
     return (
         <button 
           onClick={handleOAuthClick}
-          className="transition ease-in-out delay-150 text-white font-bold border border-white/20 shadow-2xl font-serif bg-transparent backdrop-blur-lg rounded-full p-2 my-2 w-[250px] h-[50px] hover:bg-black/40"
+          className="transition ease-in-out delay-150 text-white font-bold border border-white/10 shadow-2xl font-serif  backdrop-blur-lg rounded-full p-2 my-2 w-[250px] h-[50px] bg-black/20 hover:bg-black/30"
         >
           42 Intra
         </button> 

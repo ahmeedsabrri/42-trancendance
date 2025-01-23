@@ -69,7 +69,7 @@ export default function SignUpForm() {
             <input
                 type="text"
                 id="firstName"
-                className="mt-1 block w-full px-3 py-3 placeholder-white placeholder-opacity-50 bg-transparent backdrop-blur-lg rounded-full outline-slate-400 drop-shadow-2xl shadow-2xl"
+                className="mt-1 block w-full px-3 py-3 placeholder-white placeholder-opacity-50 text-center bg-transparent backdrop-blur-lg p-2 rounded-full outline-slate-400 drop-shadow-2xl shadow-2xl "
                 placeholder="Enter your first name"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -133,7 +133,7 @@ export default function SignUpForm() {
         <div className="mt-1 flex justify-center items-center">
           <button
             type="submit"
-            className="transition ease-in-out delay-150 bg-black text-white font-bold bg-transparent backdrop-blur-lg  rounded-full px-3 py-3 mt-1 size-full hover:bg-zinc-900 drop-shadow-2xl shadow-2xl"
+            className="transition ease-in-out delay-150  text-white font-bold  backdrop-blur-lg  rounded-full px-3 py-3 mt-1 size-full  bg-black/20 hover:bg-black/30 drop-shadow-2xl shadow-2xl"
             onClick={handleSubmit(onSubmit)}
           >
             Sign Up
