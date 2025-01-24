@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/2fa/enable/', views.Enable2FAView.as_view(), name='2fa_enable'),
     path('auth/2fa/disable/', views.Disable2FAView.as_view(), name='2fa_disable'),
     path('auth/verify-email/', views.VerifyEmailView.as_view(), name='verify-email'),
+    # path('auth/user/me/update/password/', views.PasswordUpdateView.as_view(), name='user_info'),
     # path('auth/user/me/update/username', views.UpdateUsernameView.as_view(), name='user_update'),
     # logout/
     # register/

@@ -30,26 +30,24 @@ class MarkNotificationView(APIView):
         )
 
 
-class PasswordUpdateView(GenericAPIView):
+class PasswordUpdateView(generics.UpdateAPIView):
     serializer_class = PasswordUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
 
-    def put(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                'message': 'Password successfully updated.',
-                'status': 'success'
-            }, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response({
+            'message': 'Password successfully updated.',
+            'status': 'success',
+            'user_id': instance.id,
+            'username': instance.username
+        }, status=status.HTTP_200_OK)
 
 
 class ProfileView(APIView):
@@ -174,7 +172,7 @@ class AcceptRequestView(APIView):
                 message=f'{receiver.username} accepted your friend request.',
             )
             notification_data  = self.serialiser_class(notification).data
-            notification_data['sender'] = ProfileSerializer(sender).data
+            notification_data['sender'] = ProfileSerializer(receiver).data
             send_notification(sender.id, notification_data)
             return Response(
                 {
@@ -632,3 +630,5 @@ class ImageUploadView(UpdateAPIView):
         except Exception as e:
             print(f"Error uploading to ImgBB: {e}")
             raise
+
+

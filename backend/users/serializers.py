@@ -48,7 +48,7 @@ class UpdateUsernameSerializer(serializers.ModelSerializer):
 
 
     
-class PasswordUpdateSerializer(serializers.ModelSerializer):
+class PasswordUpdateSerializer(serializers.Serializer):
     current_password = serializers.CharField(
         required=True,
         write_only=True,
@@ -64,22 +64,29 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
-    class Meta:
-        model = User 
-        fields = ['current_password', 'new_password', 'confirm_password']
+
     def validate_current_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
-            raise serializers.ValidationError('Current password is incorrect.')
+            raise serializers.ValidationError({"error":'Current password is incorrect.'})
         return value
 
     def validate_new_password(self, value):
         try:
-            # Use Django's password validation
             validate_password(value, self.context['request'].user)
         except ValidationError as e:
             raise serializers.ValidationError(list(e.messages))
         return value
+
+    def validate(self, data):
+        if data['current_password'] == data['new_password']:
+            raise serializers.ValidationError({'error': 'New password must be different from the current password.'})
+        return data
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return instance
     
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
