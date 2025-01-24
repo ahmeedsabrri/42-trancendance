@@ -1,0 +1,59 @@
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+    networks:
+      - trancendance-network
+    restart: always
+
+  db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      # DB_URL: postgresql://${SQL_USER}:${SQL_PASSWORD}@db:5432/${SQL_DB}
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - trancendance-network
+
+  
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      # dockerfile: dockerfile
+      target: dev
+    restart: always
+    command: yarn dev
+    environment:
+      - NODE_ENV=development 
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules/
+      - /frontend/.next/
+    ports:
+      - 3000:3000
+    networks:
+      - trancendance-network
+
+networks:
+  trancendance-network:
+    name: trancendance-network
+
+volumes:
+  postgres_data:
