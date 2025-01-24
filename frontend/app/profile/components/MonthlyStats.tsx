@@ -47,7 +47,7 @@ export function MonthlyStats({ games }: MonthlyStatsProps) {
     stats: GameStats; 
     icon: React.ReactNode 
   }) => (
-    <div className="backdrop-blur-md bg-white/10 rounded-lg p-4">
+    <div className="backdrop-blur-md bg-white/10 rounded-lg p-4 border-t-1 shadow-xl border-t border-l border-border">
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <h3 className="text-lg font-semibold text-white">{title}</h3>

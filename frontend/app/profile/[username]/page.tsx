@@ -209,6 +209,28 @@ export default function Profile() {
       notifyErr(err.response.data.message);
     });
   };
+  const handleFriendUnfriend = (username:string) => {
+    handleRequest(username as string, 'unfriend')
+    .then((response) => {
+      console.log(response);
+      notifyCancel(response.data.message);
+    })
+    .catch((err) => {
+      console.log(err);
+      notifyErr(err.response.data.message);
+    });
+  };
+  const handleFriendBlock = (username:string) => {
+    handleRequest(username, 'block')
+    .then((response) => {
+      console.log(response);
+      notifyCancel(response.data.message);
+    })
+    .catch((err) => {
+      console.log(err);
+      notifyErr(err.response.data.message);
+    });
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -218,7 +240,7 @@ export default function Profile() {
     return <div>Profile not found</div>;
   }
   return (
-    <div className="w-full overflow-scroll border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-lg">
+    <div className="w-5/6 h-5/6 hide-scrollbar overflow-y-scroll  border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-3xl">
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
@@ -242,14 +264,14 @@ export default function Profile() {
             </div>
           </div>
           
-        <div className="space-y-4">
+        <div className="space-y-4 ">
             <h2 className="text-2xl font-bold text-white mb-6">Friends</h2>
             {Userfriends?.map((friend) => (
               <FriendCard
                 key={friend.id}
                 friend={friend}
-                onBlock={handleBlock}
-                onUnfriend={handleUnfriend}
+                onBlock={handleFriendBlock}
+                onUnfriend={handleFriendUnfriend}
               />
             ))}
           </div>

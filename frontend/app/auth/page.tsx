@@ -44,7 +44,6 @@ export default function AuthPage() {
       window.location.href = '/';
     })
     .catch((error) => {
-      console.log(error);
       notifToast(error.response.data[0]);
     });
   };
@@ -53,7 +52,7 @@ export default function AuthPage() {
   }
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl h-auto md:h-[700px] bg-white/10 rounded-3xl rounded-tl-[8rem] rounded-br-[8rem] overflow-hidden  backdrop-blur-md shadow-2xl flex flex-col md:flex-row">
+      <div className="w-full max-w-7xl h-auto md:h-[700px] bg-white/10 rounded-3xl rounded-tl-[8rem] rounded-br-[8rem] overflow-hidden  backdrop-blur-md shadow-2xl flex flex-col md:flex-row">
         <div className="w-full md:w-1/2  flex flex-col justify-between relative">
           <Image
             src="/images/background.jpg?height=700&width=600"
@@ -85,7 +84,6 @@ export default function AuthPage() {
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 p-8 flex justify-center items-center"
               >
-                {/* {isSignUp ? <SignUpForm /> : <SignInForm />} */}
                 { otpRequired ?
                 <div className='space-y-4 flex flex-col items-center justify-center'>
                   <div className="mt-1 flex justify-center items-center">

@@ -4,7 +4,8 @@ import { UserData, useUserStore} from '@/app/store/store';
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import {AddFriends} from './addFriendsComponent';
 import { IsaFriend } from './isaFriendComponent';
-import { Shield } from 'lucide-react';
+import { Shield, X } from 'lucide-react';
+import { useEffect } from 'react';
 export interface ProfileHeaderProps {
   userProfile: UserData;
   onBlock: () => void;
@@ -32,7 +33,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
           <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${userProfile?.is_online == true ? 'bg-green-500' : 'bg-gray-500'}`} />
         </div>
         
-        <div className="backdrop-blur-md bg-white/30 rounded-lg p-4 mb-2 shadow-lg">
+        <div className="backdrop-blur-md bg-black/20 rounded-lg p-4 mb-2 shadow-lg">
           <h1 className="text-2xl font-bold text-white">{userProfile.username}</h1>
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-white/20 text-white text-sm">
@@ -45,20 +46,21 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
       <div className="absolute bottom-0 right-8 flex gap-2"> 
         {userProfile.sender == user?.username ? 
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+            className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 rounded-lg"
             onClick={onUnfriend}
           >
-            <span className="text-white">Cancell</span>
+            <X className="text-white" />
+            <span className="text-white">Cancel</span>
           </button> 
           : 
           <div className='flex gap-2'>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg" 
+            <button className="flex items-center gap-2 px-4 py-2transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 rounded-lg" 
             onClick={onAccepte}>
               <span className="text-white">Accepte Friend</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg"
+            <button className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 rounded-lg"
             onClick={onDecline}>
-              <span className="text-white">Decline Friend</span>
+              <span className="text-white">Decline</span>
             </button>
           </div> }
       </div>}
@@ -67,9 +69,3 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
     </div>
   );
 }
-
-
-// ('pending', 'pending'),
-//         ('accepted', 'accepted'),
-//         ('rejected', 'rejected'),
-//         ('blocked', 'blocked'),

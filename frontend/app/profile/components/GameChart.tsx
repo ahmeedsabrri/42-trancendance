@@ -55,7 +55,7 @@ export function GameChart({ games, type, title }: GameChartProps) {
   const data = getMonthlyGameData(games, type);
 
   return (
-    <div className="backdrop-blur-md bg-white/10 rounded-lg p-6">
+    <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 border-t-1 shadow-xl border-t border-l border-border">
       <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
       <Line options={chartOptions} data={data} />
     </div>
