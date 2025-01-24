@@ -137,7 +137,7 @@ const Profile = () => {
             />
           )}
         </div>
-        <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-full border border-white/10">
+        <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] rounded-full border border-white/10 bg-gray-500 bg-opacity-30 backdrop-blur-xl ">
           <div className="w-4 h-4 rounded-2xl">
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -146,15 +146,16 @@ const Profile = () => {
               >
                 <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-gray-500 bg-opacity-30 backdrop-blur-2xl rounded-lg border border-white/10 my-2">
-                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20">
+              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-opacity-30 :bg-black/50 backdrop-blur-md rounded-lg border border-white/10 my-2">
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
                   <Link href={`/profile/${user?.username}`}>Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="w-full text-white flex items-center justify-center transition-all font-bold text-md hover:bg-white/20">
-                  <Link href="/dashboard/setting">Setting</Link>
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
+                  <Link href="/dashboard/setting"
+                  >Setting</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="w-full text-red-500 flex items-center justify-center transition-all font-bold text-md hover:bg-gradient-to-r hover:border-r-red-500"
+                  className="font-bold text-md text-red-500/60 hover:text-red/80 flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150  hover:bg-red-500/30 rounded-lg"
                   onClick={handleLogout}
                 >
                   Logout

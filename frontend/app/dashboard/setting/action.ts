@@ -62,7 +62,6 @@ const handleTwoFactorEnable = async (otpCode: string) => {
     const response = await api.post<TwoFAResponse>('/auth/2fa/enable/', {
       otp_code: otpCode,
     });
-    alert(response.data.message);
     return {
       success: true,
       data: response.data,
@@ -87,7 +86,6 @@ const handleTwoFactorDisable = async (otpCode: string) => {
     const response = await api.post<TwoFAResponse>('/auth/2fa/disable/', {
       otp_code: otpCode,
     });
-    alert(response.data.message);
     return {
       success: true,
       data: response.data,
@@ -113,7 +111,6 @@ const handelUpdateUsername = async (username: string, password: string) => {
       password: password,
     });
     if (response.data.status === 'success') {
-      alert(response.data.message);
       return {
         success: true,
         data: response.data,

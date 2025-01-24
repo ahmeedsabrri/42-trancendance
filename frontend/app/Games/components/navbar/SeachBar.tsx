@@ -35,11 +35,11 @@ const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-4">
+    <div className="w-full max-w-xl mx-auto p-4 ">
       <div className="relative">
         <div
           className={`
-            relative backdrop-blur-xl bg-white/20 rounded-3xl
+            relative bg-gray-500 bg-opacity-30 backdrop-blur-xl rounded-3xl
             shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
             border border-white/20
             transition-all duration-300

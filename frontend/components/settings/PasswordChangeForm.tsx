@@ -22,7 +22,7 @@ export function PasswordChangeForm() {
   return (
     <form className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1 backdrop-blur-3xl">
+        <label className="block text-sm font-medium text-white mb-1">
           Current Password
         </label>
         <div className="relative">
@@ -42,7 +42,7 @@ export function PasswordChangeForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1 text-white">
+        <label className="block text-sm font-medium mb-1 text-white">
           New Password
         </label>
         <div className="relative">
@@ -63,7 +63,7 @@ export function PasswordChangeForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-1 text-white">
+        <label className="block text-sm font-medium mb-1 text-white">
           Confirm New Password
         </label>
         <div className="relative">
@@ -91,7 +91,8 @@ export function PasswordChangeForm() {
         </button>
         <button
           type="submit"
-          className="px-4 py-2 rounded-lg transition ease-in-out delay-150 bg-black font-bold bg-transparent backdrop-blur-lg  hover:bg-zinc-900 text-white "
+          className="px-4 py-2 rounded-lg transition ease-in-out delay-150 bg-black/20 hover:bg-black/30  font-bold  backdrop-blur-lg  text-white "
+          
         >
           Update Password
         </button>

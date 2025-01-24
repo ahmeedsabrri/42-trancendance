@@ -133,7 +133,7 @@ export default function SignUpForm() {
         <div className="mt-1 flex justify-center items-center">
           <button
             type="submit"
-            className="transition ease-in-out delay-150  text-white font-bold  backdrop-blur-lg  rounded-full px-3 py-3 mt-1 size-full  bg-black/20 hover:bg-black/30 drop-shadow-2xl shadow-2xl"
+            className="transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 text-white font-bold  backdrop-blur-lg  rounded-full px-3 py-3 mt-1 size-full   drop-shadow-2xl shadow-2xl"
             onClick={handleSubmit(onSubmit)}
           >
             Sign Up

@@ -9,27 +9,15 @@ import QRCode from 'react-qr-code';
 import { Modal } from '../ui/Modal';
 import { Switch } from '../ui/switch';
 import { handelTwoFactor } from '@/app/dashboard/setting/action';
+import { Bounce, toast } from 'react-toastify';
 
 
 export function SecuritySettings({user}: {user : UserData}) {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [openOtpForm, setOpenOtpForm] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
   const [isOtpEnabled, setIsOtpEnabled] = useState(user.twofa_enabled);
   const {handleTwoFactorEnable,handleTwoFactorDisable}= handelTwoFactor()
-  useEffect(() => {
-    console.log(user.twofa_enabled);
-    console.log(user.otp_uri);
-  }, [user]);
-  useEffect(() => {
-    console.log(openOtpForm);
-    console.log(isOtpEnabled);
-    console.log(otpCode);
-  }
-  , [openOtpForm]);
-  const handelOtpCode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOtpCode(e.target.value);
-  }
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const handleOtpEnable = () => {
     try{
     setIsOtpEnabled(!isOtpEnabled);
@@ -39,19 +27,84 @@ export function SecuritySettings({user}: {user : UserData}) {
     }
   }   
 
+  const tostNotify = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+  const handleChange = (element: HTMLInputElement, index: number) => {
+    // Allow only numeric input
+    if (element.value && isNaN(parseInt(element.value))) {
+      return false;
+    }
+
+    // Update the OTP state
+    setOtp((prevOtp) => {
+      const newOtp = [...prevOtp];
+      newOtp[index] = element.value;
+      return newOtp;
+    });
+
+    // Move to the next input if a value is entered
+    if (element.value && element.nextSibling) {
+      (element.nextSibling as HTMLInputElement).focus();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    // Handle Backspace key
+    if (e.key === "Backspace") {
+      // Update the OTP state to remove the current value
+      setOtp((prevOtp) => {
+        const newOtp = [...prevOtp];
+        newOtp[index] = "";
+        return newOtp;
+      });
+      
+      // Move focus to the previous input field
+      if (e.currentTarget.previousSibling) {
+        (e.currentTarget.previousSibling as HTMLInputElement).focus();
+      }
+    }
+  };
   const handleOtpSubmit = () => {
     console.log(isOtpEnabled);
+    const otpCode = otp.join('');
     console.log(otpCode);
     if (isOtpEnabled){
-      handleTwoFactorEnable(otpCode);
+      handleTwoFactorEnable(otpCode)
+      .then((res)=>{
+        if (res.success){
+          tostNotify('Two-Factor Authentication Enabled successfully');
+        }else{
+          tostNotify('Invalid OTP code');
+        }
+      
+      
+      })
     }
     else{
-      handleTwoFactorDisable(otpCode);
+      handleTwoFactorDisable(otpCode)
+      .then((res)=>{
+        console.log(res);
+        if (res.success){
+          tostNotify('Two-Factor Authentication disabled successfully');
+        }else{
+          tostNotify('Invalid OTP code');
+        }
+      
+      })
     }
   }
   return (
     <>
-      <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6">
+      <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6 border-t-1 shadow-xl border-t border-l border-border">
         <h2 className="text-xl font-semibold text-white flex items-center gap-2">
           <Shield className="w-5 h-5" />
           Security Settings
@@ -64,7 +117,7 @@ export function SecuritySettings({user}: {user : UserData}) {
               <p className="text-gray-300 text-sm">Add an extra layer of security to your account</p>
             </div>
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 hover:bg-black/30 w-[30%] text-white transition-all"
               onClick={() => setOpenOtpForm(true)}
               >
               2fa Enable / Disable
@@ -76,7 +129,7 @@ export function SecuritySettings({user}: {user : UserData}) {
               <p className="text-gray-300 text-sm">Change your account password</p>
             </div>
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-black/20 hover:bg-black/30 w-[30%] text-white transition-all"
               onClick={() => setIsPasswordModalOpen(true)}
               >
               <Key className="w-4 h-4" />
@@ -90,15 +143,16 @@ export function SecuritySettings({user}: {user : UserData}) {
         onClose={() => setOpenOtpForm(false)}
         title="Two Factor Authentication"
       >
-        <div className='flex flex-col items-center justify-center px-5'>
+        <div className='flex flex-col items-center justify-center px-5 '>
         
         {!user.twofa_enabled && <QRCode
           size={256}
           style={{ height: "auto", maxWidth: "50%", width: "50%" }}
           value={user.otp_uri}
           viewBox={`0 0 256 256`}
+          className='rounded-lg border-2 border-white border-opacity-50 p-2'
         />}
-        <div className="flex flex-col items-center justify-between py-4">
+        <div className="flex flex-col items-center justify-between py-4 ">
           <label className="text-white">  
             {!user.twofa_enabled ? `Switch Enable Two-Factor Authentication` : `Switch Disable Two-Factor Authentication`}
           </label>
@@ -107,19 +161,28 @@ export function SecuritySettings({user}: {user : UserData}) {
             onCheckedChange={handleOtpEnable}
           />
         </div>
+        
         <p className="text-white text-center mt-4">
           Scan the QR code above with Google Authenticator or Authy to enable Two-Factor Authentication
         </p>
-        <input 
-        type="text" 
-        name="Otpcode"
-        value={otpCode}
-        onChange={handelOtpCode}
-        placeholder='Enter your Otp Code'
-        className='placeholder-white text-white/50 placeholder-opacity-50 bg-transparent backdrop-blur-lg p-2 rounded-full w-[250px] h-[50px] m-2 outline-slate-400 drop-shadow-2xl shadow-2xl'/>
-        <button 
-          className='transition ease-in-out delay-150 bg-black text-white font-bold bg-transparent backdrop-blur-lg  hover:bg-zinc-900 rounded-full p-2 my-2 w-[250px] h-[50px]  drop-shadow-2xl'
-          onClick={handleOtpSubmit}
+        <div className="flex justify-between">
+        {otp.map((data, index) => (
+          <input
+            key={index}
+            type="text"
+            maxLength={1}
+            value={data}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            onChange={(e) => handleChange(e.target as HTMLInputElement, index)}
+            className="w-12 h-12 text-center text-2xl bg-white bg-opacity-20 border border-white border-opacity-30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+          />
+        ))}
+        </div>
+        <button
+        type="submit"
+        onClick={handleOtpSubmit}
+        className="transition ease-in-out delay-150  text-white font-bold  backdrop-blur-lg  rounded-full px-3 py-3 mt-1 w-[250px] h-[50px]
+          bg-black/20 hover:bg-black/30 drop-shadow-2xl shadow-2xl"
         >
           Enter
         </button>

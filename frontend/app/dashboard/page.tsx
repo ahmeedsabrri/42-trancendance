@@ -5,13 +5,13 @@ import Statistique from "./components/Statistique";
 
 export default  function   Dashboard() {
   return (
-    <div className="size-full p-4  flex flex-col justify-center border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-3xl">
+    <div className="w-5/6 h-5/6 hide-scrollbar overflow-y-scroll  border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-3xl">
             <div className="h-[50%] w-full flex items-center gap-4">
-                {/* <Game /> */}
-                {/* <Rank /> */}
+                <Game />
+                <Rank />
             </div>
             <div className="h-[50%] w-full flex items-center">
-                {/* <Statistique /> */}
+                <Statistique />
             </div>
         </div>
   );

@@ -164,6 +164,7 @@ class PasswordUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User 
         fields = ['current_password', 'new_password', 'confirm_password']
+    
     def validate_current_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
@@ -191,3 +192,35 @@ class ProfileSerializer(serializers.ModelSerializer):
                   'level',
                   'friends',
                   ]
+        
+        
+# class PasswordUpateSerializer(serializers.ModelSerializer):
+#     current_password = serializers.CharField(
+#         required=True,
+#         write_only=True,
+#         style={'input_type': 'password'}
+#     )
+#     new_password = serializers.CharField(
+#         required=True,
+#         write_only=True,
+#         style={'input_type': 'password'}
+#     )
+#     confirm_password = serializers.CharField(
+#         required=True,
+#         write_only=True,
+#         style={'input_type': 'password'}
+#     )
+#     class Meta:
+#         model = User 
+#         fields = ['current_password', 'new_password', 'confirm_password']
+        
+#     def validate(self, attrs):
+#         if attrs['new_password'] != attrs['confirm_password']:
+#             raise serializers.ValidationError('Passwords do not match.')
+#         if attrs['current_password'] == attrs['new_password']:
+#             raise serializers.ValidationError('New password must be different from current password.')
+
+#         return attrs
+        
+    
+    
