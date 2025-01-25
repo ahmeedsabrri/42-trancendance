@@ -2,12 +2,14 @@
 
 import { useParams } from "next/navigation";
 import Avatar from "../../components/navbar/profilebar/Avatar";
+import { useGameStateStore } from "../../store/CanvasStore";
 
 interface WinnerProp {
     winner: String;
+    winner_avatar: String;
 }
 
-const Winner: React.FC<WinnerProp> = ({ winner }) => {
+const Winner: React.FC<WinnerProp> = ({ winner, winner_avatar}) => {
 
 
     // // username from the auth
@@ -57,7 +59,7 @@ const Winner: React.FC<WinnerProp> = ({ winner }) => {
                 className='w-[90%] h-[20%] flex justify-center items-center gap-x-6 rounded-[30px]'
                 style={ divStyle }
             >
-                <Avatar width={60} height={60} />
+                <Avatar width={60} height={60} avatar={winner_avatar}/>
                 <h1 className='text-5xl font-bold'>{ winner }</h1>
             </div>
         </div>

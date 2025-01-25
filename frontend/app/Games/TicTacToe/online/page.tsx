@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from 'react'
 
 import Image from "next/image";
-import { useParams } from 'next/navigation';
 import Avatar from '../../components/navbar/profilebar/Avatar';
+import Winner from '../../PingPong/components/VictoryCard'
 import CustomButton from '../../components/utils/CutsomButton';
 import FindOpponent from '../FindOpponent/FindOpponent'
 import { IMAGES } from "@/public/index";
@@ -11,19 +11,20 @@ import Scores from '../../PingPong/components/Scores';
 import '../board.css'
 
 const TicTac = () => {
-    
-    const images = {
-        X : '/game/images/X.png',
-        O : '/game/images/O.png',
-        WINNER : '/game/images/winner.png'
-    }
 
+    type winner = {
+        username: string | null,
+        avatar: string | null
+    }
     type CellValue = string | '';
 
     interface User{
         username : null | string,
         opponent_username : null | string,
-        mark : 'X' | 'O'  | null
+        user_avatar: string | null,
+        opponent_avatar: string | null,
+        mark : 'X' | 'O'  | null,
+        winner: winner
     }
 
     interface Scores{
@@ -45,8 +46,11 @@ const TicTac = () => {
 
     const user = useRef<User>({
         username : null,
+        user_avatar: null,
         opponent_username : null,
-        mark : null
+        opponent_avatar: null,
+        mark : null,
+        winner: {username: null, avatar: null}
     });
     const updateBoard = useRef<CellValue[]>(board);
 
@@ -60,6 +64,8 @@ const TicTac = () => {
             {
                 user.current.username = message.username;
                 user.current.opponent_username = message.opponent_username;
+                user.current.user_avatar = message.user_avatar;
+                user.current.opponent_avatar = message.opponent_avatar;
                 user.current.mark = message.mark;
             }
             else if (message.action ==='game_started')
@@ -84,9 +90,8 @@ const TicTac = () => {
             }
             else if (message.action === 'player_won')
             {
-                message.sender === user.current.username
-                ? alert('Congrats, you have won the game')
-                : alert('You lost, Hard luck');
+                user.current.winner.username = message.sender;
+                user.current.winner.avatar = message.avatar;
                 socket.current?.close();
                 setGameOver(true);
             }
@@ -111,11 +116,11 @@ const TicTac = () => {
         if (!isInGame)
             return alert('waiting for opponent to join!');
         if (!isMyTurn)
-            return alert('wait for your turn!');
+            return;
         if (board[index] !== '')
                 return;
             let newBoard: CellValue[] = [...board];
-            user.current.mark === 'X' ? newBoard[index] = images.X : newBoard[index] = images.O;
+            user.current.mark === 'X' ? newBoard[index] = IMAGES.X : newBoard[index] = IMAGES.O;
             setBoard(newBoard);    
             updateBoard.current = [...newBoard];
             const data = {
@@ -147,29 +152,26 @@ const TicTac = () => {
                         <div className="w-full flex-start gap-y-8 px-6 mt-4 ">
                             <div className="w-full h-[90px] flex justify-between items-center">
                                 <div className="flex justify-center items-center gap-x-3">
-                                    <Avatar width={70} height={70} />
+                                    <Avatar width={70} height={70} avatar={user.current.user_avatar}/>
                                     <span className="text-white font-semibold">
                                         {user.current.username}
                                     </span>
                                 </div>
                                 <div className="w-[500px] flex justify-between items-center relative">
-                                    <span className="text-8xl font-normal text-white ">{0}</span>
+                                    <span className="text-8xl font-normal text-white ">{scores.score}</span>
                                     <span className="text-4xl font-normal text-white absolute left-56">vs</span>
-                                    <span className="text-8xl font-normal text-white ">{0}</span>
+                                    <span className="text-8xl font-normal text-white ">{scores.opponent_score}</span>
                                 </div>
                                 <div className="flex justify-center items-center gap-x-3">
                                     <span className="text-white font-semibold">
                                         {user.current.opponent_username}
                                     </span>
-                                    <Avatar width={70} height={70} />
+                                    <Avatar width={70} height={70} avatar={user.current.opponent_avatar}/>
                                 </div>
                             </div>
                         </div>
                         { gameOver ?
-                            (
-                            <div className='winner-container'>
-                                <img src={images.WINNER}/>
-                            </div>)
+                            <Winner winner={user.current.winner.username} avatar={user.current.winner.avatar}/>
                         :   (
                             <div className='tictac-container'>
                                 <div className='tictac-board'>

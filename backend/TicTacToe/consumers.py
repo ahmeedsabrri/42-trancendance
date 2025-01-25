@@ -63,15 +63,6 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
     #SOCKET MAIN FUNCTIONS (CONNECT, RECEIVE, DISCONNECT)
     async def connect(self):
         await self.accept()
-        print('----------------------------------------------')
-        print('----------------------------------------------')
-        print('----------------------------------------------')
-        print('----------------------------------------------')
-        print('----------- username : ', )
-        print('----------------------------------------------')
-        print('----------------------------------------------')
-        print('----------------------------------------------')
-        logger.info("--------User in Scope: %s", self.scope['user'])
         if len(waiting_users) < 2:
             waiting_users.append(self)
         if len(waiting_users) == 2:
@@ -89,13 +80,16 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
             await player1.send_json({'action' : 'identify_players',
                                      'username' : player1.scope['user'].username,
                                      'opponent_username' : player2.scope['user'].username,
+                                     'user_avatar' : player1.scope['user'].avatar,
+                                     'opponent_avatar' : player2.scope['user'].avatar,
                                      'mark' : player1.mark})
 
             await player2.send_json({'action' : 'identify_players',
                                      'username' : player2.scope['user'].username,
                                      'opponent_username' : player1.scope['user'].username,
+                                     'user_avatar' : player2.scope['user'].avatar,
+                                     'opponent_avatar' : player1.scope['user'].avatar,
                                      'mark' : player2.mark})
-            #update the game id
             RemoteTicTacToeConsumer.games += 1
             game_group = f"game_{RemoteTicTacToeConsumer.games}"
             player1.game_group = game_group
@@ -123,10 +117,8 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         self.opponent.board[position] = self.mark
         result = self.check_winner()
         if result == 'X' or result == 'O':
-            #reset boards
             self.board = [None] * 9
             self.opponent.board = [None] * 9
-            #score update sending to player and its opponent
             self.score += 1
             message = {'action' : 'score_update',
                        'sender' : self.scope['user'].username,
@@ -147,6 +139,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                 message = {
                     'action' : 'player_won',
                     'sender' : self.scope['user'].username,
+                    'avatar' : self.scope['user'].avatar
                 }
 
                 await self.channel_layer.group_send(
@@ -171,7 +164,6 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
             )
 
     async def disconnect(self, close_code):
-        #row gets created twice, both instances creates a row in the db
         if self in waiting_users:
             waiting_users.remove(self)
         else:
@@ -181,6 +173,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                 message = {
                     'action' : 'player_won',
                     'sender' : self.opponent.scope['user'].username,
+                    'avatar' : self.opponent.scope['user'].avatar,
                 }
                 await self.opponent.send_json(message)
                 self.is_game_owner and await self.create_game(self.opponent.scope['user'], self.scope['user'], self.game_state)
@@ -189,10 +182,9 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                     self.is_game_owner and await self.create_game(self.scope['user'], self.opponent.scope['user'], self.game_state)
                 else:
                     self.is_game_owner and await self.create_game(self.opponent.scope['user'], self.scope['user'], self.game_state)
-
             RemoteTicTacToeConsumer.games -= 1
-            await self.channel_layer.group_discard(self.game_group, self.channel_name)
-            await self.channel_layer.group_discard(self.game_group, self.opponent.channel_name)
+            self.is_game_owner and await self.channel_layer.group_discard(self.game_group, self.channel_name)
+            self.is_game_owner and await self.channel_layer.group_discard(self.game_group, self.opponent.channel_name)
 #---------------------------------------------------------------------------------------------#
 
 
@@ -234,7 +226,6 @@ class LocalTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({
                 'action' : 'game_started',
             })
-        # self.game = await self.create_game()
 
 
     #RECEIVE
@@ -245,26 +236,22 @@ class LocalTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         self.board[position] = move_data['mark']
         result = self.check_winner()
         if result == 'X' or result == 'O':
-            #reset boards
             if result == 'X':
                 self.left_score += 1
             else:
                 self.right_score += 1
             self.board = [None] * 9
-            #score update sending to player and its opponent
             message = {'action' : 'score_update',
                        'left_score' : self.left_score,
                        'right_score' : self.right_score}
             await self.send_json(message)
             if self.left_score == 4:
-                # await self.save_winner()
                 message = {
                     'action' : 'player_won',
                     'winner' : 'left_player',
                 }
                 await self.send_json(message)
             elif self.right_score == 4:
-                # await self.save_winner()
                 message = {
                     'action' : 'player_won',
                     'winner' : 'right_player',
@@ -281,7 +268,5 @@ class LocalTicTacToeConsumer(AsyncJsonWebsocketConsumer):
     #DISCONNECT
     async def disconnect(self, close_code):
         pass
-        # if self.game.status == 'ST':
-        #     await self.save_winner()
 
 #----------------------------------------------------------------------------------------#
