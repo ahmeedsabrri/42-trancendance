@@ -19,9 +19,12 @@ const Mode: React.FC<GameMode> = ({ mode, type, src }) => {
                     ? 'bg-white/25 border-2 border-white/50'
                     : 'bg-white/35 hover:bg-white/25'
                 }`}
-            onClick={() => setGameMode(type)}
+            onClick={() => { 
+                    setGameMode(type)
+                }
+            }
         >
-            <h1 className="text-6xl text-white mb-16 font-bold">{mode}</h1>
+            <h1 className="text-6xl text-white mb-16 font-bold">{ mode }</h1>
             <Image
                 src={src}
                 alt="mode"

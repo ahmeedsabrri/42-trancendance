@@ -20,6 +20,8 @@ const GAME_CONSTANTS = {
 }
 
 interface Player {
+  fullname: string
+  username: string
   x: number
   y: number
   w: number
@@ -38,6 +40,9 @@ interface Ball {
 }
 
 interface GameState {
+  countdown: number;
+  game_status: string | null,
+  avatar: string | null,
   winner: string,
   player1: Player
   player2: Player
@@ -48,17 +53,24 @@ interface GameState {
     w: boolean
     s: boolean
   }
-
   updatePaddles: (newPlayer1: any, newPlayer2: any) => void
   updateBall: (ball: any) => void
   setKeyPressed: (key: string, value: boolean) => void
   setWinner: (winner: string) => void,
-  // restartGame: () => void;
+  setGameStatus: (game_status: string | null) => void;
+  setAvatar: (avatar: string | null) => void;
+  setCountdown: (value: number) => void;
+  resetCountdown: () => void;
 }
 
 export const useGameStateStore = create<GameState>((set, get) => ({
+  countdown: 3,
+  game_status: "waiting",
+  avatar: null,
   winner: '',
   player1: {
+    fullname: "",
+    username: "Player 1",
     x: 0,
     y: GAME_CONSTANTS.CANVAS.HEIGHT / 2 - GAME_CONSTANTS.PLAYER.HEIGHT / 2,
     w: GAME_CONSTANTS.PLAYER.WIDTH,
@@ -68,6 +80,8 @@ export const useGameStateStore = create<GameState>((set, get) => ({
   },
 
   player2: {
+    fullname: "",
+    username: "Player 2",
     x: GAME_CONSTANTS.CANVAS.WIDTH - GAME_CONSTANTS.PLAYER.WIDTH,
     y: GAME_CONSTANTS.CANVAS.HEIGHT / 2 - GAME_CONSTANTS.PLAYER.HEIGHT / 2,
     w: GAME_CONSTANTS.PLAYER.WIDTH,
@@ -102,6 +116,8 @@ export const useGameStateStore = create<GameState>((set, get) => ({
       return {
                 player1: {
                   ...state.player1,
+                  fullname: newPlayer1.FULL_NAME,
+                  username: newPlayer1.USERNAME,
                   x: newPlayer1.X,
                   y: newPlayer1.Y,
                   w: newPlayer1.W,
@@ -110,6 +126,8 @@ export const useGameStateStore = create<GameState>((set, get) => ({
                 },
                 player2: {
                   ...state.player2,
+                  fullname: newPlayer2.FULL_NAME,
+                  username: newPlayer2.USERNAME,
                   x: newPlayer2.X,
                   y: newPlayer2.Y,
                   w: newPlayer2.W,
@@ -119,7 +137,6 @@ export const useGameStateStore = create<GameState>((set, get) => ({
               }
       },
     ),
-
   updateBall: (newBallState) =>
     set((state) => {
         return {
@@ -128,10 +145,14 @@ export const useGameStateStore = create<GameState>((set, get) => ({
             x: newBallState.X,
             y: newBallState.Y,
             speed: newBallState.SPEED,
-            velocityX: newBallState.Velocity_X,
-            velocityY: newBallState.velocity_Y * (Math.random() > 0.5 ? 1 : -1),
+            velocityX: newBallState.VELOCITY_X,
+            velocityY: newBallState.VELOCITY_Y * (Math.random() > 0.5 ? 1 : -1),
           },
         }
     }),
     setWinner: (winner: string) => set({winner: winner}),
+    setGameStatus: (game_status: string | null) => set({game_status: game_status}),
+    setAvatar: (avatar: string | null) => set({avatar: avatar}),
+    setCountdown: (value) => set({ countdown: value }),
+    resetCountdown: () => set({ countdown: 3 }),
 }))

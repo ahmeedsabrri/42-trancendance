@@ -56,7 +56,7 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
               <Link href={content.gameLink}>
                 <CustomButton
                   label="START"
-                  onClick={() => { label === "PAUSE" && handleCurrentState(); console.log("start game")}}
+                  onClick={() => { label === "PAUSE" && handleCurrentState()}}
                   className="text-white text-4xl font-bold bg-gray-800 bg-opacity-30 backdrop-blur-xl px-16 py-5 hover:bg-opacity-10 rounded-3xl border border-white/10"
                 />
               </Link>

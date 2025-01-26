@@ -173,6 +173,7 @@ export default function Profile() {
   };
   //hadelUnblock function
   const handleUnblock = () => {
+    console.log(username)
     handleRequest(username as string, 'unblock')
     .then((response) => {
       console.log(response);
