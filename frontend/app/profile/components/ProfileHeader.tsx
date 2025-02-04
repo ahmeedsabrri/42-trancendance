@@ -33,7 +33,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">
         <div className="relative">
           <Avatar width={96} height={96} avatar={userProfile.avatar}/>
-          <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${userProfile?.is_online == true ? 'bg-green-500' : ''}`} />
+          <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full ${userProfile?.is_online === true && userProfile?.connection_type !== 'blocked' ? 'bg-green-500 border-2 border-white' : ''}`} />
         </div>
         
         <div className="backdrop-blur-md bg-black/20 shadow-lg rounded-lg p-4 mb-2 ">
@@ -62,7 +62,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
               <span className="text-white">Accepte Friend</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 rounded-lg"
-            onClick={onDecline}>
+              onClick={onDecline}>
               <span className="text-white">Decline</span>
             </button>
           </div> }

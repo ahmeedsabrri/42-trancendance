@@ -60,7 +60,7 @@ export default {
   		},
   		backgroundImage: {
   			'footer-texture': "url('/img/footer-texture.png')",
-  			'background': "url('/game/images/StandardBackground.png')"
+  			'background': "url('/images/StandardBackground.png')"
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

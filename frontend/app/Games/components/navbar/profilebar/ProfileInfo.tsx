@@ -1,7 +1,7 @@
 import React from "react";
 import Avatar from "./Avatar";
 import { useUserStore } from "@/app/store/store";
-
+import { Loader2 } from 'lucide-react';
 const ProfileInfo = () => {
     
     const { fetchUser, user, isInitialized } = useUserStore();
@@ -17,7 +17,14 @@ const ProfileInfo = () => {
     }
   }, [isInitialized, fetchUser]);
   if (!isInitialized || !user) {
-    return <div>Loading...</div>;
+    return (
+        <div className="flex  items-center justify-center">
+            <Loader2 className="w-10 h-10 animate-spin text-white"/>
+            <p className="text-white text-[15px] font-semibold">
+                Loading...
+            </p>
+        </div>
+    );
   }
     return (
         <>
