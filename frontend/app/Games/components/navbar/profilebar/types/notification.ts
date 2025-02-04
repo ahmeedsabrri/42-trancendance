@@ -1,4 +1,4 @@
-export type NotificationType = 'message' | 'friend_request' | 'friend_accept';
+export type NotificationType = 'message' | 'friend_request' | 'friend_accept' | 'game_invite' | 'game_accept' | 'game_decline' | 'game_cancel';
 
 
 export interface userNotif {

@@ -89,8 +89,54 @@ class UserListView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     
 
-
-
+class SendGameInviteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+    def get(self, request, username):
+        try:
+            sender = request.user
+            receiver = User.objects.get(username=username)
+            if sender == receiver:
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "You can't send game invite to yourself."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+             # Create a notification using the `create_notification` method
+            notification = Notification.create_notification(
+                sender=sender,
+                recipient=receiver,
+                notification_type='game_invite',
+                message=f'{sender.username} sent you a pingpong game invite.',
+            )
+            
+            # Send the notification via WebSocket
+            notification_data  = self.serialiser_class(notification).data
+            send_notification(receiver.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite sent successfully."
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid receiver",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class SendRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -109,11 +155,19 @@ class SendRequestView(APIView):
                 )
             if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
                 connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                if connection.status == "accepted" or connection.status == "pending":
+                if connection.status == "accepted":
                     return Response(
                     {
                         "error": "Invalid request",
                         "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+                elif connection.status == "pending":
+                    return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "Friend request already sent."
                     },
                     status=status.HTTP_400_BAD_REQUEST
                     )
@@ -124,12 +178,11 @@ class SendRequestView(APIView):
                 Connection.objects.create(sender=sender, receiver=receiver)
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
-                sender=sender,
-                recipient=receiver,
-                notification_type='friend_request',
-                message=f'{sender.username} sent you a friend request.',
-            )
-
+                    sender=sender,
+                    recipient=receiver,
+                    notification_type='friend_request',
+                    message=f'{sender.username} sent you a friend request.',
+                )
             # Send the notification via WebSocket
             notification_data  = self.serialiser_class(notification).data
             send_notification(receiver.id, notification_data)
@@ -162,9 +215,30 @@ class AcceptRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="pending") | Q(sender=receiver, receiver=sender, status="pending")).exists():
                 connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
                 connection.accept(sender)
+            elif Connection.objects.filter(Q(sender=sender, receiver=receiver, status="rejected") | Q(sender=receiver, receiver=sender, status="rejected")).exists():
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "Friend request already declined."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
+            elif Connection.objects.filter(Q(sender=sender, receiver=receiver, status="accepted") | Q(sender=receiver, receiver=sender, status="accepted")).exists():
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "No friend request found."
+                    },
+                    status=status.HTTP_404_NOT_FOUND)
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -205,6 +279,108 @@ class AcceptRequestView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class AcceptInviteRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+    def get(self, request, username):
+        try:
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.accept(sender)
+            
+            notification = Notification.create_notification(
+                sender=receiver,
+                recipient=sender,
+                notification_type='invite_accept',
+                message=f'{receiver.username} accepted your game invite.'
+            )
+            notification_data  = self.serialiser_class(notification).data
+            notification_data['sender'] = ProfileSerializer(receiver).data
+            send_notification(sender.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite accepted successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid sender",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No game invite found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class DeclineInviteRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+
+    def get(self, request, username):
+        try:
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.decline()
+            notification = Notification.create_notification(
+                sender=receiver,
+                recipient=sender,
+                notification_type='game_decline',
+                message=f'{receiver.username} declined your game invite.'
+            )
+            notification_data  = self.serialiser_class(notification).data
+            notification_data['sender'] = ProfileSerializer(receiver).data
+            send_notification(sender.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite declined successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid sender",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No game invite found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 class DeclineRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request, username):
@@ -213,21 +389,27 @@ class DeclineRequestView(APIView):
             receiver = request.user
             if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
                 connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                if connection.status == "rejected":
+                    return Response(
+                        {
+                            "error": "Invalid request",
+                            "message": "Friend request already declined."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST)
                 if connection.status == "blocked":
                     return Response(
                         {
                             "error": "Invalid request",
                             "message": "Friend already blocked or request declined."
                         },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                connection.decline()
-                return Response(
+                        status=status.HTTP_400_BAD_REQUEST)
+                if connection.status == "accepted":
+                    return Response(
                     {
-                        "message": "Friend request declined successfully."
+                        "message": "You are already friends."
                     },
-                    status=status.HTTP_200_OK
-                )
+                    status=status.HTTP_400_BAD_REQUEST)
+                connection.decline()  
         except User.DoesNotExist:
             return Response(
                 {
@@ -337,7 +519,7 @@ class ListUserNotificationView(generics.ListAPIView):
         return Response(serializer.data)
     def get_queryset(self):
         user = self.request.user
-        notifications = Notification.objects.filter(recipient=user).select_related('sender')
+        notifications = Notification.objects.filter(recipient=user).select_related('sender').order_by('-created_at')
         return notifications
     
     
@@ -503,7 +685,19 @@ class UserSearchView(generics.ListAPIView):
     filterset_class = UserFilter
     
     def get_queryset(self):
-        queryset = User.objects.all()
+        user = self.request.user
+        # Get all users blocked by the current user
+        
+        # Get all users who have blocked the current user
+        blocked_by_users = Connection.objects.filter(
+            receiver=user, status='blocked'
+        ).values_list('sender', flat=True)
+        
+        # Combine both sets of blocked users
+        all_blocked_users = set(blocked_by_users)
+        
+        # Exclude blocked users from the queryset
+        queryset = User.objects.exclude(id__in=all_blocked_users)
         filtered_queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
         return filtered_queryset
     

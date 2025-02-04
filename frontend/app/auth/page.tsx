@@ -63,8 +63,9 @@ export default function AuthPage() {
           />
           <div className="relative z-10 flex flex-col items-center justify-center h-full pt-8 backdrop-blur-[5px]">
             
-            <div className='w-full absolute top-0 p-4 rounded-full flex justify-end items-center'> 
-              {!otpRequired && <button className='p-2 rounded-full  transition ease-in-out delay-150 text-white font-bold border-white/20 border  backdrop-blur-lg shadow-2xl bg-black/20 hover:bg-black/30' onClick={toggleForm}> 
+            <div className='w-full absolute top-0 p-4 rounded-full flex  justify-end items-center'> 
+              {!otpRequired && <button className='flex justify-between cursor-pointer p-2  items-center gap-x-3 rounded-full  transition ease-in-out delay-150 text-white font-bold border-white/10 border  backdrop-blur-lg shadow-2xl bg-black/20 hover:bg-black/30' onClick={toggleForm}> 
+                <label className='text-sm text-white'> {!isSignUp ? "Sign up" : "Sign in"}</label>
                 <LuArrowRight />
               </button>}
             </div>

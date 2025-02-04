@@ -10,8 +10,6 @@ import { useGameStore } from "../store/GameStore";
 const GameMode = () => {
     const { selectedMode, getGamePath } = useGameStore();
     
-    console.log("gamem mode");
-    
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
             <main className="w-full h-full flex justify-center items-center gap-x-3 p-2 relative">
@@ -39,9 +37,9 @@ const GameMode = () => {
                         </div>
                     </div>
                     <div className="w-full absolute bottom-3 flex justify-center items-center">
-                        <Link href={selectedMode ? getGamePath() : "#"}>
+                        <Link href={`${selectedMode ? '/Games/GameBackground' : ''}`}>
                             <CustomButton 
-                                label="START" 
+                                label="NEXT" 
                                 className={`ml-20 text-white text-4xl font-bold ${
                                     selectedMode 
                                         ? 'bg-blue-300 bg-opacity-60 hover:bg-opacity-40 cursor-pointer' 

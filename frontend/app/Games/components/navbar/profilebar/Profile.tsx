@@ -23,7 +23,7 @@ import useWebSocket from 'react-use-websocket';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
 
 const Profile = () => {
-  const {readyState} = useNotificationWebSocket("ws://localhost:8000/ws/notifications/");
+  const {readyState} = useNotificationWebSocket("wss://localhost/ws/notifications/");
   const { user } = useUserStore();
   const { logout } = AuthActions();
   const {notifications,markAsRead,unreadCount,removeNotification} = useNotificationStore();
@@ -101,6 +101,30 @@ const Profile = () => {
     });
   };
 
+  const handleAcceptInvite = (username: string) => {
+    console.log(`Accepted Invite request from user ${username}`);
+    handleRequest(username, 'acceptInvite')
+    .then((res) => {
+      console.log(res.data.message);
+      notifAccept(res.data.message);
+    })
+    .catch((err) => {
+      notifyErr(err.response.data.message);
+    });
+  };
+
+  const handleDeclineInvite = (username: string) => {
+    console.log(`Rejected Invite request from user ${username}`);
+    handleRequest(username, 'declineInvite')
+    .then((res) => {
+      console.log(res.data.message);
+      notifDecilne(res.data.message);
+    })
+    .catch((err) => {
+      notifyErr(err.response.data.message);
+    });
+  }
+
   // Handle logout
   const handleLogout = () => {
     logout()
@@ -132,6 +156,8 @@ const Profile = () => {
               onClose={() => setShowPanel(false)}
               onMarkAsRead={handleMarkAsRead}
               onAcceptFriend={handleAcceptFriend}
+              onAcceptInvite={handleAcceptInvite}
+              onDeclineInvite={handleDeclineInvite}
               onRejectFriend={handleRejectFriend}
               onRemoveNotification={removeNotification}
             />
@@ -139,23 +165,23 @@ const Profile = () => {
         </div>
         <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] rounded-full border border-white/10 bg-gray-500 bg-opacity-30 backdrop-blur-xl ">
           <div className="w-4 h-4 rounded-2xl">
-            <DropdownMenu>
+            <DropdownMenu >
               <DropdownMenuTrigger
                 className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
                 onClick={handlePanelOpen}
               >
                 <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-opacity-30 :bg-black/50 backdrop-blur-md rounded-lg border border-white/10 my-2">
-                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
+              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-opacity-30 bg-black bg-opacity-15 backdrop-blur-md rounded-lg border border-white/10 absolute top-5 -left-10">
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75 text-white hover:bg-black/30 rounded-lg font-bold text-md cursor-pointer">
                   <Link href={`/profile/${user?.username}`}>Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75 text-white hover:bg-black/30 rounded-lg font-bold text-md cursor-pointer">
                   <Link href="/dashboard/setting"
                   >Setting</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="font-bold text-md text-red-500/60 hover:text-red/80 flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150  hover:bg-red-500/30 rounded-lg"
+                  className="font-bold text-md text-red-500/60 hover:text-red/80 flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75  hover:bg-red-500/30 rounded-lg cursor-pointer"
                   onClick={handleLogout}
                 >
                   Logout

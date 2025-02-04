@@ -9,7 +9,7 @@ import { redirect, useParams } from 'next/navigation';
 
 const api = axios.create({
 
-    baseURL: 'http://localhost:8000/api',
+    baseURL: 'https://localhost/api',
     withCredentials: true,
 })
 
@@ -31,7 +31,7 @@ export default function VerifyEmail({
                 console.log('uid', uid);
                 console.log('token', token);
                 // Send a POST request to the backend to verify the email
-                const response = await api.post('http://localhost:8000/api/auth/verify-email/', {
+                const response = await api.post('https://localhost/api/auth/verify-email/', {
                     uid,
                     token,
                 });

@@ -4,23 +4,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from "next/image";
 import FindOpponent from '../FindOpponent/FindOpponent'
 import { IMAGES } from "@/public/index";
-import '../board.css'
+import Avatar from '../../components/navbar/profilebar/Avatar';
+import Winner from '../../PingPong/components/VictoryCard'
+import Link from 'next/link';
+import ExitButton from '../ExitButton/ExitButton'
+
 
 const TicTac = () => {
     
     const images = {
         X : '/game/images/X.png',
         O : '/game/images/O.png',
-        WINNER : '/game/images/winner.png' 
     }
 
     type CellValue = string | '';
 
-    interface User{
-        username : null | string,
-        opponent_username : null | string,
-        mark : 'X' | 'O'  | null
-    }
 
     interface Scores{
         left_score : number,
@@ -33,15 +31,15 @@ const TicTac = () => {
     const [mark, setMark] = useState<'X' | 'O'>('X')
     const [scores, setScores] = useState<Scores>({
         left_score: 0,
-        right_score : 0
+        right_score : 0,
     });
-
+    const winner = useRef<string>('')
     const socket = useRef<null | WebSocket>(null);
 
     const updateBoard = useRef<CellValue[]>(board);
 
     useEffect(() => {
-        socket.current = new WebSocket('ws://localhost:8000/ws/TicTac/local/');
+        socket.current = new WebSocket('wss://localhost/ws/TicTac/local/');
 
         socket.current.onmessage = (event) =>{
             const message = JSON.parse(event.data);
@@ -59,8 +57,8 @@ const TicTac = () => {
             else if (message.action === 'player_won')
             {
                 socket.current?.close();
+                message.winner === 'left_player' ? winner.current = "Player 1" : winner.current = "Player 2";
                 setGameOver(true);
-                message.winner === 'left_player' ? alert('X player won') : alert('O player won');
             }
             else if (message.action === 'draw')
                 resetGame();
@@ -98,9 +96,6 @@ const TicTac = () => {
         }
     }
 
-    if (!isInGame)
-        return <FindOpponent />
-
     return (
         <div className="py-1 bg-gray-500  bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
             <main className="w-full h-full flex justify-center items-center gap-x-2 p-2 relative">
@@ -113,30 +108,44 @@ const TicTac = () => {
                         quality={100}
                         priority
                     />
-                    <div className="w-full h-full rounded-3xl relative flex flex-col justify-start items-center">
-                        <div className="w-full flex-start gap-y-8 px-6 mt-4">
+                    <div className="w-full h-full rounded-3xl relative flex flex-col justify-start items-center gap-y-16">
+                        <div className="w-full flex-start gap-y-8 px-6 mt-4 ">
                             <div className="w-full h-[90px] flex justify-between items-center">
-                                <div className="w-[500px] flex justify-between items-center relative">
-                                    <span className="text-8xl font-normal text-white ">{0}</span>
-                                    <span className="text-4xl font-normal text-white absolute left-56">vs</span>
-                                    <span className="text-8xl font-normal text-white ">{0}</span>
+                                <div className="flex justify-center items-center gap-x-3">
+                                    <Avatar width={70} height={70} avatar={null}/>
+                                    <span className="text-white font-semibold">
+                                        player_1
+                                    </span>
                                 </div>
-                                { gameOver ?
+                                <div className="w-[500px] flex justify-between items-center relative">
+                                    <span className="text-8xl font-normal text-white ">{scores.left_score}</span>
+                                    <span className="text-4xl font-normal text-white absolute left-56">vs</span>
+                                    <span className="text-8xl font-normal text-white ">{scores.right_score}</span>
+                                </div>
+                                <div className="flex justify-center items-center gap-x-3">
+                                    <span className="text-white font-semibold">
+                                        player_2
+                                    </span>
+                                    <Avatar width={70} height={70} avatar={null}/>
+                                </div>
+                            </div>
+                        </div>
+                        { gameOver ?
                             (
-                            <div className='winner-container'>
-                                <img src={images.WINNER}/>
-                            </div>)
+                            <>
+                                <Winner winner={winner.current} winner_avatar={null}/>
+                                <ExitButton/>
+                            </>
+                            )
                         :   (
-                            <div className='tictac-container'>
-                                <div className='tictac-board'>
+                            <div className="bg-[rgba(0,225,90,1)] h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none">
+                                <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%] m-[10px]">
                                 {board.map((cell, index) =>
-                                    <div key={index} className='cell-styling' onClick= {() => handleClick(index)}>
+                                    <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:bg-[#0bbe53] hover:cursor-pointer" onClick= {() => handleClick(index)}>
                                         <img src={(board[index] !== '') ? board[index] : null} />
                                     </div>)}
                                 </div>
                                 </div>)}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </main >

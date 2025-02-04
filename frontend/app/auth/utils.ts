@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Base API setup for making HTTP requests
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'https://localhost/api',
   withCredentials: true,
 });
 
@@ -29,7 +29,7 @@ const getToken = (type  = "jwt_token") => {
 
 
 const register = (first_name: string, last_name: string, email: string, username: string, password: string) => {
-  const res = axios.post("http://localhost:8000/api/auth/register/", {
+  const res = axios.post("https://localhost/api/auth/register/", {
     first_name: first_name,
     last_name: last_name,
     email: email,
@@ -42,7 +42,7 @@ const register = (first_name: string, last_name: string, email: string, username
   };
   
 const login = async (username: string, password: string) => {
-  const res = axios.post("http://localhost:8000/api/auth/login/", {
+  const res = axios.post("https://localhost/api/auth/login/", {
     username: username,
     password: password,
   }, {
@@ -52,7 +52,7 @@ const login = async (username: string, password: string) => {
 };
 
 const loginWithOtp = async (username: string, password: string, otpCode: string) => {
-  const res = axios.post("http://localhost:8000/api/auth/login/", {
+  const res = axios.post("https://localhost/api/auth/login/", {
     username: username,
     password: password,
     otp_code: otpCode,
@@ -63,7 +63,7 @@ const loginWithOtp = async (username: string, password: string, otpCode: string)
 };
 
 const logout = () => {
-  const res = axios.get("http://localhost:8000/api/auth/logout/", { withCredentials: true });
+  const res = axios.get("https://localhost/api/auth/logout/", { withCredentials: true });
 
   console.log(res);
   return res;

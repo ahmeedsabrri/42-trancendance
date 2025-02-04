@@ -39,9 +39,8 @@ const SearchBar: React.FC = () => {
       <div className="relative">
         <div
           className={`
-            relative bg-gray-500 bg-opacity-30 backdrop-blur-xl rounded-3xl
-            shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]
-            border border-white/20
+            relative 
+            shadow-2xl rounded-full border border-white/10 bg-gray-500 bg-opacity-30 backdrop-blur-xl 
             transition-all duration-300
             ${isFocused ? 'bg-white/30' : ''}
           `}
@@ -50,7 +49,7 @@ const SearchBar: React.FC = () => {
             <Search className="w-4 h-4 text-white/50" />
             <input
               type="text"
-              className="w-full px-3 py-1 bg-transparent border-none outline-none text-white/90 font-semibold placeholder-white/50"
+              className="w-full px-3 py-1 bg-transparent outline-none text-white/90  placeholder-white/50"
               placeholder="Search ..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -42,8 +42,18 @@ interface Ball {
 interface GameState {
   countdown: number;
   game_status: string | null,
-  avatar: string | null,
-  winner: string,
+  player1info: {
+    avatar: string,
+    fullname: string,
+  },
+  player2info: {
+    avatar: string,
+    fullname: string,
+  },
+  winner: {
+    fullname: string,
+    avatar: string,
+  },
   player1: Player
   player2: Player
   ball: Ball
@@ -52,22 +62,34 @@ interface GameState {
     ArrowDown: boolean
     w: boolean
     s: boolean
-  }
+  },
   updatePaddles: (newPlayer1: any, newPlayer2: any) => void
   updateBall: (ball: any) => void
   setKeyPressed: (key: string, value: boolean) => void
-  setWinner: (winner: string) => void,
+  setWinner: (winner: any) => void,
   setGameStatus: (game_status: string | null) => void;
-  setAvatar: (avatar: string | null) => void;
+  setPlayer1info: (player1info: any) => void;
+  setPlayer2info: (player2info: any) => void;
   setCountdown: (value: number) => void;
   resetCountdown: () => void;
+  resetPlayersInfo: () => void;
 }
 
 export const useGameStateStore = create<GameState>((set, get) => ({
   countdown: 3,
   game_status: "waiting",
-  avatar: null,
-  winner: '',
+  player1info: {
+    avatar: "",
+    fullname: "",
+  },
+  player2info: {
+    avatar: "",
+    fullname: "",
+  },
+  winner: {
+    fullname: "",
+    avatar: "",
+  },
   player1: {
     fullname: "",
     username: "Player 1",
@@ -150,9 +172,30 @@ export const useGameStateStore = create<GameState>((set, get) => ({
           },
         }
     }),
-    setWinner: (winner: string) => set({winner: winner}),
+    setWinner: (winner: any) => set({ winner: { fullname: winner.FULL_NAME, avatar: winner.avatar,}}),
     setGameStatus: (game_status: string | null) => set({game_status: game_status}),
-    setAvatar: (avatar: string | null) => set({avatar: avatar}),
+    setPlayer1info: (player1info) => set((state) => {
+      return {
+        player1info: {
+          ...state.player1info,
+          avatar: player1info.avatar,
+          fullname: player1info.FULL_NAME
+        }
+      }
+    }),
+    setPlayer2info: (player2info) => set((state) => {
+      return {
+        player2info: {
+          ...state.player2info,
+          avatar: player2info.avatar,
+          fullname: player2info.FULL_NAME
+        }
+      }
+    }),
     setCountdown: (value) => set({ countdown: value }),
     resetCountdown: () => set({ countdown: 3 }),
+    resetPlayersInfo: () => {
+      set({player1info: {avatar: "", fullname: ""}});
+      set({player2info: {avatar: "", fullname: ""}});
+    },
 }))

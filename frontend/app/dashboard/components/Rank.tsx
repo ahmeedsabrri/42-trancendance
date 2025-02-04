@@ -38,7 +38,7 @@ const users = [
 
 const UserComponent = (user: any) => {
     return (
-        <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-border border gap-[10px] shadow-xl hover:duration-200 hover:bg-gradient-to-r hover:from-search_color ">
+        <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 ">
             <h1 className="text-xl text-white">{user.id}</h1>
             <Image src={avatar} alt="avatar" width={50} height={50} />
             <div className="w-full">
@@ -47,7 +47,7 @@ const UserComponent = (user: any) => {
                 </div>
                 <div className="w-full flex items-center justify-between">
                     <p className="font-bold text-picton_blue">@{user.login}</p>
-                    <p className="font-bold text-text_message">LVL: {user.level}</p>
+                    <p className="font-bold text-white/75">LVL: {user.level}</p>
                 </div>
             </div>
         </div>

@@ -19,18 +19,21 @@ interface GameState {
         };
         WINNER?: any,
     },
+    PLAYERS: any,
     gameStatus: any,
 }
 
 const Canvas = () => {
-    const { label, currentState, handleCurrentState } = useGameStore();
+    const { label, currentState, handleCurrentState, GameBoardColor, invited_id } = useGameStore();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { player1, player2, ball } = useGameStateStore();
-    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, game_status, countdown} = useGameStateStore();
+    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, setPlayer1info, setPlayer2info, resetPlayersInfo, game_status, countdown } = useGameStateStore();
 
     const mode = useParams().mode;
+    console.log(mode);
     const currentStateRef = useRef(currentState);
-    const socketUrl = `ws://localhost:8000/ws/game/${mode}Game/`;
+    // const invited = null;
+    const socketUrl = `wss://localhost/ws/game/${mode}Game/${invited_id ? invited_id : ''}`;
 
     const {
         sendJsonMessage,
@@ -44,8 +47,7 @@ const Canvas = () => {
     });
 
     useEffect(() => {
-        if (!countdown && mode === "online")
-        {
+        if (!countdown && mode === "online") {
             console.log("send the game to be updated");
             handleCurrentState();
             sendJsonMessage({ "Action": "StartGame" });
@@ -56,15 +58,25 @@ const Canvas = () => {
         if (lastJsonMessage) {
 
             if (mode === "online" && lastJsonMessage.gameStatus) {
-                console.log(`Received game status: ${lastJsonMessage.gameStatus}`);
+
+                if (lastJsonMessage.PLAYERS) {
+                    const PLAYERS = lastJsonMessage.PLAYERS;
+                    console.log(PLAYERS);
+
+                    if (PLAYERS.PLAYER1)
+                        setPlayer1info(PLAYERS.PLAYER1 || '');
+                    if (PLAYERS.PLAYER2)
+                        setPlayer2info(PLAYERS.PLAYER2 || '');
+                }
                 setGameStatus(lastJsonMessage.gameStatus);
             }
 
-            if (lastJsonMessage.game)
-            {
+            if (lastJsonMessage.game) {
                 const { BALL, PLAYERS, WINNER } = lastJsonMessage.game;
-                updateBall(BALL);
-                updatePaddles(PLAYERS["PLAYER1"], PLAYERS["PLAYER2"]);
+                if (BALL)
+                    updateBall(BALL);
+                if (PLAYERS)
+                    updatePaddles(PLAYERS["PLAYER1"], PLAYERS["PLAYER2"]);
                 if (WINNER)
                     setWinner(WINNER);
             }
@@ -109,16 +121,16 @@ const Canvas = () => {
             document.removeEventListener('keydown', keydownHandler);
             document.removeEventListener('keyup', keyupHandler);
             resetCountdown();
+            resetPlayersInfo();
         };
     }, [sendJsonMessage, setKeyPressed]);
 
     useEffect(() => {
         currentStateRef.current = currentState;
 
-        if (mode === "local")
-        {
+        if (mode === "local") {
             const gameState = currentStateRef.current === "PAUSE" ? "PAUSE" : "PLAY";
-            sendJsonMessage({ "Action": gameState});
+            sendJsonMessage({ "Action": gameState });
         }
         console.log(mode);
     }, [currentState, mode, sendJsonMessage]);
@@ -139,12 +151,12 @@ const Canvas = () => {
         </div>
     ) : null;
 
-    if (mode === "online")
-    {
-        if (game_status === "waiting") 
+    if (mode === "online") {
+        if (game_status === "waiting")
             return <WaitingForPlayer />
-        else if (game_status === "ready" && countdown > 0)
+        else if (game_status === "ready" && countdown > 0) {
             return <WaitingForPlayer />
+        }
     }
 
     return (
@@ -153,9 +165,9 @@ const Canvas = () => {
                 ref={canvasRef}
                 width={canvas.CANVAS_CONFIG.WIDTH}
                 height={canvas.CANVAS_CONFIG.HEIGHT}
-                className="border-cyan-200 rounded-sm"
+                className={`border-cyan-200 rounded-sm ${GameBoardColor}`}
             />
-            { GameControls }
+            {GameControls}
         </div>
     );
 };

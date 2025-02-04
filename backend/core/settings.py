@@ -10,16 +10,14 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
+# CORS
+CORS_ALLOWED_ORIGINS = ["https://localhost"]
 CORS_ALLOW_CREDENTIALS = True
-# Application definition
+# CORS_EXPOSE_HEADERS = ["Set-Cookie"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+]
 
 INSTALLED_APPS = [
     "daphne",
@@ -30,15 +28,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "game",
-    "TicTacToe",
-    # 'chat',
+    'chat',
     "rest_framework",
     "channels",
     "corsheaders",
     # local apps
     "verify_email.apps.VerifyEmailConfig",
     "authentication",
+    "game",
+    "TicTacToe",
     # third party apps
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -58,15 +56,6 @@ MIDDLEWARE = [
     "authentication.middleware.JWTCookieMiddleware",
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",  # Frontend origin
-]
-
-CORS_ALLOW_CREDENTIALS = True
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-]
 
 ROOT_URLCONF = "core.urls"
 
@@ -119,6 +108,8 @@ DATABASES = {
         # 'PORT': os.environ.get('SQL_PORT'),
     }
 }
+
+
 # Password validation
 # https://docs.djangocore.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -153,7 +144,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangocore.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/backend_staticfiles/"
+STATIC_ROOT = BASE_DIR / "static"
 
 # Default primary key field type
 # https://docs.djangocore.com/en/4.2/ref/settings/#default-auto-field
@@ -202,7 +194,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'sabriahmeed1@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'kmoudscyrfclewus'  # Use the generated App Password here
 DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Default sender email
-
-
 
 IMGBB_API_KEY = '053f132b8b449609833ef0da83ad84fa'

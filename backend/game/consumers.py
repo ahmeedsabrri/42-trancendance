@@ -11,6 +11,8 @@ class LocalGameConsumer(AsyncWebsocketConsumer):
         try:
             await self.accept()
 
+            # self.invite = self.scope["url"]["kwargs"][""]
+
             print("SERVER CONNECTED SUCCESSFULLY...")
             self.user = self.scope["user"]
 
@@ -97,47 +99,82 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
         try:
             await self.accept()
             self.user = self.scope["user"]
-            print(self.user)
+            self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id")
+
+            if (self.invite_id):
+                self.invite_id = int(self.invite_id)
 
             self.game_engine = OnlineGameEngine()
 
-            self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name)
+            self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
+
             self.room_group_name = f'online_game_{self.group_id}'
 
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
-            if (OnlineGameEngine.groups[self.group_id]["status"] == "waiting"):
-                await self.send(text_data=json.dumps({ "gameStatus": OnlineGameEngine.groups[self.group_id]["status"] }))
-
-            if (OnlineGameEngine.groups[self.group_id]["status"] == "ready"):
-                await self.send_initial_game_state(self.group_id)
+            await self.send_initial_game_state()
 
             print("SERVER CONNECTED SUCCESSFULLY...")
 
             if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
                 self.task = asyncio.create_task(self.game_loop())
-
         except Exception as e:
             print("Error connecting to server: <error> ", e)
 
-    async def disconnect(self):
+    async def disconnect(self, close_code):
         try:
-            if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
-                if hasattr(self, 'task') and not self.task.done():
-                    self.task.cancel()
-                    try:
-                        await self.task
-                    except asyncio.CancelledError:
-                        print("Task cancelled successfully.")
-                
+            group = OnlineGameEngine.groups[self.group_id]
+
+            if (group["status"] == "waiting"):
+                del group
+                OnlineGameEngine.next_group_id -= 1
+
+            elif (group["status"] == "ready"):
+                if (group["game_leader"] == self.channel_name):
+                    loser_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
+                    winner_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
+
+                    await save_match_history(group["user"], self.user, winner_score, loser_score, "PingPong", "Abandoned")
+                    
+                    self.winner =  group["PLAYERS"]["PLAYER2"]
+                    self.client_name = group["PLAYERS"]["PLAYER2"]["channel_name"]
+                else:
+                    loser_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
+                    winner_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
+
+                    await save_match_history(self.user, group["user"], winner_score, loser_score, "PingPong", "Abandoned")
+                    self.winner =  group["PLAYERS"]["PLAYER1"]
+                    self.client_name = self.channel_name
+
+                await self.channel_layer.send(self.client_name,
+                    {
+                        "type": "send.message",
+                            "game": {
+                                "WINNER": self.winner,
+                            }
+                    }
+                )
+                group["status"] = "Abandoned"
+
+            elif (group["game_leader"] == self.channel_name and group["status"] == "Completed"):
+                group = OnlineGameEngine.groups[self.group_id]
+
+                await save_match_history(group["game_winner"], group["game_loser"], self.game_engine.winnerScore, self.game_engine.loserScore, "PingPong", "Finished")
+
+                group["status"] = "Finished"
+            elif (group["status"] == "Abandoned"):
+                group["status"] = "Finished"
+                del group
+                OnlineGameEngine.next_group_id -= 1
+    
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
-            print(f"user disconnected: {self.channel_name}")
+            print(f"user disconnected: {self.user.username}")
 
         except Exception as e:
-            print("Error connecting to server: <error> ", e)
+            print("Error disconnecting from server: <error> ", e)
 
     async def receive(self, text_data):
         self.action = json.loads(text_data).get("Action")
@@ -164,10 +201,12 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
     async def game_loop(self):
         while True:
+            if OnlineGameEngine.groups[self.group_id]["status"] == "Finished":
+                print("Game finished, stopping the game loop.")
+                break 
             if not OnlineGameEngine.groups[self.group_id]["running"]:
                 await asyncio.sleep(self.game_engine.GAME_INFO["FRAME_RATE"])
                 continue
-
             self.game_engine.update_paddles(self.group_id)
 
             self.game_engine.update_ball(self.group_id)
@@ -209,21 +248,54 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 "PLAYERS": OnlineGameEngine.groups[self.group_id]["PLAYERS"],
             }
         ))
+    async def close_task(self):
+        if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
+            if hasattr(self, 'task') and not self.task.done():
+                self.task.cancel()
+                try:
+                    await self.task
+                except asyncio.CancelledError:
+                    print("Task cancelled successfully.")
+                print("game abondoned")
 
-    # @database_sync_to_async
-    # def find_match_or_create_it(self):
-    #     wait_for_match = Match.objects.filter(
-    #         status = 'waiting',
-    #         player2=None
-    #     ).first()
-    #     if wait_for_match:
-    #         wait_for_match.player2 = self.user
-    #         wait_for_match.status = 'ready'
-    #         wait_for_match.save()
-    #         print("Match found")
-    #         return wait_for_match
-    #     match = Match.objects.create(
-    #         player1=self.user,
-    #         status = 'waiting'
-    #     )
-    #     return match
+@database_sync_to_async
+def save_match_history(winner, loser, winner_score, loser_score, game_type, status='completed'):
+    match_history = MatchHistory.objects.create(
+        winner=winner,
+        loser=loser,
+        score=f"{winner_score}-{loser_score}",
+        game_type=game_type,
+        status=status
+    )
+
+    winner_stats, created = PlayerStats.objects.get_or_create(
+        user=winner, 
+        game_type=game_type,
+        defaults={
+            'total_matches': 1,
+            'wins': 1,
+            'win_rate': 100.00
+        }
+    )
+
+    if not created:
+        winner_stats.total_matches += 1
+        winner_stats.wins += 1
+        winner_stats.win_rate = (winner_stats.wins / winner_stats.total_matches) * 100
+        winner_stats.save()
+
+    loser_stats, created = PlayerStats.objects.get_or_create(
+        user=loser, 
+        game_type=game_type,
+        defaults={
+            'total_matches': 1,
+            'losses': 1,
+            'win_rate': 0.00
+        }
+    )
+
+    if not created:
+        loser_stats.total_matches += 1
+        loser_stats.losses += 1
+        loser_stats.win_rate = (loser_stats.wins / loser_stats.total_matches) * 100
+        loser_stats.save()

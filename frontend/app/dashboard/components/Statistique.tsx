@@ -83,9 +83,9 @@ const data = [
 
 const Statistique = () => {
     return (
-        <div className="size-full gap-2 shadow-2xl flex flex-col justify-center">
+        <div className="size-full gap-2 flex flex-col justify-center">
             <h1 className='text-white font-bold text-xl text_shadow'>Game Activity</h1>
-            <div className='flex items-center justify-center size-full px-4 border border-border rounded-2xl'>
+            <div className='flex items-center justify-center size-full px-4 rounded-2xl'>
                 <ResponsiveContainer width="100%" height="80%" className="mr-4">
                   <BarChart data={data}>
                     <Bar dataKey="score" fill={`url(#BarGradient)`} barSize={20} radius={[5, 5, 5, 5]}/>
