@@ -16,7 +16,10 @@ export interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onAccepte, onDecline}: ProfileHeaderProps) {
-  const {user} = useUserStore();
+  const {user, fetchUser} = useUserStore();
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
   return (
     <div className="relative mb-8">
       <div className="h-48 w-full overflow-hidden rounded-xl">
@@ -30,10 +33,10 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">
         <div className="relative">
           <Avatar width={96} height={96} avatar={userProfile.avatar}/>
-          <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${userProfile?.is_online == true ? 'bg-green-500' : 'bg-gray-500'}`} />
+          <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${userProfile?.is_online == true ? 'bg-green-500' : ''}`} />
         </div>
         
-        <div className="backdrop-blur-md bg-black/20 rounded-lg p-4 mb-2 shadow-lg">
+        <div className="backdrop-blur-md bg-black/20 shadow-lg rounded-lg p-4 mb-2 ">
           <h1 className="text-2xl font-bold text-white">{userProfile.username}</h1>
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-white/20 text-white text-sm">

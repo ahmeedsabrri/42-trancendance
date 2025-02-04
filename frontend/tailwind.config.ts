@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+
+const { fontFamily } = require('tailwindcss/defaultTheme');
+
 export default {
     darkMode: ["class"],
     content: [
@@ -9,6 +12,9 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			orbitron: ['var(--font-orbitron)', ...fontFamily.sans], 
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -41,6 +47,7 @@ export default {
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
   			border: 'hsl(var(--border))',
+			picton_blue: 'rgba(50, 169, 214, 1)',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			chart: {
@@ -53,13 +60,22 @@ export default {
   		},
   		backgroundImage: {
   			'footer-texture': "url('/img/footer-texture.png')",
-  			'background': "url('/images/background.jpeg')"
+  			'background': "url('/game/images/StandardBackground.png')"
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+		boxShadow: {
+			search_inner: 'inset 0px 2px 6px rgba(0, 0, 0, 0.5)',
+			input_inner: 'inset 0px 2px 15px rgba(0, 0, 0, 0.5)'
+		},
+		borderRadius: {
+			lg: 'var(--radius)',
+			md: 'calc(var(--radius) - 2px)',
+			sm: 'calc(var(--radius) - 4px)'
+		}
   	}
   },
   plugins: [

@@ -22,12 +22,12 @@ interface RenderableObject {
 
 export const drawTable = (ctx: CanvasRenderingContext2D) => {
 
-    const gradient = ctx.createLinearGradient(0, 0, CANVAS_CONFIG.WIDTH, CANVAS_CONFIG.HEIGHT);
-    gradient.addColorStop(0, "rgba(124, 45, 18, 0.8)");    // amber-900
-    gradient.addColorStop(0.5, "rgba(91, 33, 182, 0.8)");  // purple-700
-    gradient.addColorStop(1, "rgba(30, 58, 138, 0.8)");    // blue-900
+    // const gradient = ctx.createLinearGradient(0, 0, CANVAS_CONFIG.WIDTH, CANVAS_CONFIG.HEIGHT);
+    // gradient.addColorStop(0, "rgba(124, 45, 18, 0.8)");    // amber-900
+    // gradient.addColorStop(0.5, "rgba(91, 33, 182, 0.8)");  // purple-700
+    // gradient.addColorStop(1, "rgba(30, 58, 138, 0.8)");    // blue-900
     
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = 'transparent';
     ctx.fillRect(0, 0, CANVAS_CONFIG.WIDTH, CANVAS_CONFIG.HEIGHT);
 
 

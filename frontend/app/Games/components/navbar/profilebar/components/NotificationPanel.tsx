@@ -10,6 +10,8 @@ interface NotificationPanelProps {
   onClose: () => void;
   onMarkAsRead: (id: number) => void;
   onAcceptFriend: (username: string) => void;
+  onAcceptInvite: (username: string) => void;
+  onDeclineInvite: (username: string) => void;
   onRejectFriend: (username: string) => void;
   onRemoveNotification: (id: number) => void; // Add this
 }
@@ -19,6 +21,8 @@ export function NotificationPanel({
   onClose,
   onMarkAsRead,
   onAcceptFriend,
+  onAcceptInvite,
+  onDeclineInvite,
   onRejectFriend,
   onRemoveNotification, // Add this
 }: NotificationPanelProps) {
@@ -45,7 +49,7 @@ export function NotificationPanel({
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 transition-colors cursor-pointer hover:bg-white/5 ${notification.read ? 'opacity-60' : ''}`}
+              className={`p-4 transition-colors cursor-pointer  bg-gray-800 backdrop-blur-xl hover:bg-white/4 ${notification.read ? 'opacity-60' : ''}`}
               onClick={() => {
                 if (notification.notification_type !== 'friend_request') {
                   onMarkAsRead(notification.id);
@@ -97,6 +101,31 @@ export function NotificationPanel({
                           e.stopPropagation();
                           onRejectFriend(notification.sender?.username || '');
                           onMarkAsRead(notification.id);
+                        }}
+                        className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  ) ||
+                  notification.notification_type === 'game_invite' && !notification.read && (
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAcceptInvite(notification.sender?.username );
+                          onMarkAsRead(notification.id);
+                          redirect('Games/PingPong/online');
+                        }}
+                        className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveNotification(notification.id);
+                          onDeclineInvite(notification.sender?.username );
                         }}
                         className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
                       >

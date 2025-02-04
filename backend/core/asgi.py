@@ -20,7 +20,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 djang_asgi_application = get_asgi_application()
 
-
+from chat.consumers import ChatConsumer
 from users.consumers import NotificationConsumer
 from django.urls import re_path
 
@@ -29,12 +29,13 @@ application = ProtocolTypeRouter({
     "websocket": AllowedHostsOriginValidator(
         WebSocketJWTAuthMiddleware(
             URLRouter([
-                re_path(r'ws/notifications/', NotificationConsumer.as_asgi()),
+                re_path(r'ws/notifications/$', NotificationConsumer.as_asgi()),
+                re_path(r'ws/chat/$', ChatConsumer.as_asgi()),
                 re_path(r"ws/game/localGame/$", PongCosumers.LocalGameConsumer.as_asgi()),
-                re_path(r"ws/game/onlineGame/$", PongCosumers.OnlineGameConsumer.as_asgi()),
+                re_path(r"ws/game/onlineGame/(?P<invite_id>\d+)?/?$", PongCosumers.OnlineGameConsumer.as_asgi()),
                 re_path(r"ws/TicTac/remote/", TicTacConsumers.RemoteTicTacToeConsumer.as_asgi()),
                 re_path(r"ws/TicTac/local/", TicTacConsumers.LocalTicTacToeConsumer.as_asgi()),
-                # re_path(r'ws/notifications/$',)
+
             ])
         )
     )

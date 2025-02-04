@@ -59,8 +59,8 @@ const [error, setError] = useState<string | null>(null);
     <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4">
       {isLoading ? (
         <>
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <h2 className="text-xl font-semibold text-primary">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <h2 className="text-xl text-white font-semibold text-primary">
             Authenticating with 42...
           </h2>
           <p className="text-muted-foreground">

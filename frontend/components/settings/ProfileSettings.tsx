@@ -83,7 +83,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
             try {
               console.log('Uploading file...'); 
               const response = await axios.put(
-                'http://localhost:8000/api/users/me/upload-avatar/',
+                'https://localhost/api/users/me/upload-avatar/',
                 formData,
                 { withCredentials: true }
               );
@@ -99,7 +99,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
         };
         
   return (
-    <div className="backdrop-blur-md bg-white/10 rounded-lg p-6 space-y-6 border-t-1 shadow-xl border-t border-l border-border">
+    <div className="backdrop-blur-md rounded-lg p-6 space-y-6">
       <h2 className="text-xl font-semibold text-white flex items-center gap-2">
         <User className="w-5 h-5" />
         Profile Settings

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Axios instance with base URL and credentials
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: 'https://localhost/api/',
   withCredentials: true,
 });
 

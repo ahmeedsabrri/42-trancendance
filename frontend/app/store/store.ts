@@ -3,7 +3,7 @@ import axios from 'axios';
 import { FriendData } from '../profile/types';
 
 export const api = axios.create({
-    baseURL: 'http://localhost:8000/api',
+    baseURL: 'https://localhost/api',
     withCredentials: true,
 });
 
@@ -24,8 +24,8 @@ export interface UserData {
 }
 
 interface UserStore {
-    user: UserData | null;
-    viewedProfile: UserData| null,
+    user: UserData;
+    viewedProfile: UserData,
     loading: boolean;
     error: string | null;
     isInitialized: boolean;

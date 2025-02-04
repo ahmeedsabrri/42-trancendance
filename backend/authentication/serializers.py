@@ -1,5 +1,4 @@
 from rest_framework import serializers
-import logging
 import random
 from django.contrib.auth import get_user_model
 from requests_oauthlib import OAuth2Session
@@ -10,7 +9,7 @@ from .utils.utils import send_email_verification_link
 from django.db import IntegrityError
 
 User = get_user_model()
-logger = logging.getLogger(__name__)
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  # Ensure password is write-only
@@ -59,19 +58,16 @@ class OuathCallBackSerializer(serializers.Serializer):
                 client_id=settings.OAUTH_CLIENT_ID,
                 redirect_uri=settings.OAUTH_REDIRECT_URI,
             )
-            logger.info("Fetching token with code: %s", attrs["code"])
             token = oauth.fetch_token(
                 token_url="https://api.intra.42.fr/oauth/token",
                 code=attrs["code"],
                 client_secret=settings.OAUTH_CLIENT_SECRET,
                 include_client_id=True,
             )
-            logger.info("Token fetched successfully: %s", token)
 
             user_info = oauth.get("https://api.intra.42.fr/v2/me")
             user_info.raise_for_status()
             user_info_json = user_info.json()
-            logger.info("User info fetched successfully: %s", user_info_json)
 
             return {
                 "username": user_info_json["login"],
@@ -81,7 +77,6 @@ class OuathCallBackSerializer(serializers.Serializer):
                 "avatar": user_info_json["image"]["link"],
             }
         except Exception as e:
-            logger.error("OAuth2 error: %s", str(e))
             raise serializers.ValidationError(str(e))
 
     def unique_unique_username(self, username):

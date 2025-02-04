@@ -16,7 +16,7 @@ export function GameHistoryCard({ game }: GameHistoryCardProps) {
   };
 
   return (
-    <div className="backdrop-blur-md bg-white/10 rounded-lg p-4 hover:bg-white/20 transition-all border-t-1 shadow-xl border-t border-l border-border">
+    <div className="backdrop-blur-md bg-black/20 shadow-lg rounded-2xl p-4 hover:bg-white/20 transition-all ">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {game.type === 'pingpong' ? (

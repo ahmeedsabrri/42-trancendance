@@ -89,8 +89,54 @@ class UserListView(generics.ListAPIView):
     serializer_class = ProfileSerializer
     
 
-
-
+class SendGameInviteView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+    def get(self, request, username):
+        try:
+            sender = request.user
+            receiver = User.objects.get(username=username)
+            if sender == receiver:
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "You can't send game invite to yourself."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+             # Create a notification using the `create_notification` method
+            notification = Notification.create_notification(
+                sender=sender,
+                recipient=receiver,
+                notification_type='game_invite',
+                message=f'{sender.username} sent you a pingpong game invite.',
+            )
+            
+            # Send the notification via WebSocket
+            notification_data  = self.serialiser_class(notification).data
+            send_notification(receiver.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite sent successfully."
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid receiver",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class SendRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -193,6 +239,108 @@ class AcceptRequestView(APIView):
                 {
                     "error": "Invalid request",
                     "message": "No friend request found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class AcceptInviteRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+    def get(self, request, username):
+        try:
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.accept(sender)
+            
+            notification = Notification.create_notification(
+                sender=receiver,
+                recipient=sender,
+                notification_type='invite_accept',
+                message=f'{receiver.username} accepted your game invite.'
+            )
+            notification_data  = self.serialiser_class(notification).data
+            notification_data['sender'] = ProfileSerializer(receiver).data
+            send_notification(sender.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite accepted successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid sender",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No game invite found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class DeclineInviteRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serialiser_class = NotificationSerializer
+
+    def get(self, request, username):
+        try:
+            sender = User.objects.get(username=username)
+            receiver = request.user
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
+                connection.decline()
+            notification = Notification.create_notification(
+                sender=receiver,
+                recipient=sender,
+                notification_type='game_decline',
+                message=f'{receiver.username} declined your game invite.'
+            )
+            notification_data  = self.serialiser_class(notification).data
+            notification_data['sender'] = ProfileSerializer(receiver).data
+            send_notification(sender.id, notification_data)
+            return Response(
+                {
+                    "message": "Game invite declined successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid sender",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No game invite found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )

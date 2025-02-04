@@ -50,7 +50,7 @@ const SearchBar: React.FC = () => {
             <Search className="w-4 h-4 text-white/50" />
             <input
               type="text"
-              className="w-full px-3 py-1 bg-transparent border-none outline-none text-white/90 font-semibold placeholder-white/50"
+              className="w-full px-3 py-1 bg-transparent border-none outline-none text-white/90  placeholder-white/50 font-orbitron"
               placeholder="Search ..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}

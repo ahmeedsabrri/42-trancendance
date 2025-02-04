@@ -160,7 +160,7 @@ export default function Profile() {
   };
   // handleBlock function
   const handleBlock =  () => {
-    console.log('Blocked');
+    console.log('Blocked'); 
     handleRequest(username as string, 'block')
     .then((response) => {
       console.log(response);
@@ -173,7 +173,6 @@ export default function Profile() {
   };
   //hadelUnblock function
   const handleUnblock = () => {
-    console.log(username)
     handleRequest(username as string, 'unblock')
     .then((response) => {
       console.log(response);
@@ -241,7 +240,7 @@ export default function Profile() {
     return <div>Profile not found</div>;
   }
   return (
-    <div className="w-5/6 h-5/6 hide-scrollbar overflow-y-scroll  border-t-1 shadow-xl border-t border-l border-border backdrop-blur-3xl rounded-3xl">
+    <div className=" w-full h-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-2 border border-white/10">
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
@@ -258,15 +257,15 @@ export default function Profile() {
             <MonthlyStats games={mockGames} />
             
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-white mb-6">Game History</h2>
+              <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Game History</h2>
               {mockGames.map((game) => (
                 <GameHistoryCard key={game.id} game={game} />
               ))}
             </div>
           </div>
           
-        <div className="space-y-4 ">
-            <h2 className="text-2xl font-bold text-white mb-6">Friends</h2>
+        <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Friends</h2>
             {Userfriends?.map((friend) => (
               <FriendCard
                 key={friend.id}
@@ -279,7 +278,7 @@ export default function Profile() {
         </div>
 
         <div className="mt-8 space-y-4">
-          <h2 className="text-2xl font-bold text-white mb-6">Monthly Progress</h2>
+          <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Monthly Progress</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <GameChart 
               games={mockGames} 
