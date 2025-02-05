@@ -33,9 +33,11 @@ interface GameState {
   tournament_match_winner:string | null
   TicTacOpponent: TicTacOpponent
   invited_id: string | null
+  inviter_id: string | null
   GameBoardColor: string | null,
 
-  setInvitedId: (id: number | null) => void,
+  setInvitedId: (id: string | null) => void,
+  setInviterId: (id: string | null) => void,
   resetInvitedId: () => void,
   switchGame: () => void
   setGameMode: (mode: 'local' | 'online') => void
@@ -55,6 +57,7 @@ interface GameState {
 
 export const useGameStore = create<GameState>((set, get) => ({
   invited_id: null,
+  inviter_id: null,
   currentGame: 'pingpong',
   label: 'PLAY',
   currentState: 'PAUSE',
@@ -139,8 +142,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     setInvitedId: (id) => {
       set({invited_id: id})
     },
+    setInviterId: (id) => {
+      set({inviter_id: id})
+    },
     resetInvitedId: () => {
       set({invited_id: null})
+    },
+    resetInviterId: () => {
+      set({inviter_id: null})
     }
     
 

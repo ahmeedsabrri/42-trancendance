@@ -10,20 +10,27 @@ import { notifyErr } from "@/app/chat/Tools/wstools";
 import { handleRequestGames } from "../../Tools/apiTools";
 import { useGameStore } from "@/app/Games/store/GameStore";
 import { useGameStateStore } from "@/app/Games/store/CanvasStore";
+import { useUserStore } from "@/app/store/store";
+import { useEffect } from "react";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
+    const {user} = useUserStore();
     const {setWinner} = useGameStateStore();
+
+    useEffect(() => {
+        console.log("invited_id infooo", invited_id);
+    }, [invited_id]);
 
     const handlePingPongNotifyAdd = () => {
         console.log("user_id info", conversationSelected?.userTarget?.id);
         // setWinner(null);
-        setInvitedId(conversationSelected?.userTarget?.id);
+        
+        resetInvitedId();
+        setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
         setGameMode("online");
-
-        console.log("invited_id info", invited_id);
 
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {

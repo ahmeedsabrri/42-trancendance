@@ -14,7 +14,7 @@ import { AuthActions } from '@/app/auth/utils';
 import { useUserStore } from '@/app/store/store';
 import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { CircleChevronDown } from 'lucide-react';
 // import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
@@ -36,7 +36,7 @@ const Profile = () => {
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setInvitedId, invited_id, setGameMode} = useGameStore();
+  const { setInvitedId, inviter_id, setGameMode} = useGameStore();
   const router = useRouter();
 
   const notifAccept = (message:string) => toast(message,{
@@ -115,10 +115,9 @@ const Profile = () => {
   const handleAcceptInvite = async (username: string) => {
     
     setGameMode("online");
-    setInvitedId(user?.id);
-  
+    setInvitedId(`${user?.id}-${inviter_id}`);
     handleRequest(username, "acceptInvite")
-      .then((res) => {
+    .then((res) => {
         notifAccept(res.data.message);
       })
       .catch((err) => {
