@@ -106,7 +106,7 @@ const TicTac = () => {
                     break;
 
                 case 'score_update':
-                    let scoreObj: Scores = { score: 0, opponent_score: 0 };
+                    const scoreObj: Scores = { score: 0, opponent_score: 0 };
                     lastJsonMessage.sender === user.current.username
                         ? (scoreObj.score = lastJsonMessage.score, scoreObj.opponent_score = lastJsonMessage.opponent_score)
                         : (scoreObj.score = lastJsonMessage.opponent_score, scoreObj.opponent_score = lastJsonMessage.score);
@@ -121,7 +121,7 @@ const TicTac = () => {
 
                 case 'player_won':
                     if (lastJsonMessage.reason === 'OPPONENT DISCONNECTED') {
-                        let scoreObj: Scores = { score: 0, opponent_score: 0 };
+                        const scoreObj: Scores = { score: 0, opponent_score: 0 };
                         scoreObj.score = 4;
                         scoreObj.opponent_score = scores.opponent_score
                         setScores(scoreObj);
@@ -152,7 +152,7 @@ const TicTac = () => {
             return;
         if (board[index] !== '')
             return;
-        let newBoard: CellValue[] = [...board];
+        const newBoard: CellValue[] = [...board];
         user.current.mark === 'X' ? newBoard[index] = IMAGES.X : newBoard[index] = IMAGES.O;
         setBoard(newBoard);
         updateBoard.current = [...newBoard];

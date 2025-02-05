@@ -43,7 +43,7 @@ const Statistique = () => {
     };
   });
 
-  let data = updatedData.slice(-10);
+  const data = updatedData.slice(-10);
 
   return (
     <div className="size-full flex flex-col justify-center">

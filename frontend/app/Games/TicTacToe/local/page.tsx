@@ -47,7 +47,7 @@ const TicTac = () => {
                 setIsInGame(true);
             else if (message.action === 'score_update')
             {
-                let scoreObj : Scores = {left_score: 0, right_score : 0};
+                const scoreObj : Scores = {left_score: 0, right_score : 0};
                 scoreObj.left_score = message.left_score;
                 scoreObj.right_score = message.right_score;
                 setScores(scoreObj);
@@ -81,7 +81,7 @@ const TicTac = () => {
                 return;
         else
         {
-            let newBoard: CellValue[] = [...board];
+            const newBoard: CellValue[] = [...board];
             mark === 'X' ? newBoard[index] = images.X : newBoard[index]=images.O 
             mark === 'X' ? setMark('O') : setMark('X')
             setBoard(newBoard);

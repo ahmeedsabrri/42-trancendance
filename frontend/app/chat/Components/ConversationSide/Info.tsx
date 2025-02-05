@@ -27,6 +27,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
     const handlePingPongNotifyAdd = () => {
         console.log("user_id info", conversationSelected?.userTarget?.id);
         // setWinner(null);
+        console.log("manage. stt")
         
         resetInvitedId();
         setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);

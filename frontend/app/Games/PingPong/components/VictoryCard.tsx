@@ -26,9 +26,9 @@ const Winner: React.FC<WinnerProp> = ({ winner, winner_avatar, reason}) => {
         if (tournament_match === "last match")
             winner === "player1" ? tournamentMatchWinner.current = tournament_players[4] : tournament_players[5];
     }
-    let headerStyle = { textShadow: `0px 0px 10px rgba(0, 161, 255, 0.8), 0px 0px 20px rgba(255, 255, 255, 0.8), 0px 0px 30px rgba(0, 225, 79, 0.8), 0px 0px 40px rgba(0, 186, 65, 0.8)` };
-    let divStyle = { background: 'linear-gradient(to right, rgba(255, 234, 0, 0.8), rgba(179, 179, 179, 0.5), rgba(204, 204, 204, 0.4), rgba(255, 255, 255, 0.0))' }
-    let description = "WINNER";
+    const headerStyle = { textShadow: `0px 0px 10px rgba(0, 161, 255, 0.8), 0px 0px 20px rgba(255, 255, 255, 0.8), 0px 0px 30px rgba(0, 225, 79, 0.8), 0px 0px 40px rgba(0, 186, 65, 0.8)` };
+    const divStyle = { background: 'linear-gradient(to right, rgba(255, 234, 0, 0.8), rgba(179, 179, 179, 0.5), rgba(204, 204, 204, 0.4), rgba(255, 255, 255, 0.0))' }
+    const description = "WINNER";
 
     return (
         <div

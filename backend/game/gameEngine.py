@@ -377,7 +377,7 @@ class OnlineGameEngine:
                     break
                 if (group_info["invited_id"] and group_info["invited_id"] != invited_id):
                     print(f'users the same = {group_info["invited_id"]} {invited_id}')
-                    break
+                    continue
                 # Join existing group as player 2
                 group_info["PLAYERS"]["PLAYER2"] = {
                     "channel_name": channel_name,

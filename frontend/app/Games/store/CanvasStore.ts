@@ -79,7 +79,7 @@ interface GameState {
   resetInvitedCountdown: () => void,
 }
 
-export const useGameStateStore = create<GameState>((set, get) => ({
+export const useGameStateStore = create<GameState>((set) => ({
   countdown: 3,
   invitedCountdown: 30,
   game_status: "waiting",
