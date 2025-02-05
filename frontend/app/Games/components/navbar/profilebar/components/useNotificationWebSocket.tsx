@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import useNotificationStore from '../store/WebsocketNotifStore';
+import { useGameStore } from '@/app/Games/store/GameStore';
 
 
 const useNotificationWebSocket = (url:string) => {
   const {fetchNotifications, addNotification} = useNotificationStore();
+  // const {resetInvitedId} = useGameStore();
 
   const { lastMessage, readyState } = useWebSocket(url, {
     onOpen: () => console.log('WebSocket connected'),
@@ -19,6 +21,12 @@ const useNotificationWebSocket = (url:string) => {
       console.log('Received message:', lastMessage.data);
 
       const newNotification = JSON.parse(lastMessage.data);
+
+      // if (newNotification.notification.notification_type === "game_decline")
+      //   {
+      //       resetInvitedId();
+      //       console.log("REset Invited_id");
+      //   }
       const data = newNotification.notification
       console.log('New notification:', newNotification);
       addNotification(data);

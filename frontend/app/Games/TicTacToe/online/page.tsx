@@ -15,7 +15,8 @@ import ExitButton from '../ExitButton/ExitButton';
 const TicTac = () => {
     type winner = {
         username: string | null,
-        avatar: string | null
+        avatar: string | null,
+        reason: string | null
     };
     type CellValue = string | '';
 
@@ -39,6 +40,8 @@ const TicTac = () => {
 
     const WS_URL = "wss://localhost/ws/TicTac/remote/";
 
+    const websocket = useRef<WebSocket | null>(null)
+
     const {
         sendJsonMessage,
         lastJsonMessage,
@@ -46,11 +49,14 @@ const TicTac = () => {
     } = useWebSocket<any>(WS_URL, {
         shouldReconnect: (closeEvent) => false,
         onError: (event) => console.log('WebSocket error:', event),
-        onOpen: () => console.log('WebSocket connected'),
+        onOpen: (event) => {
+            console.log('WebSocket connected')
+            websocket.current = event.target as WebSocket
+        },
         onClose: () => console.log('WebSocket disconnected'),
     });
 
-    const { GameBoardColor } = useGameStore()
+    const { GameBoardColor, setTicTacOpponent, TicTacOpponent } = useGameStore()
     const [isInGame, setIsInGame] = useState<false | true>(false);
     const [isMyTurn, setIsMyTurn] = useState<false | true>(false);
     const [board, setBoard] = useState<CellValue[]>(Array(9).fill(''));
@@ -61,58 +67,76 @@ const TicTac = () => {
         opponent_score: 0
     });
 
-
     const user = useRef<User>({
         username: null,
         user_avatar: null,
         opponent_username: null,
         opponent_avatar: null,
         mark: null,
-        winner: { username: null, avatar: null }
+        winner: { username: null, avatar: null, reason: null }
     });
     const updateBoard = useRef<CellValue[]>(board);
 
     useEffect(() => {
-        if (!lastJsonMessage) return;
-        switch (lastJsonMessage.action)
-        {
-            case 'identify_players':
-                user.current.username = lastJsonMessage.username;
-                user.current.opponent_username = lastJsonMessage.opponent_username;
-                user.current.user_avatar = lastJsonMessage.user_avatar;
-                user.current.opponent_avatar = lastJsonMessage.opponent_avatar;
-                user.current.mark = lastJsonMessage.mark;
-                break;
-
-            case 'game_started':
-                setIsInGame(true);
-                setIsWaiting(false);
-                lastJsonMessage.turn ? setIsMyTurn(true) : setIsMyTurn(false);
-                break;
-
-            case 'score_update' :
-                let scoreObj: Scores = { score: 0, opponent_score: 0 };
-                lastJsonMessage.sender === user.current.username
-                ? (scoreObj.score = lastJsonMessage.score, scoreObj.opponent_score = lastJsonMessage.opponent_score)
-                : (scoreObj.score = lastJsonMessage.opponent_score, scoreObj.opponent_score = lastJsonMessage.score);
-                setScores(scoreObj);
-                resetGame();
-                break;
-
-            case 'board_update':
-                setBoard([...lastJsonMessage.board]);
-                setIsMyTurn(true);
-                break;
-
-            case 'player_won':
-                user.current.winner.username = lastJsonMessage.sender;
-                user.current.winner.avatar = lastJsonMessage.avatar;
-                setGameOver(true);
-                break;
-
-            case 'draw':
-                resetGame();
+        if (isWaiting && !isInGame) {
+            if (websocket.current && websocket.current.readyState === WebSocket.OPEN)
+                websocket.current.close();
         }
+    }, [])
+
+
+    useEffect(() => {
+        if (!lastJsonMessage) return;
+        const handleMessage = async () => {
+            switch (lastJsonMessage.action) {
+                case 'identify_players':
+                    user.current.username = lastJsonMessage.username;
+                    user.current.opponent_username = lastJsonMessage.opponent_username;
+                    user.current.user_avatar = lastJsonMessage.user_avatar;
+                    user.current.opponent_avatar = lastJsonMessage.opponent_avatar;
+                    user.current.mark = lastJsonMessage.mark;
+                    setTicTacOpponent(true, user.current.opponent_username, user.current.opponent_avatar)
+                    break;
+
+                case 'game_started':
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    setIsInGame(true);
+                    setIsWaiting(false);
+                    lastJsonMessage.turn ? setIsMyTurn(true) : setIsMyTurn(false);
+                    break;
+
+                case 'score_update':
+                    let scoreObj: Scores = { score: 0, opponent_score: 0 };
+                    lastJsonMessage.sender === user.current.username
+                        ? (scoreObj.score = lastJsonMessage.score, scoreObj.opponent_score = lastJsonMessage.opponent_score)
+                        : (scoreObj.score = lastJsonMessage.opponent_score, scoreObj.opponent_score = lastJsonMessage.score);
+                    setScores(scoreObj);
+                    resetGame();
+                    break;
+
+                case 'board_update':
+                    setBoard([...lastJsonMessage.board]);
+                    setIsMyTurn(true);
+                    break;
+
+                case 'player_won':
+                    if (lastJsonMessage.reason === 'OPPONENT DISCONNECTED') {
+                        let scoreObj: Scores = { score: 0, opponent_score: 0 };
+                        scoreObj.score = 4;
+                        scoreObj.opponent_score = scores.opponent_score
+                        setScores(scoreObj);
+                    }
+                    user.current.winner.username = lastJsonMessage.sender;
+                    user.current.winner.avatar = lastJsonMessage.avatar;
+                    user.current.winner.reason = lastJsonMessage.reason;
+                    setGameOver(true);
+                    break;
+
+                case 'draw':
+                    resetGame();
+            }
+        }
+        handleMessage()
     }
         , [lastJsonMessage])
 
@@ -187,18 +211,22 @@ const TicTac = () => {
                         </div>
                         {gameOver ?
                             <>
-                                <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} />
-                                <ExitButton/>
+                                <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} reason={user.current.winner.reason} />
+                                <ExitButton />
                             </>
                             : (
-                                <div className={` ${GameBoardColor} h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none`}>
-                                    <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%] m-[10px]">
-                                        {board.map((cell, index) =>
-                                            <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                <img src={(board[index] !== '') ? board[index] : null} />
-                                            </div>)}
+                                <div className='h-full w-full flex items-center justify-center flex-col'>
+                                    <div className={` ${GameBoardColor} h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none`}>
+                                        <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
+                                            {board.map((cell, index) =>
+                                                <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
+                                                    <img src={(board[index] !== '') ? board[index] : null} />
+                                                </div>)}
+                                        </div>
                                     </div>
-                                </div>)}
+                                    <ExitButton />
+                                </div>
+                                )}
                     </div>
                 </div>
             </main >

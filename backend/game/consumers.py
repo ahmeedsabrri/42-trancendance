@@ -103,6 +103,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
             if (self.invite_id):
                 self.invite_id = int(self.invite_id)
+                print(self.invite_id)
 
             self.game_engine = OnlineGameEngine()
 
@@ -126,15 +127,14 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
             group = OnlineGameEngine.groups[self.group_id]
 
             if (group["status"] == "waiting"):
-                del group
-                OnlineGameEngine.next_group_id -= 1
+                group["status"] = "Finished"
 
             elif (group["status"] == "ready"):
                 if (group["game_leader"] == self.channel_name):
                     loser_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
                     winner_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
 
-                    await save_match_history(group["user"], self.user, winner_score, loser_score, "PingPong", "Abandoned")
+                    await save_match_history(group["user2"], self.user, winner_score, loser_score, "PingPong", "Abandoned")
                     
                     self.winner =  group["PLAYERS"]["PLAYER2"]
                     self.client_name = group["PLAYERS"]["PLAYER2"]["channel_name"]
@@ -142,9 +142,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                     loser_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
                     winner_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
 
-                    await save_match_history(self.user, group["user"], winner_score, loser_score, "PingPong", "Abandoned")
+                    await save_match_history(self.user, group["user2"], winner_score, loser_score, "PingPong", "Abandoned")
                     self.winner =  group["PLAYERS"]["PLAYER1"]
-                    self.client_name = self.channel_name
+                    self.client_name = group["PLAYERS"]["PLAYER1"]["channel_name"]
 
                 await self.channel_layer.send(self.client_name,
                     {
@@ -162,10 +162,10 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 await save_match_history(group["game_winner"], group["game_loser"], self.game_engine.winnerScore, self.game_engine.loserScore, "PingPong", "Finished")
 
                 group["status"] = "Finished"
+
             elif (group["status"] == "Abandoned"):
+                print("then here")
                 group["status"] = "Finished"
-                del group
-                OnlineGameEngine.next_group_id -= 1
     
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -203,6 +203,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
         while True:
             if OnlineGameEngine.groups[self.group_id]["status"] == "Finished":
                 print("Game finished, stopping the game loop.")
+                del OnlineGameEngine.groups[self.group_id]
+                OnlineGameEngine.next_group_id -= 1
+                print(OnlineGameEngine.groups)
                 break 
             if not OnlineGameEngine.groups[self.group_id]["running"]:
                 await asyncio.sleep(self.game_engine.GAME_INFO["FRAME_RATE"])

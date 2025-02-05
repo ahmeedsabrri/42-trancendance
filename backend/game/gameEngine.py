@@ -329,6 +329,7 @@ class OnlineGameEngine:
 
         # Winner check and game status update
         if PLAYERS["PLAYER1"]["SCORE"] == 3:
+            PLAYERS["PLAYER1"]["reason"] = "GAME FINISHED"
             self.winner = PLAYERS["PLAYER1"]
             self.winnerScore =  PLAYERS["PLAYER1"]["SCORE"]
             self.loserScore = PLAYERS["PLAYER2"]["SCORE"]
@@ -337,6 +338,7 @@ class OnlineGameEngine:
             OnlineGameEngine.groups[group_id]["status"] = "Completed"
             
         elif PLAYERS["PLAYER2"]["SCORE"] == 3:
+            PLAYERS["PLAYER2"]["reason"] = "GAME FINISHED"
             self.winner = PLAYERS["PLAYER2"]
             self.winnerScore =  PLAYERS["PLAYER2"]["SCORE"]
             self.loserScore = PLAYERS["PLAYER1"]["SCORE"]
@@ -374,7 +376,7 @@ class OnlineGameEngine:
                 if group_info["PLAYERS"]["PLAYER1"]["user_id"] == user.id:
                     break
                 if (group_info["invited_id"] and group_info["invited_id"] != invited_id):
-                    print(f'users the same = {group_info["invited_id"]} {user.id}')
+                    print(f'users the same = {group_info["invited_id"]} {invited_id}')
                     break
                 # Join existing group as player 2
                 group_info["PLAYERS"]["PLAYER2"] = {
@@ -387,7 +389,8 @@ class OnlineGameEngine:
                     "W": self.GAME_INFO["PLAYER_WIDTH"],
                     "H": self.GAME_INFO["PLAYER_HEIGHT"],
                     "SCORE": 0,
-                    "avatar": f'{user.avatar}'
+                    "avatar": f'{user.avatar}',
+                    "reason": "OPPONENT DISCONNECTED",
                 }
                 group_info["status"] = "ready"
                 group_info["user2"] = user
@@ -410,7 +413,8 @@ class OnlineGameEngine:
                     "W": self.GAME_INFO["PLAYER_WIDTH"],
                     "H": self.GAME_INFO["PLAYER_HEIGHT"],
                     "SCORE": 0,
-                    "avatar": f'{user.avatar}'
+                    "avatar": f'{user.avatar}',
+                    "reason": "OPPONENT DISCONNECTED",
                 },
                 "PLAYER2": None,
             },

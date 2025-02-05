@@ -3,6 +3,7 @@
 import Image from "next/image";
 import * as Tooltip from '@radix-ui/react-tooltip';
 import Link from "next/link";
+import { useGameStateStore } from "../../store/CanvasStore";
 
 interface SideBarItemProps {
     src: string;
@@ -12,8 +13,11 @@ interface SideBarItemProps {
 }
 
 const SideBarItem: React.FC<SideBarItemProps> = ({ src, alt, title, link }) => {
+
+    const { setWinner } = useGameStateStore();
+
     return (
-        <Link href={ `${link}` } >
+        <Link href={ `${link}` }>
             <Tooltip.Provider>
                 <Tooltip.Root>
                     <Tooltip.Trigger asChild>

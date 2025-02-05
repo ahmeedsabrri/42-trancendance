@@ -4,7 +4,7 @@ import axios, {AxiosResponse} from "axios";
 import { sortConversationsByDate } from "../Components/utils/utils";
 
 const api = axios.create({
-    baseURL: 'https://localhost/',
+    baseURL: 'https://localhost/api/',
     withCredentials: true,
 });
 
@@ -79,9 +79,15 @@ const fetchMessages = async (conversation_id: number) => {
     source.cancel('Operation canceled by the user.');
 }
 
-const handleRequestGames = async (username:string, type:string) => {
-    const response = await api.get(`api/users/request/${type}/${username}/`);
-     return response;
+const getMatcheHistory = async () => {
+    const response = await api.get(`match_history/`);
+    console.log(response.data);
+    return response.data.matches;
 }
 
-export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames};
+const handleRequestGames = async (username:string, type:string) => {
+    const response = await api.get(`users/request/${type}/${username}/`);
+    return response;
+}
+
+export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames, getMatcheHistory };

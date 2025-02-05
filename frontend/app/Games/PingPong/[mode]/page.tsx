@@ -16,13 +16,14 @@ import { useGameStore } from '../../store/GameStore';
 const Game = () => {
 
     const mode = useParams().mode;
+    const {invited_id, setInvitedId } = useGameStore();
     const { winner, game_status, countdown, setWinner } = useGameStateStore();
     const winnerRef = useRef(winner.fullname);
     const avatarRef = useRef(winner.avatar);
 
     const {tournament_match, is_tournament, tournament_players, setTournamentPlayers, setTournamentMatch, handleCurrentState} = useGameStore()
 
-    function setWinnerInTournament(player_winner:string)
+    function setWinnerInTournament(player_winner:string|null)
     {
         if (tournament_match === "first match")
             player_winner === "player1" ? setTournamentPlayers(tournament_players[0], 4) : setTournamentPlayers(tournament_players[2], 4)
@@ -32,15 +33,20 @@ const Game = () => {
             player_winner === "player1" ? setTournamentPlayers(tournament_players[4], 6) : setTournamentPlayers(tournament_players[5], 6)
     }
 
+    // useEffect(() => {
+    //     console.log("invited_id can", invited_id);
+    // }, [setInvitedId]);
+
     useEffect(() => {
-        setWinner('')
+        return (() => {
+            setWinner('');
+        })
     }, []);
 
     useEffect(() => {
         winnerRef.current = winner.fullname;
         avatarRef.current = winner.avatar;
         is_tournament && setWinnerInTournament(winnerRef.current);
-        console.log(winnerRef.current);
     }, [winner, game_status]);
 
     const ScoresContent = () => {
@@ -49,7 +55,7 @@ const Game = () => {
         return null;
     }
 
-    const WinnerCardOrCanvas = winnerRef.current ? <Winner winner={winnerRef.current} winner_avatar={avatarRef.current} /> : <Canvas />;
+    const WinnerCardOrCanvas = winnerRef.current ? <Winner winner={winnerRef.current} winner_avatar={avatarRef.current} reason={winner.reason}/> : <Canvas />;
     
     const Continue = () => {
         if (winnerRef.current) {

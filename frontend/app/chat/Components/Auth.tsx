@@ -25,7 +25,7 @@ const Auth = () => {
         };
 
         const getUser = async () => {
-            const response = await fetch("https://localhost/chat/new_user", {
+            const response = await fetch("http://localhost:8000/chat/new_user", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

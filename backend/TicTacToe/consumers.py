@@ -33,7 +33,8 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                 winner=winner,
                 loser=loser,
                 status=game_state,
-                score=f'{self.score}-{self.opponent.score}')
+                score=f'{self.score}-{self.opponent.score}',
+                game_type='tictactoe')
         except Exception as e:
             logger.error(f"Error raised while creating the game : {e}")
     
@@ -43,7 +44,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
             user = User.objects.get(id=self.scope['user'].id)
             Stats, created = PlayerStats.objects.get_or_create(
                 user=self.scope['user'],
-                game_type='TicTacToe'
+                game_type='Tic Tac Toe'
             )
             Stats.total_matches+=1
             if self.is_winner:
@@ -52,7 +53,8 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
             else:
                 Stats.losses += 1
                 user.level += 10
-            Stats.win_rate = 0
+            Stats.win_rate = (Stats.wins / Stats.total_matches) * 100
+            print("win rate ", Stats.win_rate)
             Stats.save()
             user.save()
         except Exception as e:
@@ -122,7 +124,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                                             'user_avatar' : player1.scope['user'].avatar,
                                             'opponent_avatar' : player2.scope['user'].avatar,
                                             'mark' : player1.mark})
-
+                    # return
                     await player2.send_json({'action' : 'identify_players',
                                             'username' : player2.scope['user'].username,
                                             'opponent_username' : player1.scope['user'].username,
@@ -179,6 +181,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                     self.is_winner = True
                     message = {
                         'action' : 'player_won',
+                        'reason' : 'GAME FINISHED',
                         'sender' : self.scope['user'].username,
                         'avatar' : self.scope['user'].avatar
                     }
@@ -215,8 +218,10 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                     self.game_state = 'abondoned'
                     self.opponent.game_state = 'abondoned'
                     self.opponent.is_winner = True
+                    self.opponent.score = 4
                     message = {
                         'action' : 'player_won',
+                        'reason'  : 'OPPONENT DISCONNECTED',
                         'sender' : self.opponent.scope['user'].username,
                         'avatar' : self.opponent.scope['user'].avatar,
                     }
@@ -227,10 +232,10 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                         self.is_game_owner and await self.create_game(self.scope['user'], self.opponent.scope['user'], self.game_state)
                     else:
                         self.is_game_owner and await self.create_game(self.opponent.scope['user'], self.scope['user'], self.game_state)
-                RemoteTicTacToeConsumer.games -= 1
+                if self.is_game_owner:
+                    RemoteTicTacToeConsumer.games -= 1
                 await self.create_player_stat()
-                self.is_game_owner and await self.channel_layer.group_discard(self.game_group, self.channel_name)
-                self.is_game_owner and await self.channel_layer.group_discard(self.game_group, self.opponent.channel_name)
+                await self.channel_layer.group_discard(self.game_group, self.channel_name)
         except Exception as e:
             logger.error(f"Error raised while disconnecting : {e}")
 #---------------------------------------------------------------------------------------------#

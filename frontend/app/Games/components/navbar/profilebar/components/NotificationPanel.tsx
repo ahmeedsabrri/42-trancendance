@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 import type { Notificationdata } from '../types/notification';
 import Avatar from "../Avatar";
 import { redirect } from 'next/navigation';
+import { useGameStateStore } from '@/app/Games/store/CanvasStore';
+import { useRouter } from 'next/navigation'
+import { useGameStore } from '@/app/Games/store/GameStore';
 
 interface NotificationPanelProps {
   notifications: Notificationdata[];
@@ -27,6 +30,9 @@ export function NotificationPanel({
   onRemoveNotification, // Add this
 }: NotificationPanelProps) {
 
+  const router = useRouter();
+  const { setGameMode, resetInvitedId } = useGameStore();
+
   return (
     <div className="absolute top-full right-0 mt-2 w-96 max-h-[32rem] overflow-hidden bg-white/10 backdrop-blur-2xl border border-white/20 rounded-lg shadow-xl flex flex-col z-50">
       {/* Header */}
@@ -49,7 +55,7 @@ export function NotificationPanel({
           notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`p-4 transition-colors cursor-pointer  bg-gray-800 backdrop-blur-xl hover:bg-white/4 ${notification.read ? 'opacity-60' : ''}`}
+              className={`p-4 transition-colors cursor-pointer hover:bg-white/5 ${notification.read ? 'opacity-60' : ''}`}
               onClick={() => {
                 if (notification.notification_type !== 'friend_request') {
                   onMarkAsRead(notification.id);
@@ -89,7 +95,7 @@ export function NotificationPanel({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onAcceptFriend(notification.sender?.username );
+                          onAcceptFriend(notification.sender?.username);
                           onMarkAsRead(notification.id);
                         }}
                         className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
@@ -108,31 +114,50 @@ export function NotificationPanel({
                       </button>
                     </div>
                   ) ||
-                  notification.notification_type === 'game_invite' && !notification.read && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAcceptInvite(notification.sender?.username );
-                          onMarkAsRead(notification.id);
-                          redirect('Games/PingPong/online');
-                        }}
-                        className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRemoveNotification(notification.id);
-                          onDeclineInvite(notification.sender?.username );
-                        }}
-                        className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
-                      >
-                        Decline
-                      </button>
-                    </div>
-                  )}
+                    notification.notification_type === 'game_invite' && !notification.read && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // setWinner(null);
+                            onAcceptInvite(notification.sender?.username);
+                            onMarkAsRead(notification.id);
+                            router.push('/Games/GameBackground');
+                            
+                          }}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveNotification(notification.id);
+                            onDeclineInvite(notification.sender?.username);
+                          }}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    ) || notification.notification_type === 'game_decline' && !notification.read && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMarkAsRead(notification.id);
+                            router.push('/dashboard');
+                            
+                            
+                          }}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
+                        >
+                          Back To Home
+                        </button>
+                        
+                      </div>
+                    )
+                    }
                 </div>
 
                 {/* Unread Indicator */}

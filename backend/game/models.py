@@ -10,7 +10,7 @@ class MatchHistory(models.Model):
         ('completed', 'Completed'),
         ('abandoned', 'Abandoned')
     ]
-    
+
     GAME_TYPE_CHOICES = [
         ('pingpong', 'Ping Pong'),
         ('tictactoe', 'Tic Tac Toe')
@@ -47,7 +47,7 @@ class PlayerStats(models.Model):
         on_delete=models.CASCADE,
         related_name='stats'
     )
-    total_matches = models.IntegerField(default=0)  
+    total_matches = models.IntegerField(default=0)
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     win_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
@@ -58,3 +58,5 @@ class PlayerStats(models.Model):
 
     def __str__(self):
         return f"Stats for {self.user.username}"
+
+# matches for the specific USER, HIS SCORE, 
