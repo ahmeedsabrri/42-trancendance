@@ -30,7 +30,7 @@ const getNotifications = async () => {
 const newConversation = async (user: number) => {
     try {
         const response = await api.post(`chat/new_conversation/${user}`);
-        console.log(response.data);
+        // console.log(response.data);
         return response.data;
     }
     catch (error) {

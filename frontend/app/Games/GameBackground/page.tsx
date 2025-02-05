@@ -6,12 +6,12 @@ import { IMAGES } from "@/public/index";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
+
 const ChooseBackground = () => {
 
-    const { GameBoardColor, setGameBoardColor, getGamePath } = useGameStore();
+    const { GameBoardColor, setGameBoardColor, getGamePath, invited_id } = useGameStore();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [isFirstRender, setIsFirstRender] = useState(true);
-
 
     const handleDivClick = (index: number) => {
       setIsFirstRender(false);
@@ -29,7 +29,15 @@ const ChooseBackground = () => {
     useEffect(() => {
         setGameBoardColor(divClasses[2]);
         setActiveIndex(2);
+        // console.log(invited_id);
     }, []);
+
+    useEffect(() => {
+        if (invited_id) {
+          console.log("Invited ID is available:", invited_id);
+        }
+      }, [invited_id]);
+
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
             <main className="w-full h-full flex justify-center items-center gap-x-3 p-2 relative">

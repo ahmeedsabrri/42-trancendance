@@ -120,10 +120,8 @@ export function NotificationPanel({
                           onClick={(e) => {
                             e.stopPropagation();
                             // setWinner(null);
-                            onAcceptInvite(notification.sender?.username);
                             onMarkAsRead(notification.id);
-                            router.push('/Games/GameBackground');
-                            
+                            onAcceptInvite(notification.sender?.username);                            
                           }}
                           className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
                         >

@@ -32,7 +32,7 @@ interface GameState {
   tournament_match: string | null
   tournament_match_winner:string | null
   TicTacOpponent: TicTacOpponent
-  invited_id: number | null
+  invited_id: string | null
   GameBoardColor: string | null,
 
   setInvitedId: (id: number | null) => void,

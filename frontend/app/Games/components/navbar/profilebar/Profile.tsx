@@ -25,7 +25,10 @@ import useNotificationWebSocket from './components/useNotificationWebSocket';
 import { useGameStore } from '@/app/Games/store/GameStore';
 import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+
+
 const Profile = () => {
+
   const {readyState} = useNotificationWebSocket("wss://localhost/ws/notifications/");
   const { user } = useUserStore();
   const { logout } = AuthActions();
@@ -33,8 +36,9 @@ const Profile = () => {
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setInvitedId, invited_id, setGameMode } = useGameStore();
+  const { setInvitedId, invited_id, setGameMode} = useGameStore();
   const router = useRouter();
+
   const notifAccept = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -46,6 +50,7 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
+
   const notifDecilne = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -57,6 +62,7 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
+
   const notifyErr = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -106,19 +112,21 @@ const Profile = () => {
     });
   };
 
-  const handleAcceptInvite = (username: string) => {
-
+  const handleAcceptInvite = async (username: string) => {
+    
     setGameMode("online");
     setInvitedId(user?.id);
-    
-    handleRequest(username, 'acceptInvite')
-    .then((res) => {
-      console.log(res.data.message);
-      notifAccept(res.data.message);
-    })
-    .catch((err) => {
-      notifyErr(err.response.data.message);
-    });
+  
+    handleRequest(username, "acceptInvite")
+      .then((res) => {
+        notifAccept(res.data.message);
+      })
+      .catch((err) => {
+        notifyErr(err.response.data.message);
+      })
+      .finally(() => {
+        router.push("/Games/GameBackground");
+      });
   };
 
   const handleDeclineInvite = (username: string) => {

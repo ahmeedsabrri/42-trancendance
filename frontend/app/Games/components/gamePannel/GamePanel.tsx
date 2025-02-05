@@ -22,9 +22,7 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
   const content = gameContent[gameType];
 
   useEffect(() => {
-    return (() => {
       resetInvitedId();
-    })
   }, []);
 
   return (

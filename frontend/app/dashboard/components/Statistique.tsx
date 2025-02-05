@@ -32,7 +32,7 @@ const Statistique = () => {
   }, []);
 
   if (!Matches) return null;
-  console.log(Matches);
+  // console.log(Matches);
 
   const updatedData = Matches.map((match: any, index: number) => {
     return {

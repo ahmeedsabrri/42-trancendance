@@ -24,8 +24,7 @@ interface GameState {
 }
 
 const Canvas = () => {
-    const { label, currentState, handleCurrentState, GameBoardColor,  invited_id, resetInvitedId } = useGameStore();
-     
+    const { label, currentState, handleCurrentState, GameBoardColor,  invited_id } = useGameStore();
     const router = useRouter();
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
