@@ -12,9 +12,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
         <p>{`Match: ${label}`}</p>
-        <p>Score: <span className="text-picton_blue/80">{data.score}</span></p>
+        <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
         <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
-        <p>{`Played At: ${data.playedAt}`}</p>
       </div>
     );
   }
@@ -32,14 +31,12 @@ const Statistique = () => {
   }, []);
 
   if (!Matches) return null;
-  // console.log(Matches);
 
   const updatedData = Matches.map((match: any, index: number) => {
     return {
       name: `match ${index + 1}`,
-      score: match.score[0],
+      user_score: match.user_score,
       status: match.status,
-      playedAt: timeHandle(match.played_at),
     };
   });
 
@@ -51,7 +48,7 @@ const Statistique = () => {
       <div className="flex items-center justify-center size-full px-4 rounded-2xl">
         <ResponsiveContainer width="100%" height="70%" className="mr-4">
           <BarChart data={data}>
-            <Bar dataKey="score" fill={`url(#BarGradient)`} barSize={20} radius={[5, 5, 5, 5]} minPointSize={10}/>
+            <Bar dataKey="user_score" fill={`url(#BarGradient)`} barSize={20} radius={[5, 5, 5, 5]} minPointSize={10}/>
             <defs>
               <linearGradient id="BarGradient" x1="0.8" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#A46E9C" stopOpacity={0.5} />
