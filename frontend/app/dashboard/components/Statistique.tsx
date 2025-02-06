@@ -1,29 +1,45 @@
 "use client";
 
-import { BarChart, Bar, ResponsiveContainer, defs, linearGradient, CartesianGrid, XAxis, YAxis, filter, Tooltip } from 'recharts';
-import { useEffect, useState } from 'react';
-import { getMatcheHistory } from '@/app/chat/Tools/apiTools';
-import { timeHandle } from '@/app/chat/Components/utils/utils';
+import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis } from "recharts";
+import { useEffect, useState } from "react";
+import { getMatcheHistory } from "@/app/chat/Tools/apiTools";
+import { timeHandle } from "@/app/chat/Components/utils/utils";
+// import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
-// Custom Tooltip Component
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
-        <p>{`Match: ${label}`}</p>
-        <p>Score: <span className="text-picton_blue/80">{data.score}</span></p>
-        <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
-        <p>{`Played At: ${data.playedAt}`}</p>
-      </div>
-    );
-  }
+// Define Match interface
+interface Match {
+  score: string;
+  status: string;
+  playedAt: string;
+}
 
-  return null;
-};
+// // Define Props for CustomTooltip
+// interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {}
+
+// // Custom Tooltip Component
+// const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+//   if (active && payload && payload.length) {
+//     const data = payload[0].payload as Match;
+//     return (
+//       <div className="custom-tooltip" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", padding: "10px", borderRadius: "15px", color: "rgba(255, 255, 255, 0.7)" }}>
+//         <p>{`Match: ${label}`}</p>
+//         <p>
+//           Score: <span className="text-picton_blue/80">{data.score}</span>
+//         </p>
+//         <p>
+//           Status:
+//           <span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span>
+//         </p>
+//         <p>{`Played At: ${data.playedAt}`}</p>
+//       </div>
+//     );
+//   }
+
+//   return null;
+// };
 
 const Statistique = () => {
-  const [Matches, setMatches] = useState<any>();
+  const [matches, setMatches] = useState<Match[]>([]);
 
   useEffect(() => {
     getMatcheHistory().then((data) => {
@@ -31,17 +47,14 @@ const Statistique = () => {
     });
   }, []);
 
-  if (!Matches) return null;
-  // console.log(Matches);
+  if (!matches.length) return null;
 
-  const updatedData = Matches.map((match: any, index: number) => {
-    return {
-      name: `match ${index + 1}`,
-      score: match.score[0],
-      status: match.status,
-      playedAt: timeHandle(match.played_at),
-    };
-  });
+  const updatedData = matches.map((match: Match, index: number) => ({
+    name: `Match ${index + 1}`,
+    score: match.score[0],
+    status: match.status,
+    playedAt: timeHandle(match.playedAt),
+  }));
 
   const data = updatedData.slice(-10);
 
@@ -51,7 +64,7 @@ const Statistique = () => {
       <div className="flex items-center justify-center size-full px-4 rounded-2xl">
         <ResponsiveContainer width="100%" height="70%" className="mr-4">
           <BarChart data={data}>
-            <Bar dataKey="score" fill={`url(#BarGradient)`} barSize={20} radius={[5, 5, 5, 5]} minPointSize={10}/>
+            <Bar dataKey="score" fill={`url(#BarGradient)`} barSize={20} radius={[5, 5, 5, 5]} minPointSize={10} />
             <defs>
               <linearGradient id="BarGradient" x1="0.8" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#A46E9C" stopOpacity={0.5} />
@@ -65,23 +78,9 @@ const Statistique = () => {
               </filter>
             </defs>
             <CartesianGrid strokeDasharray="1 8" vertical={false} stroke="rgba(255, 255, 255, 0.25)" />
-            <Tooltip
-              content={<CustomTooltip />} // Use the custom tooltip component
-              cursor={{fill: "transparent"}}
-            />
-            <XAxis
-              dataKey="name"
-              interval={0}
-              tick={{ fill: 'rgba(255, 255, 255, 0.25)', fontSize: 12 }}
-              padding={{ right: 10, left: 10 }}
-              filter="url(#shadow)"
-            />
-            <YAxis
-              tick={{ fill: 'rgba(255, 255, 255, 0.25)', fontSize: 12 }}
-              padding={{ top: 50 }}
-              filter="url(#shadow)"
-              dx={-10}
-            />
+            {/* <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} /> */}
+            <XAxis dataKey="name" interval={0} tick={{ fill: "rgba(255, 255, 255, 0.25)", fontSize: 12 }} padding={{ right: 10, left: 10 }} filter="url(#shadow)" />
+            <YAxis tick={{ fill: "rgba(255, 255, 255, 0.25)", fontSize: 12 }} padding={{ top: 50 }} filter="url(#shadow)" dx={-10} />
           </BarChart>
         </ResponsiveContainer>
       </div>

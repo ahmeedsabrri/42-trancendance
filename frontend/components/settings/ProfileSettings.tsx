@@ -58,7 +58,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
     const {handelUpdateUsername} = handelTwoFactor();
     const onSubmit = () => {
       handelUpdateUsername(formData.username, formData.password)
-        .then((res) => {
+        .then(() => {
           console.log("Logged in successfully");
           tostNotify('Profile updated successfully');
         })

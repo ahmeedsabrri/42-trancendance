@@ -1,9 +1,8 @@
 import { useChatStore, Conversation } from "@/app/store/chatStore";
-import { User, useUser } from "@/app/context/userContext";
 import { timeHandle, findTargetUser } from "../utils/utils";
-import Avatar from "@/components/navbar/profilebar/Avatar";
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import React, { memo } from "react";
-import { useUserStore } from "@/app/store/store";
+import { UserData, useUserStore } from "@/app/store/store";
 
 
 interface ConversationCompProps {
@@ -16,7 +15,7 @@ const ConversationComp: React.FC<ConversationCompProps> = memo(({ conversation})
     const user_id = useUserStore().user?.id;;
     const conversationSelected_id = useChatStore(state => state.conversationSelected.id);
 
-    const userTarget: User = findTargetUser(conversation, user_id || 0);
+    const userTarget: UserData = findTargetUser(conversation, user_id || 0);
     const selectOptions = conversationSelected_id === conversation.id ? "bg-gradient-to-r from-white/30" : "";
 
     return (
@@ -38,5 +37,5 @@ const ConversationComp: React.FC<ConversationCompProps> = memo(({ conversation})
         </div>
     );
 });
-
+ConversationComp.displayName = "ConversationComp";
 export default ConversationComp;

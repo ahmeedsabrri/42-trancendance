@@ -1,7 +1,11 @@
 import { UserPlus2Icon } from "lucide-react";
-import { ProfileHeaderProps } from "./ProfileHeader";
 
-export function AddFriends( {addFriend}:ProfileHeaderProps) {
+export interface ProfileHeaderProp {
+  addFriend: () => void;
+}
+
+
+export function AddFriends( {addFriend}:ProfileHeaderProp) {
   
     return (
         <div className="absolute bottom-0 right-8 flex gap-2">

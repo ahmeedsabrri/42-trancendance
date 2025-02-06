@@ -2,29 +2,18 @@
 
 import Link from "next/link"
 import CustomButton from "../../../components/utils/CutsomButton"
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStateStore } from '../../../store/CanvasStore';
 import { useGameStore } from '../../../store/GameStore';
 import WaitingForPlayer from "../waitingPlayer";
 import * as canvas from './gameRenderer';
 import { useParams, useRouter } from 'next/navigation';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
-
-interface GameState {
-    game: {
-        BALL: any;
-        PLAYERS: {
-            PLAYER1: any;
-            PLAYER2: any;
-        };
-        WINNER?: any,
-    },
-    PLAYERS: any,
-    gameStatus: any,
-}
+import useWebSocket from 'react-use-websocket';
+import { GameState } from "./Gameinterface";
 
 const Canvas = () => {
-    const { label, currentState, handleCurrentState, GameBoardColor,  invited_id } = useGameStore();
+
+    const { label, currentState, handleCurrentState, GameBoardColor, invited_id } = useGameStore();
     const router = useRouter();
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,9 +27,8 @@ const Canvas = () => {
     const {
         sendJsonMessage,
         lastJsonMessage,
-        readyState,
     } = useWebSocket<GameState>(socketUrl, {
-        shouldReconnect: (closeEvent) => false,
+        shouldReconnect: () => false,
         onError: (event) => console.log('WebSocket error:', event),
         onOpen: () => console.log('WebSocket connected'),
         onClose: () => console.log('WebSocket disconnected'),
@@ -52,6 +40,7 @@ const Canvas = () => {
             handleCurrentState();
             sendJsonMessage({ "Action": "StartGame" });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [countdown]);
 
     useEffect(() => {
@@ -80,7 +69,7 @@ const Canvas = () => {
                 if (WINNER)
                     setWinner(WINNER);
             }
-        }
+        }// eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastJsonMessage, mode, setGameStatus, updateBall, updatePaddles, setWinner]);
 
     useEffect(() => {
@@ -123,7 +112,7 @@ const Canvas = () => {
             resetCountdown();
             resetInvitedCountdown();
             resetPlayersInfo();
-        };
+        };  // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sendJsonMessage, setKeyPressed]);
 
     useEffect(() => {
@@ -133,7 +122,6 @@ const Canvas = () => {
             const gameState = currentStateRef.current === "PAUSE" ? "PAUSE" : "PLAY";
             sendJsonMessage({ "Action": gameState });
         }
-        console.log(mode);
     }, [currentState, mode, sendJsonMessage]);
 
     const GameControls = mode === "local" ? (
@@ -158,10 +146,9 @@ const Canvas = () => {
             router.push('/Games');
         }
     }, [game_status, invited_id, invitedCountdown, router]);
-    
+
     if (mode === "online") {
-        if (game_status === "waiting" && invited_id && invitedCountdown > 0)
-        {
+        if (game_status === "waiting" && invited_id && invitedCountdown > 0) {
             console.log("waiting for fro", invited_id, mode);
             return <WaitingForPlayer />
         }

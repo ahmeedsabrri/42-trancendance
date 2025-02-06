@@ -4,7 +4,7 @@ import { UserData, useUserStore} from '@/app/store/store';
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import {AddFriends} from './addFriendsComponent';
 import { IsaFriend } from './isaFriendComponent';
-import { Shield, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useEffect } from 'react';
 export interface ProfileHeaderProps {
   userProfile: UserData;
@@ -67,8 +67,8 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
             </button>
           </div> }
       </div>}
-      {userProfile?.connection_type === 'accepted' &&<IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
-      {(userProfile?.connection_type === 'not_connected' || userProfile?.connection_type == 'rejected')  && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
+      {userProfile?.connection_type === 'accepted' && <IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
+      {(userProfile?.connection_type === 'not_connected' || userProfile?.connection_type == 'rejected')  && <AddFriends addFriend={addFriend}/>}
     </div>
   );
 }

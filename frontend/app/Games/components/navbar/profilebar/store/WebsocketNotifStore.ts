@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from 'axios';
-import useWebSocket from 'react-use-websocket';
 import type { Notificationdata } from '../types/notification';
 // Base API setup
 const api = axios.create({
@@ -23,9 +22,9 @@ interface NotificationStore {
 }
 
 
-const useNotificationStore = create<NotificationStore>((set, get) => ({
+const useNotificationStore = create<NotificationStore>((set) => ({
   notifications: [],
-  unreadCount: 0, 
+  unreadCount: 0,
   isLoading: false,
   error: null,
   onlineUsers: {},
@@ -37,12 +36,15 @@ const useNotificationStore = create<NotificationStore>((set, get) => ({
       const response = await api.get('/users/me/notif/');
       const notifications = response.data;
 
-      // Calculate unread count
-      const unreadCount = notifications.filter((n) => !n.read).length;
+      const unreadCount = notifications.filter((n: Notificationdata) => !n.read).length;
 
       set({ notifications, unreadCount, isLoading: false });
-    } catch (error) {
-      set({ error: error.response?.data?.message || 'Failed to fetch notifications', isLoading: false });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        set({ error: error.response?.data?.message || 'Failed to fetch notifications', isLoading: false });
+      } else {
+        set({ error: 'An unknown error occurred', isLoading: false });
+      }
       console.error('Failed to fetch notifications:', error);
     }
   },
@@ -59,10 +61,18 @@ const useNotificationStore = create<NotificationStore>((set, get) => ({
         ),
         unreadCount: state.unreadCount - 1,
       }));
-    } catch (error) {
-      set({ error: error.data.message });
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        set({ error: error.response?.data?.message ?? 'Failed to mark notification as read' });
+      } else {
+        set({ error: 'An unknown error occurred' });
+      }
       console.error('Failed to mark notification as read:', error);
     }
+    // } catch (error: any) {
+    //   set({ error: error.data.message });
+    //   console.error('Failed to mark notification as read:', error);
+    // }
   },
   addNotification: (newNotification) =>
     set((state) => ({
@@ -80,10 +90,14 @@ const useNotificationStore = create<NotificationStore>((set, get) => ({
           ? state.unreadCount - 1
           : state.unreadCount,
       }));
-    } catch (error) {
-      set({ error: error.response?.data?.message || 'Failed to remove notification' });
-      console.error('Failed to remove notification:', error);
-    }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        set({ error: error.response?.data?.message ?? 'Failed to mark notification as read' });
+      } else {
+        set({ error: 'An unknown error occurred' });
+      }
+      console.error('Failed to mark notification as read:', error);
+    }    
   },
 
   // Clear error state

@@ -90,4 +90,10 @@ const handleRequestGames = async (username:string, type:string) => {
     return response;
 }
 
+// const getUsers = async () => {
+//     const response = await api.get(`users/`);
+//     console.log("users: ", response.data);
+//     return response.data;
+// }
+
 export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames, getMatcheHistory };

@@ -15,7 +15,9 @@ import { UserFriendsActions } from '../utils/actions';
 import { Bounce, toast } from 'react-toastify';
 
 // Mock data
-const mockUser: UserData = {
+
+
+const mockUser: any = {
   id: 5,
   username: 'john_doe',
   email: '',
@@ -62,10 +64,10 @@ const mockGames: GameHistory[] = [
 
 export default function Profile() {
   const { fetchFriend, user, viewedProfile, loading } = useUserStore();
-  const { Userfriends, fetchUserFriends, fetchOwnFriends, UserOwnfriends } = useUserFriendsStore();
+  const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
-  const [profileState, setProfileState] = useState<UserData | null>(null);
+  const [profileState, setProfileState] = useState<UserData| null>(null);
 
   const notifyAdd = (message: string) =>
     toast(message, {
@@ -138,7 +140,8 @@ export default function Profile() {
     const profileToShow = username !== user?.username ? viewedProfile : user;
     setProfileState(profileToShow);
   }, [user, viewedProfile, username]);
-
+  if (!user)
+    return ;
   const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend') => {
     handleRequest(username as string, action)
       .then((response) => {
@@ -163,7 +166,7 @@ export default function Profile() {
             break;
           case 'send':
             notifyAdd(response.data.message);
-            setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'pending', sender: user.username } : null);
+            setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'pending', sender: user.username  } : null);
             break;
           case 'unfriend':
             notifyCancel(response.data.message);

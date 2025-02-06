@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGameStateStore } from "../../store/CanvasStore";
 import WaitingDots from "./WaitingDots";
-import Avatar from "@/components/navbar/profilebar/Avatar";
+import Avatar from "../../components/navbar/profilebar/Avatar";
 import { useGameStore } from "../../store/GameStore";
 
 const WaitingForPlayer = () => {
@@ -24,7 +24,7 @@ const WaitingForPlayer = () => {
                 setinvitedCountdown(invitedCountdown - 1);
             }, 1000);
             return () => clearInterval(timer);
-        }
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [game_status, countdown, invitedCountdown, setCountdown]);
 
 

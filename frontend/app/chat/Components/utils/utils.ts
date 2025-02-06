@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
-import { Conversation } from '@/app/stores/chatStore';
-import { User } from '@/app/context/userContext';
+import { Conversation } from '@/app/store/chatStore';
+import { UserData } from '@/app/store/store';
+import { UserFriendsData } from '@/app/store/UserFriendsStrore';
+
 
 const secretKey = "f2a55ff22864a0ea4791baed9c1607fa07dcbdcd70dee5e117e35ede141a193f";
 
@@ -16,16 +18,16 @@ export function timeHandle(time: string) {
     return `${hours}:${minutes} PM`;
 }
 
-export function filterFriends(friends: User[] | null, search: string) {
+export function filterFriends(friends: UserFriendsData[] | null, search: string) {
     if (!friends)
         return [];
-    return friends.filter((friend: User) => friend.username.toLowerCase().includes(search));
+    return friends.filter((friend: UserFriendsData) => friend.username.toLowerCase().includes(search));
 }
 
-export function sortFriendsByName(friends: User[] | null) {
+export function sortFriendsByName(friends: UserFriendsData[] | null) {
     if (!friends)
         return [];
-    return friends.sort((a: User, b: User) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+    return friends.sort((a: UserFriendsData, b: UserFriendsData) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
 }
 
 const useDelayedLoading = (isLoading: boolean, delay: number) => {
@@ -57,7 +59,8 @@ export function pushConversationIdToUrl(conversationId: number) {
     const existingId = params.get('conversationId');
     if (existingId !== encryptNumber(conversationId))
     {
-        existingId && params.delete('conversationId');
+        if (existingId)
+            params.delete('conversationId');
         params.set('conversationId', encryptNumber(conversationId));
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.pushState({}, '', newUrl);
@@ -89,7 +92,7 @@ export function findConversationById(conversations: Conversation[], id: number) 
 }
 
 export function findTargetUser(conversation: Conversation, user_id: number) {
-    const target: User = conversation.user1?.id === user_id ? conversation.user2 : conversation.user1;
+    const target: UserData = conversation.user1?.id === user_id ? conversation.user2 : conversation.user1;
     return target;
 }
 

@@ -3,9 +3,6 @@ import React from 'react';
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/router';
-import { redirect, useParams } from 'next/navigation';
-
 
 const api = axios.create({
 
@@ -16,9 +13,9 @@ const api = axios.create({
 
 export default function VerifyEmail({
     params,
-  }: {
+}: {
     params: Promise<{ uid: string; token: string }>;
-  }) {
+}) {
     // Unwrap the params Promise using React.use()
     const { uid, token } = React.use(params);
 
@@ -30,6 +27,7 @@ export default function VerifyEmail({
             try {
                 console.log('uid', uid);
                 console.log('token', token);
+
                 // Send a POST request to the backend to verify the email
                 const response = await api.post('https://localhost/api/auth/verify-email/', {
                     uid,
@@ -37,12 +35,15 @@ export default function VerifyEmail({
                 });
 
                 window.location.href = '/auth'; // Redirect to the login page
-                // redirect('/auth');
                 setMessage(response.data.message);
-            } catch (err: any) {
-                // Display the error message
-                console.log(err.error);
-                setError(err.error || 'An error occurred during verification.');
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    console.log(err.message);
+                    setError(err.message || 'An error occurred during verification.');
+                } else {
+                    console.log('An unknown error occurred');
+                    setError('An unknown error occurred during verification.');
+                }
             } finally {
                 setIsLoading(false); // Stop loading
             }
@@ -54,15 +55,15 @@ export default function VerifyEmail({
     }, [uid, token]);
 
     return (
-            <div className="flex flex-col items-center justify-center space-y-4 w-full h-screen">
-        <h1 className="text-2xl font-bold mb-4 text-white/70">Email Verification</h1>
-        {isLoading ? (
-            <p className="text-gray-600">Loading...</p>
-        ) : error ? (
-            <p className="text-red-500">{error}</p>
-        ) : (
-            <p className="text-green-600">{message}</p>
-        )}
-            </div>
+        <div className="flex flex-col items-center justify-center space-y-4 w-full h-screen">
+            <h1 className="text-2xl font-bold mb-4 text-white/70">Email Verification</h1>
+            {isLoading ? (
+                <p className="text-gray-600">Loading...</p>
+            ) : error ? (
+                <p className="text-red-500">{error}</p>
+            ) : (
+                <p className="text-green-600">{message}</p>
+            )}
+        </div>
     );
 }

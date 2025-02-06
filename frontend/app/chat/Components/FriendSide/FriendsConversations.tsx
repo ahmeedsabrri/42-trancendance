@@ -17,9 +17,6 @@ const FriendConversations = () => {
     const {setConversationSelected} = useChatStore();
     const user_id = useUserStore().user?.id;
 
-    // const params = new URLSearchParams(window.location.search);
-    // const QueryConversationid = params.get('conversationId');
-
     const {data: conversationFetched,  isLoading, isError} = useQuery({
         queryKey: ["conversations"],
         queryFn: () => fetchConversations(),
@@ -36,19 +33,10 @@ const FriendConversations = () => {
                 if (conversation)
                     setConversationSelected(conversation);
             }
-            // setConversationId(QueryConversationid);
-        }
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationFetched, user_id]);
 
     const isReady = useDelayedLoading(isLoading, 500);
-
-    // useEffect(() => {
-    //     if (QueryConversationid) {
-    //         const conversation: Conversation | null = findConversationById(conversationFetched || [], parseInt(decryptNumber(QueryConversationid)));
-    //         if (conversation)
-    //             setConversationSelected(conversation);
-    //     }
-    // }, [conversationFetched, user_id, QueryConversationid]);
 
     return (
         <div className="w-full h-full flex items-center justify-start flex-col overflow-y-scroll snap-y snap-mandatory scrollbar scrollbar-thumb-black/30 scrollbar-track-transparent">

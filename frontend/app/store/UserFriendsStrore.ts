@@ -18,6 +18,7 @@ export interface UserFriendsData {
     status: string;
     level: number;
 }
+
 interface UserFriendsStore {
     Userfriends: UserFriendsData[] | null;
     UserOwnfriends: UserFriendsData[] | null;

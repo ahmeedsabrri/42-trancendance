@@ -6,18 +6,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import SignUpForm from './components/signup'
 import SignInForm from './components/signin'
 import Oauthbutton from './components/Oauthbutton'
-import {redirect, useSearchParams } from 'next/navigation'
-import OTP from './otp/page'
+import { useSearchParams } from 'next/navigation'
+import OTP from './otp/OTP'
 import { AuthActions } from './utils'
-import { useRouter } from 'next/router'
 import { LuArrowRight } from "react-icons/lu";
 import { Bounce, toast } from 'react-toastify'
-export default function AuthPage() {
+
+const AuthPage = () => {
+
   const [isSignUp, setIsSignUp] = useState(false)
   const [otpRequired, setOtpRequired] = useState(false);
 
   const searchParams = useSearchParams();
-  const notifToast = (message:string) => toast(message,{
+  const notifToast = (message:string) => toast(message, {
     position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,
@@ -28,6 +29,7 @@ export default function AuthPage() {
     theme: "dark",
     transition: Bounce,
   });
+
   useEffect(() => {
     const otpRequiredParam = searchParams.get('otp_code');
     if (otpRequiredParam === 'requried') {
@@ -35,7 +37,9 @@ export default function AuthPage() {
       console.log('OTP is required');
     }
   }, [searchParams]);
+
   const {loginWithOtp } = AuthActions();
+  
   const onOtpSubmit = (otp_code: string) => {
     loginWithOtp('', '', otp_code)
     .then((res) => {
@@ -50,6 +54,7 @@ export default function AuthPage() {
   const toggleForm = () => {
     setIsSignUp(!isSignUp)
   }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-7xl h-auto md:h-[700px] bg-white/10 rounded-3xl rounded-tl-[8rem] rounded-br-[8rem] overflow-hidden  backdrop-blur-md shadow-2xl flex flex-col md:flex-row">
@@ -101,7 +106,4 @@ export default function AuthPage() {
   )
 }
 
-
-
-
-
+export default AuthPage;

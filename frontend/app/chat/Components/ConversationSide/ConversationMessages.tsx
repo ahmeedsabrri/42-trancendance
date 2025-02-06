@@ -56,7 +56,7 @@ const ConversationMessages = () => {
                     isReady ? <MessagesSkeleton/> : isError ? <h1 className="text-xl text-text_message_color">Error</h1> :
                         Array.isArray(fetchedMessages) ? fetchedMessages.map((message: Message) => {
                             return <MessageComp message={message} key={message.id} />
-                        }) : <h1 className="text-xl text-text_message_color">Let's get Started</h1>
+                        }) : <h1 className="text-xl text-text_message_color">Lets get Started</h1>
                 }
             </ul>
         </div>

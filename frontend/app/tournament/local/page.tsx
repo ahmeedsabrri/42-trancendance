@@ -53,7 +53,7 @@ const Tournament = () => {
             setIsTournament(false)
             setTournamentMatch(null)
             setIsFinished(true)
-            setWinner('')
+            setWinner(null)
         }
     }, [isStartClickable, tournament_players, setIsTournament, setWinner]);
 

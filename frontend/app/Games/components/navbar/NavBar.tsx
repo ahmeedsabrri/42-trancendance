@@ -1,7 +1,6 @@
 'use client'
 
 import SearchBar from "./SeachBar";
-import SearchList from "./SearchList";
 import Profile from "./profilebar/Profile";
 
 const NavBar = () => {
