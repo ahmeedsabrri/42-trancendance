@@ -17,6 +17,8 @@ type GameImages = {
     pongTable: string;
     standardBackground: string;
     TicTacToe: string;
+    X: string;
+    O: string;
 }
 
 type ImagePaths = GameIcons & GameImages;
@@ -40,6 +42,8 @@ export const IMAGES: ImagePaths = {
     pongTable: '/game/images/pong_table.png',
     standardBackground: '/game/images/StandardBackground.png',
     TicTacToe: '/game/images/tictactoe.png',
+    X: '/game/images/X.png',
+    O: '/game/images/O.png',
 } as const;
 
 export const getImageUrl = (key: keyof typeof IMAGES): string => {

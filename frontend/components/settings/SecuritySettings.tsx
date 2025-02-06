@@ -2,7 +2,6 @@
 
 import { UserData } from "@/app/store/store";
 import React, { useState } from "react";
-import { useEffect } from "react";
 import { PasswordChangeForm } from "./PasswordChangeForm";
 import { Shield, Key } from "lucide-react";
 import QRCode from "react-qr-code";

@@ -99,11 +99,11 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
         try:
             await self.accept()
             self.user = self.scope["user"]
-            self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id")
+            self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id", None)
 
-            if (self.invite_id):
-                self.invite_id = int(self.invite_id)
-                print(self.invite_id)
+            # if (self.invite_id):
+                # self.invite_id = int(self.invite_id)
+            print(self.invite_id)
 
             self.game_engine = OnlineGameEngine()
 

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Image from "next/image";
 import CustomButton from '../../components/utils/CutsomButton';
 import { IMAGES } from "@/public/index";
@@ -16,12 +16,12 @@ import { useGameStore } from '../../store/GameStore';
 const Game = () => {
 
     const mode = useParams().mode;
-    const {invited_id, setInvitedId } = useGameStore();
+
     const { winner, game_status, countdown, setWinner } = useGameStateStore();
     const winnerRef = useRef(winner.fullname);
     const avatarRef = useRef(winner.avatar);
 
-    const {tournament_match, is_tournament, tournament_players, setTournamentPlayers, setTournamentMatch, handleCurrentState} = useGameStore()
+    const {tournament_match, is_tournament, tournament_players, setTournamentPlayers, handleCurrentState} = useGameStore()
 
     function setWinnerInTournament(player_winner:string|null)
     {
@@ -32,10 +32,6 @@ const Game = () => {
         else if (tournament_match === "last match")
             player_winner === "player1" ? setTournamentPlayers(tournament_players[4], 6) : setTournamentPlayers(tournament_players[5], 6)
     }
-
-    // useEffect(() => {
-    //     console.log("invited_id can", invited_id);
-    // }, [setInvitedId]);
 
     useEffect(() => {
         return (() => {

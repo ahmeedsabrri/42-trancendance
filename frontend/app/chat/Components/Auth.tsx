@@ -11,7 +11,7 @@ const Auth = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        for (let [key, value] of formData.entries()) {
+        for (const [key, value] of formData.entries()) {
             console.log({key, value});
         }
         const FormUser = {

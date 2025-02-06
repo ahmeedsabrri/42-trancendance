@@ -29,7 +29,6 @@ const ChooseBackground = () => {
     useEffect(() => {
         setGameBoardColor(divClasses[2]);
         setActiveIndex(2);
-        // console.log(invited_id);
     }, []);
 
     useEffect(() => {
