@@ -6,6 +6,7 @@ import CustomButton from "../utils/CutsomButton";
 import ProfileScroller from "../utils/ProfileScroller";
 import { useGameStore } from "../../store/GameStore";
 import { useUserStore } from "@/app/store/store";
+import { useEffect } from "react";
 
 interface GamePanelProps {
   gameType: 'pingpong' | 'tictactoe';
@@ -15,10 +16,14 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
 
   const { currentGame, isReversed, showContent, gameContent, handleGameSwitch, handleCurrentState, label } = useGameStore();
   const { user } = useUserStore();
-  const { resetTournamentPlayer, setTournamentMatch, setIsTournament } = useGameStore()
+  const { resetTournamentPlayer, setTournamentMatch, setIsTournament, resetInvitedId} = useGameStore()
 
   const isActive = gameType === 'pingpong' ? !isReversed : isReversed;
   const content = gameContent[gameType];
+
+  useEffect(() => {
+      resetInvitedId();
+  }, []);
 
   return (
     <div
@@ -37,9 +42,9 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
         priority
       />
       {isActive && (
-        <div className={`w-full h-full flex flex-col justify-between items-center transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'
+        <div className={`w-full h-full flex flex-col justify-between p-14 items-center transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'
           }`}>
-          <div className="w-full h-full flex justify-between items-start px-[80px] py-[40px]">
+          <div className="w-full h-full flex justify-between items-start ">
             <div className="text-white">
               <h1 className="text-8xl font-bold mb-6">
                 {content.title}
@@ -52,11 +57,10 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
               <h1>Let&apos;s <span className="text-blue-200">Go</span> {user?.first_name} {user?.last_name}</h1>
             </div>
           </div>
-          <div className="w-full h-full flex justify-between items-end px-[80px] py-[80px]">
+          <div className="w-full h-full flex justify-between items-end">
             <div className="flex justify-center items-center gap-x-5">
               <Link href={content.gameLink}>
                 <CustomButton
-                  
                   label="START"
                   onClick={() => { ((label === "PAUSE" && handleCurrentState()), setIsTournament(false), setTournamentMatch(null)) }}
                   className="text-white text-4xl font-bold bg-gray-800 bg-opacity-30 backdrop-blur-xl px-16 py-5 hover:bg-opacity-10 rounded-3xl border border-white/10"
@@ -66,7 +70,7 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
                 currentGame === "pingpong" &&
                 <Link href="/tournament/local">
                   <CustomButton
-                    onClick={()=> resetTournamentPlayer()}
+                    onClick={() => resetTournamentPlayer()}
                     label="TOURNAMENT"
                     className="text-white text-4xl font-bold bg-gray-800 bg-opacity-30 backdrop-blur-xl px-8 py-5 hover:bg-opacity-10 rounded-3xl border border-white/10"
                   />

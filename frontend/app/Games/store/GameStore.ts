@@ -9,6 +9,12 @@ interface GameContent {
   tournament: string
 }
 
+interface TicTacOpponent{
+  isFound: boolean,
+  username: string | null,
+  avatar: string | null
+}
+
 interface GameState {
   currentGame: 'pingpong' | 'tictactoe'
   label: 'PLAY' | 'PAUSE'
@@ -25,8 +31,14 @@ interface GameState {
   tournament_players: Array<string | null>
   tournament_match: string | null
   tournament_match_winner:string | null
-  invited_id: number | null
+  TicTacOpponent: TicTacOpponent
+  invited_id: string | null
+  inviter_id: string | null
   GameBoardColor: string | null,
+
+  setInvitedId: (id: string | null) => void,
+  setInviterId: (id: string | null) => void,
+  resetInvitedId: () => void,
   switchGame: () => void
   setGameMode: (mode: 'local' | 'online') => void
   toggleDots: () => void
@@ -40,13 +52,12 @@ interface GameState {
   setTournamentMatch: (match:string|null) => void,
   resetTournamentPlayer: () => void,
   setGameBoardColor: (Color: string) => void,
-  setInvitedId: (id: number | null) => void,
-  resetInvitedId: () => void,
+  setTicTacOpponent: (flag:boolean, opponentName: string | null, opponentAvatar: string | null) => void
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
-
   invited_id: null,
+  inviter_id: null,
   currentGame: 'pingpong',
   label: 'PLAY',
   currentState: 'PAUSE',
@@ -75,6 +86,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   tournament_match: null,
   tournament_match_winner: null,
+  TicTacOpponent: { isFound: false ,username: null, avatar: null },
+
   switchGame: () => set((state) => ({
     currentGame: state.currentGame === 'pingpong' ? 'tictactoe' : 'pingpong',
   })),
@@ -119,10 +132,25 @@ export const useGameStore = create<GameState>((set, get) => ({
   setGameBoardColor: (color) => {
     set({GameBoardColor: color})
   },
-  setInvitedId: (id) => {
-    set({invited_id: id})
-  },
-  resetInvitedId: () => {
-    set({invited_id: null})
-  }
+  setTicTacOpponent: (flag:boolean ,opponentUsername: null | string, opponentAvatar: null | string) => set({TicTacOpponent: {
+          isFound: flag,
+          username: opponentUsername,
+          avatar: opponentAvatar
+        }
+      }
+    ),
+    setInvitedId: (id) => {
+      set({invited_id: id})
+    },
+    setInviterId: (id) => {
+      set({inviter_id: id})
+    },
+    resetInvitedId: () => {
+      set({invited_id: null})
+    },
+    resetInviterId: () => {
+      set({inviter_id: null})
+    }
+    
+
 }))

@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import SubmitName from './SubmitName/SubmitName'
 import Player from './Player/Player'
 import Image from 'next/image'
 import { IMAGES } from '@/public/index'
@@ -12,7 +11,7 @@ import CustomButton from '@/app/Games/components/utils/CutsomButton'
 
 const Tournament = () => {
     const router = useRouter();
-    const { is_tournament, setIsTournament, tournament_match, setTournamentMatch, resetTournamentPlayer, tournament_players } = useGameStore();
+    const { setIsTournament, tournament_match, setTournamentMatch, tournament_players } = useGameStore();
     const { setWinner } = useGameStateStore();
     const [isStartClickable, setStartClick] = useState<boolean>(false);
     const [isFinished, setIsFinished] = useState<boolean>(false);

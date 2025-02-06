@@ -41,6 +41,7 @@ interface Ball {
 
 interface GameState {
   countdown: number;
+  invitedCountdown: number;
   game_status: string | null,
   player1info: {
     avatar: string,
@@ -53,6 +54,7 @@ interface GameState {
   winner: {
     fullname: string,
     avatar: string,
+    reason: string,
   },
   player1: Player
   player2: Player
@@ -73,10 +75,13 @@ interface GameState {
   setCountdown: (value: number) => void;
   resetCountdown: () => void;
   resetPlayersInfo: () => void;
+  setinvitedCountdown: (value: number) => void,
+  resetInvitedCountdown: () => void,
 }
 
-export const useGameStateStore = create<GameState>((set, get) => ({
+export const useGameStateStore = create<GameState>((set) => ({
   countdown: 3,
+  invitedCountdown: 30,
   game_status: "waiting",
   player1info: {
     avatar: "",
@@ -89,6 +94,7 @@ export const useGameStateStore = create<GameState>((set, get) => ({
   winner: {
     fullname: "",
     avatar: "",
+    reason: "",
   },
   player1: {
     fullname: "",
@@ -172,7 +178,7 @@ export const useGameStateStore = create<GameState>((set, get) => ({
           },
         }
     }),
-    setWinner: (winner: any) => set({ winner: { fullname: winner.FULL_NAME, avatar: winner.avatar,}}),
+    setWinner: (winner: any) => set({ winner: { fullname: winner.FULL_NAME, avatar: winner.avatar, reason: winner.reason}}),
     setGameStatus: (game_status: string | null) => set({game_status: game_status}),
     setPlayer1info: (player1info) => set((state) => {
       return {
@@ -193,7 +199,9 @@ export const useGameStateStore = create<GameState>((set, get) => ({
       }
     }),
     setCountdown: (value) => set({ countdown: value }),
+    setinvitedCountdown: (value) => set({ invitedCountdown: value }),
     resetCountdown: () => set({ countdown: 3 }),
+    resetInvitedCountdown: () => set({ invitedCountdown: 30 }),
     resetPlayersInfo: () => {
       set({player1info: {avatar: "", fullname: ""}});
       set({player2info: {avatar: "", fullname: ""}});

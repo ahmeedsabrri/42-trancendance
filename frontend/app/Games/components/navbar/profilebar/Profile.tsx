@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import ProfileInfo from './ProfileInfo';
@@ -13,16 +14,21 @@ import { AuthActions } from '@/app/auth/utils';
 import { useUserStore } from '@/app/store/store';
 import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { CircleChevronDown } from 'lucide-react';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
 import { Bounce, toast } from 'react-toastify';
 import { UserFriendsActions } from '@/app/profile/utils/actions';
 import useWebSocket from 'react-use-websocket';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
+import { useGameStore } from '@/app/Games/store/GameStore';
+import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
 
 const Profile = () => {
+
   const {readyState} = useNotificationWebSocket("wss://localhost/ws/notifications/");
   const { user } = useUserStore();
   const { logout } = AuthActions();
@@ -30,6 +36,8 @@ const Profile = () => {
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { setInvitedId, inviter_id, setGameMode} = useGameStore();
+  const router = useRouter();
 
   const notifAccept = (message:string) => toast(message,{
     position: "bottom-right",
@@ -42,6 +50,7 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
+
   const notifDecilne = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -53,6 +62,7 @@ const Profile = () => {
     theme: "dark",
     transition: Bounce,
   });
+
   const notifyErr = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -78,6 +88,7 @@ const Profile = () => {
   // Handle accepting a friend request
   const handleAcceptFriend = (username: string) => {
     console.log(`Accepted friend request from user ${username}`);
+    
     handleRequest(username, 'accept')
     .then((res) => {
       console.log(res.data.message);
@@ -101,16 +112,20 @@ const Profile = () => {
     });
   };
 
-  const handleAcceptInvite = (username: string) => {
-    console.log(`Accepted Invite request from user ${username}`);
-    handleRequest(username, 'acceptInvite')
+  const handleAcceptInvite = async (username: string) => {
+    
+    setGameMode("online");
+    setInvitedId(`${user?.id}-${inviter_id}`);
+    handleRequest(username, "acceptInvite")
     .then((res) => {
-      console.log(res.data.message);
-      notifAccept(res.data.message);
-    })
-    .catch((err) => {
-      notifyErr(err.response.data.message);
-    });
+        notifAccept(res.data.message);
+      })
+      .catch((err) => {
+        notifyErr(err.response.data.message);
+      })
+      .finally(() => {
+        router.push("/Games/GameBackground");
+      });
   };
 
   const handleDeclineInvite = (username: string) => {
@@ -165,23 +180,23 @@ const Profile = () => {
         </div>
         <div className="px-[25px] py-[8px] flex items-center justify-between gap-x-[20px] rounded-full border border-white/10 bg-gray-500 bg-opacity-30 backdrop-blur-xl ">
           <div className="w-4 h-4 rounded-2xl">
-            <DropdownMenu >
+            <DropdownMenu>
               <DropdownMenuTrigger
                 className="size-full gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex justify-between"
                 onClick={handlePanelOpen}
               >
                 <CircleChevronDown className="size-full text-white transition-transform group-hover:scale-110" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-opacity-30 bg-black bg-opacity-15 backdrop-blur-md rounded-lg border border-white/10 absolute top-5 -left-10">
-                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75 text-white hover:bg-black/30 rounded-lg font-bold text-md cursor-pointer">
+              <DropdownMenuContent className="px-[20px] py-[8px] flex flex-col items-center justify-between bg-opacity-30 :bg-black/50 backdrop-blur-md rounded-lg border border-white/10 my-2">
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
                   <Link href={`/profile/${user?.username}`}>Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75 text-white hover:bg-black/30 rounded-lg font-bold text-md cursor-pointer">
+                <DropdownMenuItem className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 text-white hover:bg-black/30 rounded-lg font-bold text-md">
                   <Link href="/dashboard/setting"
                   >Setting</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="font-bold text-md text-red-500/60 hover:text-red/80 flex items-center gap-2 px-4 py-2 transition ease-in-out delay-75  hover:bg-red-500/30 rounded-lg cursor-pointer"
+                  className="font-bold text-md text-red-500/60 hover:text-red/80 flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150  hover:bg-red-500/30 rounded-lg"
                   onClick={handleLogout}
                 >
                   Logout

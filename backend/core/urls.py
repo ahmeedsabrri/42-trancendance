@@ -22,8 +22,9 @@ urlpatterns = [
     path('api/', include('authentication.urls')),
     path('api/', include('users.urls')),
     # path('api/', include('chat.urls')),
-    path('chat/', include('chat.urls')),
+    path('api/', include('chat.urls')),
     path('verification/', include('verify_email.urls')),
+    path('api/', include('TicTacToe.urls')),
 
     # path('game/', include("game.urls")),
 ]

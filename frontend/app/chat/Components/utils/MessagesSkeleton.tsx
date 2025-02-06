@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 
 function SkeletonItem( {msgPosition = 'justify-end', h = "h-3", w = "w-fit", array = 1} ) {
 
-    let adaptiveWidth = 100 + (array * Math.random());
+    const adaptiveWidth = 100 + (array * Math.random());
     return (
         <div className='size-full flex items-center justify-center'>
             <div className={`w-full h-fit flex ${msgPosition} items-end gap-2 transition-all`}>

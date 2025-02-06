@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import { FriendData } from '../profile/types';
 
 export const api = axios.create({
     baseURL: 'https://localhost/api',

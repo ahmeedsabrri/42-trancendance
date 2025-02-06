@@ -32,7 +32,7 @@ application = ProtocolTypeRouter({
                 re_path(r'ws/notifications/$', NotificationConsumer.as_asgi()),
                 re_path(r'ws/chat/$', ChatConsumer.as_asgi()),
                 re_path(r"ws/game/localGame/$", PongCosumers.LocalGameConsumer.as_asgi()),
-                re_path(r"ws/game/onlineGame/(?P<invite_id>\d+)?/?$", PongCosumers.OnlineGameConsumer.as_asgi()),
+                re_path(r"ws/game/onlineGame/(?P<invite_id>[\w-]*)/?$", PongCosumers.OnlineGameConsumer.as_asgi()),
                 re_path(r"ws/TicTac/remote/", TicTacConsumers.RemoteTicTacToeConsumer.as_asgi()),
                 re_path(r"ws/TicTac/local/", TicTacConsumers.LocalTicTacToeConsumer.as_asgi()),
 

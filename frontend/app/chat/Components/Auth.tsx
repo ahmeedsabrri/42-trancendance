@@ -11,7 +11,7 @@ const Auth = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        for (let [key, value] of formData.entries()) {
+        for (const [key, value] of formData.entries()) {
             console.log({key, value});
         }
         const FormUser = {
@@ -25,7 +25,7 @@ const Auth = () => {
         };
 
         const getUser = async () => {
-            const response = await fetch("https://localhost/chat/new_user", {
+            const response = await fetch("http://localhost:8000/chat/new_user", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

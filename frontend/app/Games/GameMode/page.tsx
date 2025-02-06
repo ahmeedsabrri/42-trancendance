@@ -8,7 +8,7 @@ import { IMAGES } from "@/public/index";
 import { useGameStore } from "../store/GameStore";
 
 const GameMode = () => {
-    const { selectedMode, getGamePath } = useGameStore();
+    const { selectedMode } = useGameStore();
     
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">

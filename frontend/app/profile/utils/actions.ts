@@ -8,6 +8,7 @@ const api = axios.create({
 
 const handleRequest = async (username:string, type:string) => {
        const response = await api.get(`/users/request/${type}/${username}/`);
+       console.log("not: ", response);
         return response;
 
 }

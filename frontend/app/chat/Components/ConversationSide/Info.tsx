@@ -9,16 +9,29 @@ import { notifyAdd } from "@/app/chat/Tools/wstools";
 import { notifyErr } from "@/app/chat/Tools/wstools";
 import { handleRequestGames } from "../../Tools/apiTools";
 import { useGameStore } from "@/app/Games/store/GameStore";
+import { useGameStateStore } from "@/app/Games/store/CanvasStore";
+import { useUserStore } from "@/app/store/store";
+import { useEffect } from "react";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
-    const {invited_id, setInvitedId, resetInvitedId} = useGameStore();
+    const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
+    const {user} = useUserStore();
+    const {setWinner} = useGameStateStore();
+
+    useEffect(() => {
+        console.log("invited_id infooo", invited_id);
+    }, [invited_id]);
 
     const handlePingPongNotifyAdd = () => {
-        console.log("user_id", conversationSelected?.userTarget?.id);
-        setInvitedId(conversationSelected?.userTarget?.id);
-        console.log("invited_id", invited_id);
+        console.log("user_id info", conversationSelected?.userTarget?.id);
+        // setWinner(null);
+        console.log("manage. stt")
+        
+        resetInvitedId();
+        setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
+        setGameMode("online");
 
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {
@@ -51,7 +64,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
                                 </Link>
                             </div>
                             <div className="size-[60px] flex items-center justify-center">
-                                <Link rel="preload" href="Games/PingPong/online" onClick={handlePingPongNotifyAdd}>
+                                <Link rel="preload" href="Games/GameBackground" onClick={handlePingPongNotifyAdd}>
                                     <Image src={pingPong} alt="info" width={40} className="hover:size-[46px] active:size-[42px] transition-all opacity-75 hover:opacity-100" />
                                 </Link>
                             </div>
