@@ -4,13 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Message } from "postcss";
 import { useEffect, useRef, useState } from "react";
 
-const useChatSocket = () => {
+const useChatSocket = (user_id: number) => {
 
     const socket = useRef<WebSocket>(null);
     const {user} = useUserStore();
     const [wsActive, setWsActive] = useState(true);
     
-    const user_id = user?.id;
     const queryClient = useQueryClient();
     const {setSocket, setEventMessage, setUserId} = useChatStore();
     
@@ -37,6 +36,12 @@ const useChatSocket = () => {
             setEventMessage(e);
             const message = JSON.parse(e.data);
             console.log("Message received: ", message);
+            console.log("Messages: ", queryClient.getQueryData(["messages", message.conversation_id])); 
+            if (!queryClient.getQueryData(["messages", message.conversation_id])) {
+                console.log("Invalidating messages");
+                queryClient.invalidateQueries({ queryKey: ["messages", message.conversation_id] });
+            }
+            
             queryClient.setQueryData(
                 ["messages", message.conversation_id],
                 (oldData: Message[] = []) => {
@@ -69,6 +74,7 @@ const useChatSocket = () => {
                     }
                 }
             )
+            
         }
 
         socket.current.onclose = (event) => {
