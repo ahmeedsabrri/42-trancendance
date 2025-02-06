@@ -37,7 +37,7 @@ const Game = () => {
         return (() => {
             setWinner('');
         })
-    });
+    }, []);
 
     useEffect(() => {
         winnerRef.current = winner.fullname;
