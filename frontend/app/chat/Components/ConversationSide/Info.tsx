@@ -12,6 +12,7 @@ import { useGameStore } from "@/app/Games/store/GameStore";
 import { useGameStateStore } from "@/app/Games/store/CanvasStore";
 import { useUserStore } from "@/app/store/store";
 import { useEffect } from "react";
+import { UserFriendsActions } from "@/app/profile/utils/actions";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
@@ -19,6 +20,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
     const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
     const {user} = useUserStore();
     const {setWinner} = useGameStateStore();
+    const { handleRequest } = UserFriendsActions();
 
     useEffect(() => {
         console.log("invited_id infooo", invited_id);
@@ -45,6 +47,20 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
         });
     };
 
+    const handleBlock = () => {
+
+        console.log("Blocked");
+        handleRequest(conversationSelected?.userTarget?.username as string, 'block')
+        .then((response) => {
+            console.log(response);
+            notifyAdd(response.data.message);
+        })
+        .catch((err) => {
+            console.log(err);
+            notifyErr(err.response.data.message);
+        });
+    }
+
     return (
         <>
             {showInfo && 
@@ -69,7 +85,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
                                 </Link>
                             </div>
                             <div className="size-[60px] flex items-center justify-center">
-                                <Link rel="preload" href="#">
+                                <Link rel="preload" href="#" onClick={handleBlock}>
                                     <Image src={block} alt="info" width={50} className="hover:size-[56px] active:size-[52px] transition-all opacity-75 hover:opacity-100" />
                                 </Link>
                             </div>

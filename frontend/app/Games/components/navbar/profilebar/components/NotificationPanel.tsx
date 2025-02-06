@@ -159,6 +159,7 @@ export function NotificationPanel({
                             e.stopPropagation();
                             onMarkAsRead(notification.id);
                             router.push('/chat');
+                            
                           }}
                           className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
                         >
