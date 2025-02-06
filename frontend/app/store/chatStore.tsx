@@ -39,8 +39,6 @@ interface ChatStore {
     setSearch: (search: string) => void;
     conversationSelected: ConversationSelected;
     setConversationSelected: (conversation: Conversation) => void;
-    friends: UserData[];
-    setFriends: (friends: UserData[]) => void;
 }
 
 const useChatStore = create<ChatStore>((set, get) => ({
@@ -73,15 +71,12 @@ const useChatStore = create<ChatStore>((set, get) => ({
                 last_message: conversation.last_message,
             },
           });
+
+          console.log("userTarget: ", get().conversationSelected.userTarget?.id);
           
           pushConversationIdToUrl(conversation.id);
         }
     },
-
-    friends: [],
-    setFriends: (friends: UserData[]) => {
-        set({ friends });
-    }
 
 }));
 

@@ -1,25 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import MessageComp from "./MessageComp";
 import { fetchMessages } from "../../Tools/apiTools";
 import { Message, useChatStore} from "@/app/store/chatStore";
 import MessagesSkeleton from "../utils/MessagesSkeleton";
 import useDelayedLoading from "../utils/utils";
+import { set } from "react-hook-form";
 
 const ConversationMessages = () => {
 
     const conversationSelected_id = useChatStore((state) => state.conversationSelected?.id);
     const conversationRef = useRef<HTMLDivElement>(null);
 
-
     const { data: fetchedMessages, isLoading, isError } = useQuery({
         queryKey: ["messages", conversationSelected_id],
         queryFn: () => fetchMessages(conversationSelected_id ? conversationSelected_id : 0),
         refetchOnWindowFocus: false,
         enabled: !!conversationSelected_id,
-        staleTime: Infinity,
     });
 
     useEffect(() => {

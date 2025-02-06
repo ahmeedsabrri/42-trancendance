@@ -23,7 +23,6 @@ const FriendConversations = () => {
     const {data: conversationFetched,  isLoading, isError} = useQuery({
         queryKey: ["conversations"],
         queryFn: () => fetchConversations(),
-        staleTime: Infinity,
         refetchOnWindowFocus: false,
     });
 
