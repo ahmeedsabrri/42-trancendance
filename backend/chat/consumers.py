@@ -8,6 +8,7 @@ from .serializers import MessagesSerializer, ConversationsSerializer
 from .models import Conversation, Message
 from users.utils import send_notification
 from users.models import Notification
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -99,11 +100,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'conversation_id': data['conversation_id'],
                 'time': data['time']
             }
-            
+
             new_message = await self.create_message(message_data)
             if not new_message:
                 logger.error("Failed to create message")
                 return
+
             response_data = {
                 'type': 'chat_message',
                 'id': new_message.id,
@@ -120,7 +122,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'conversation_id': new_message.conversation.id,
                 'time': new_message.time,
             }
-            
+
             for group_name in [
                 f'chat_user_{self.user_id}',
                 f'chat_user_{data["reciever_id"]}'
@@ -131,7 +133,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 logger.error("Failed to create notification")
                 return
             await sync_to_async(send_notification)(receiver.id,notification)
-
         except json.JSONDecodeError:
             logger.error("Invalid JSON received")
         except Exception as e:
@@ -146,7 +147,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'conversation_id': event['conversation_id'],
             'time': event['time'],
         }))
-    
+
     @database_sync_to_async
     def create_notif(self,data):
         """
@@ -164,4 +165,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.error("Missing required message data")
             return None
         return notification
-        

@@ -12,8 +12,10 @@ interface SideBarItemProps {
 }
 
 const SideBarItem: React.FC<SideBarItemProps> = ({ src, alt, title, link }) => {
+
+
     return (
-        <Link href={ `${link}` } >
+        <Link href={ `${link}` }>
             <Tooltip.Provider>
                 <Tooltip.Root>
                     <Tooltip.Trigger asChild>

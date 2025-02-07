@@ -6,16 +6,16 @@ import { IMAGES } from "@/public/index";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
+
 const ChooseBackground = () => {
 
     const { GameBoardColor, setGameBoardColor, getGamePath } = useGameStore();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [isFirstRender, setIsFirstRender] = useState(true);
 
-
     const handleDivClick = (index: number) => {
-      setIsFirstRender(false);
-      setActiveIndex(index === activeIndex ? null : index);
+        setIsFirstRender(false);
+        setActiveIndex(index === activeIndex ? null : index);
     };
 
     const divClasses = [
@@ -24,12 +24,16 @@ const ChooseBackground = () => {
         "bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900",
         "bg-gradient-to-br from-indigo-900 via-purple-800 to-blue-900",
         "bg-gradient-to-br from-blue-700 via-cyan-600 to-teal-700",
-      ];
-    
+    ];
+
     useEffect(() => {
         setGameBoardColor(divClasses[2]);
         setActiveIndex(2);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency array, only run once on mount
+
+
+
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
             <main className="w-full h-full flex justify-center items-center gap-x-3 p-2 relative">
@@ -53,9 +57,9 @@ const ChooseBackground = () => {
                                 }}
                                 className={`${gradient} p-40 rounded-3xl transition duration-300 ease-in-out cursor-pointer border-white
                                 ${(isFirstRender && index === 2) || (!isFirstRender && activeIndex === index)
-                                    ? "scale-110 -translate-y-1 border-2" 
-                                    : "hover:scale-110 hover:-translate-y-1"
-                                }`}
+                                        ? "scale-110 -translate-y-1 border-2"
+                                        : "hover:scale-110 hover:-translate-y-1"
+                                    }`}
                             ></div>
                         ))}
                     </div>

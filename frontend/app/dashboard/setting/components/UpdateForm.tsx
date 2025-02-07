@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/app/context/userContext";
+import { useUserStore } from "@/app/store/store";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button"
 
@@ -10,7 +10,7 @@ type FormData = {
     password: string;
 };
 export default function UpdateForm() {
-    const {user} = useUser();
+    const {user} = useUserStore();
     const { register, handleSubmit } = useForm<FormData>({
         defaultValues: {
             firstName: "",

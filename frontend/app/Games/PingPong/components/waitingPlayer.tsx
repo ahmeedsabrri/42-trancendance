@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGameStateStore } from "../../store/CanvasStore";
 import WaitingDots from "./WaitingDots";
-import Avatar from "@/components/navbar/profilebar/Avatar";
+import Avatar from "../../components/navbar/profilebar/Avatar";
+import { useGameStore } from "../../store/GameStore";
 
 const WaitingForPlayer = () => {
 
-    const { game_status, countdown, setCountdown } = useGameStateStore();
+    const { game_status, countdown, invitedCountdown ,setCountdown, setinvitedCountdown } = useGameStateStore();
     const { player1info, player2info } = useGameStateStore()
+    const { invited_id } = useGameStore();
 
     useEffect(() => {
         if (game_status === "ready" && countdown > 0) {
@@ -17,9 +19,19 @@ const WaitingForPlayer = () => {
             }, 1000);
             return () => clearInterval(timer);
         }
-    }, [game_status, countdown, setCountdown]);
+        else if (game_status === "waiting" && invited_id && invitedCountdown > 0) {
+            const timer = setInterval(() => {
+                setinvitedCountdown(invitedCountdown - 1);
+            }, 1000);
+            return () => clearInterval(timer);
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [game_status, countdown, invitedCountdown, setCountdown]);
+
 
     const WaitingReadyComponent = () => {
+        if (game_status === "waiting" && invited_id) {
+            return <h1 className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 font-bold p-2 drop-shadow-2xl">Game will be discarded in {invitedCountdown}</h1>
+        }
         if (game_status === "waiting" || !game_status) {
             return <h1 className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 font-bold p-2 drop-shadow-2xl">Searching for player</h1>
         } else if (game_status === "ready" && countdown > 0) {
@@ -32,7 +44,7 @@ const WaitingForPlayer = () => {
         if (game_status === "waiting")
             return <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin"></div>
         else
-            return <Avatar width={300} height={300} avatar={player2info.avatar} />
+            return <Avatar width={300} height={300} avatar={player2info.avatar || ''} />
       }
 
     return (
@@ -44,7 +56,7 @@ const WaitingForPlayer = () => {
             <div className='flex justify-around items-center w-[80%]'>
                 <div className="flex flex-col justify-center items-center gap-y-4">
                     <div className='w-[300px] h-[300px] bg-gray-500 bg-opacity-30 backdrop-blur-xl rounded-full broder border-2 border-gray-500'>
-                        <Avatar width={300} height={300} avatar={player1info.avatar} />
+                        <Avatar width={300} height={300} avatar={player1info.avatar || ''} />
                     </div>
                     <p className="text-4xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 p-2">{ player1info.fullname }</p>
                 </div>

@@ -23,7 +23,6 @@ const FriendConversations = () => {
     const {data: conversationFetched,  isLoading, isError} = useQuery({
         queryKey: ["conversations"],
         queryFn: () => fetchConversations(),
-        staleTime: Infinity,
         refetchOnWindowFocus: false,
     });
 
@@ -38,6 +37,7 @@ const FriendConversations = () => {
             }
             // setConversationId(QueryConversationid);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationFetched, user_id]);
 
     const isReady = useDelayedLoading(isLoading, 500);

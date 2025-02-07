@@ -71,11 +71,6 @@ export default {
 			search_inner: 'inset 0px 2px 6px rgba(0, 0, 0, 0.5)',
 			input_inner: 'inset 0px 2px 15px rgba(0, 0, 0, 0.5)'
 		},
-		borderRadius: {
-			lg: 'var(--radius)',
-			md: 'calc(var(--radius) - 2px)',
-			sm: 'calc(var(--radius) - 4px)'
-		}
   	}
   },
   plugins: [

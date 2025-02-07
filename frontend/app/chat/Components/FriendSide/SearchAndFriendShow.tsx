@@ -4,8 +4,8 @@ import { newConversation } from "../../Tools/apiTools";
 import { Conversation, useChatStore } from "@/app/store/chatStore";
 import {findConversation, filterFriends, sortFriendsByName} from "../utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import Avatar from "@/components/navbar/profilebar/Avatar";
-import { UserData, useUserStore,  } from "@/app/store/store";
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
+import { useUserStore } from "@/app/store/store";
 import { UserFriendsData, useUserFriendsStore } from "@/app/store/UserFriendsStrore";
 import React from "react";
 import FriendsSkeleton from "../utils/FriendsSkeleton";
@@ -41,14 +41,14 @@ const FriendShow = () => {
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const search = useChatStore((state) => state.search);
     const { fetchOwnFriends, UserOwnfriends} = useUserFriendsStore();
-    const friends: UserFriendsData[] = UserOwnfriends;
-    const [IsLoading, setIsLoading] = React.useState(false);
+    const friends: UserFriendsData[] = UserOwnfriends || [];
+    const [IsLoading] = React.useState(false);
     
     React.useEffect(() => {
       fetchOwnFriends();
     }, [UserOwnfriends, fetchOwnFriends]);
 
-    const handleNewConversation = async ( currentUser: UserData ) => {
+    const handleNewConversation = async ( currentUser: UserFriendsData ) => {
 
         console.log("currentUser", currentUser);
 
@@ -80,7 +80,10 @@ const FriendShow = () => {
             <ul className="w-full flex items-center scrollable-x overflow-x-scroll snap-x snap-mandatory scrollbar scrollbar-thumb-black/30 scrollbar-track-transparent">
                 {IsLoading ?  <FriendsSkeleton/> : sortFriendsByName(filterFriends(friends, search))?.map((friend: UserFriendsData) => {
                     return (
-                        <li key={friend.id} onClick={() => {conversationSelected?.userTarget?.id !== friend?.id && handleNewConversation(friend)}} className="flex flex-col items-center min-w-[90px] h-[110px] p-2 gap-2 snap-start snap-always hover:bg-hover_color active:bg-active_color transition-all rounded-xl">
+                        <li key={friend.id} onClick={() => {
+                                if (conversationSelected?.userTarget?.id !== friend?.id)
+                                    handleNewConversation(friend)
+                            }} className="flex flex-col items-center min-w-[90px] h-[110px] p-2 gap-2 snap-start snap-always hover:bg-hover_color active:bg-active_color transition-all rounded-xl">
                             <Avatar width={60} height={60} avatar={friend.avatar} />
                             <p className="text-white/80 whitespace-nowrap">{friend.username}</p>
                         </li>

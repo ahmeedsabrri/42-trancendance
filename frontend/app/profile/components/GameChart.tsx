@@ -11,8 +11,8 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { GameHistory } from '../types';
 import { getMonthlyGameData } from '../utils/chartUtils';
+import { MatchData } from '@/app/store/store';
 
 ChartJS.register(
   CategoryScale,
@@ -46,14 +46,14 @@ const chartOptions = {
 };
 
 interface GameChartProps {
-  games: GameHistory[];
+  games: MatchData[] | null;
   type: 'pingpong' | 'tictactoe';
   title: string;
 }
 
 export function GameChart({ games, type, title }: GameChartProps) {
   const data = getMonthlyGameData(games, type);
-
+  // console.log(data);
   return (
     <div className="backdrop-blur-md bg-black/20 shadow-lg rounded-2xl p-6 ">
       <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>

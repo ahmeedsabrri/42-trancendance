@@ -2,45 +2,33 @@
 
 import Link from "next/link"
 import CustomButton from "../../../components/utils/CutsomButton"
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStateStore } from '../../../store/CanvasStore';
 import { useGameStore } from '../../../store/GameStore';
 import WaitingForPlayer from "../waitingPlayer";
 import * as canvas from './gameRenderer';
-import { useParams } from 'next/navigation';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
-
-interface GameState {
-    game: {
-        BALL: any;
-        PLAYERS: {
-            PLAYER1: any;
-            PLAYER2: any;
-        };
-        WINNER?: any,
-    },
-    PLAYERS: any,
-    gameStatus: any,
-}
+import { useParams, useRouter } from 'next/navigation';
+import useWebSocket from 'react-use-websocket';
+import { GameState } from "./Gameinterface";
 
 const Canvas = () => {
+
     const { label, currentState, handleCurrentState, GameBoardColor, invited_id } = useGameStore();
+    const router = useRouter();
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { player1, player2, ball } = useGameStateStore();
-    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, setPlayer1info, setPlayer2info, resetPlayersInfo, game_status, countdown } = useGameStateStore();
+    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, resetInvitedCountdown, setPlayer1info, setPlayer2info, resetPlayersInfo, game_status, countdown, invitedCountdown } = useGameStateStore();
 
     const mode = useParams().mode;
-    console.log(mode);
     const currentStateRef = useRef(currentState);
-    // const invited = null;
     const socketUrl = `wss://localhost/ws/game/${mode}Game/${invited_id ? invited_id : ''}`;
 
     const {
         sendJsonMessage,
         lastJsonMessage,
-        readyState,
     } = useWebSocket<GameState>(socketUrl, {
-        shouldReconnect: (closeEvent) => false,
+        shouldReconnect: () => false,
         onError: (event) => console.log('WebSocket error:', event),
         onOpen: () => console.log('WebSocket connected'),
         onClose: () => console.log('WebSocket disconnected'),
@@ -52,6 +40,7 @@ const Canvas = () => {
             handleCurrentState();
             sendJsonMessage({ "Action": "StartGame" });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [countdown]);
 
     useEffect(() => {
@@ -80,7 +69,7 @@ const Canvas = () => {
                 if (WINNER)
                     setWinner(WINNER);
             }
-        }
+        }// eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastJsonMessage, mode, setGameStatus, updateBall, updatePaddles, setWinner]);
 
     useEffect(() => {
@@ -121,8 +110,9 @@ const Canvas = () => {
             document.removeEventListener('keydown', keydownHandler);
             document.removeEventListener('keyup', keyupHandler);
             resetCountdown();
+            resetInvitedCountdown();
             resetPlayersInfo();
-        };
+        };  // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sendJsonMessage, setKeyPressed]);
 
     useEffect(() => {
@@ -132,7 +122,6 @@ const Canvas = () => {
             const gameState = currentStateRef.current === "PAUSE" ? "PAUSE" : "PLAY";
             sendJsonMessage({ "Action": gameState });
         }
-        console.log(mode);
     }, [currentState, mode, sendJsonMessage]);
 
     const GameControls = mode === "local" ? (
@@ -151,13 +140,27 @@ const Canvas = () => {
         </div>
     ) : null;
 
+
+    useEffect(() => {
+        if (game_status === "waiting" && invited_id && !invitedCountdown) {
+            router.push('/Games');
+        }
+    }, [game_status, invited_id, invitedCountdown, router]);
+
     if (mode === "online") {
-        if (game_status === "waiting")
+        if (game_status === "waiting" && invited_id && invitedCountdown > 0) {
+            console.log("waiting for fro", invited_id, mode);
             return <WaitingForPlayer />
+        }
+        else if (game_status === "waiting") {
+            console.log("wainting", invited_id, mode);
+            return <WaitingForPlayer />
+        }
         else if (game_status === "ready" && countdown > 0) {
             return <WaitingForPlayer />
         }
     }
+
 
     return (
         <div className="flex justify-center flex-col items-center p-4 bg-gray-500 bg-opacity-30 backdrop-blur-xl rounded-xl mt-10">

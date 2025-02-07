@@ -1,20 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter, redirect } from 'next/navigation';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AuthActions } from "../utils";
 
-
-
-
-export default function CallbackPage() {
-const router = useRouter();
-const [error, setError] = useState<string | null>(null);
+function CallbackContent() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { Oauth42 } = AuthActions();
   const searchParams = useSearchParams();
+
   useEffect(() => {
     const code = searchParams.get('code');
     const handleCallback = () => {
@@ -29,18 +27,20 @@ const [error, setError] = useState<string | null>(null);
           if (error.response && error.response.status === 400) {
             const errorData = error.response.data;
             if (errorData.otp_code) {
-              redirect(`/auth?otp_code=requried`); 
+              redirect(`/auth?otp_code=required`); 
             } else {
               setError("An error occurred");
               setIsLoading(false);
             }
           }
         });
-      }
-      if (code) {
-        handleCallback();
-      }
-    }, [searchParams, Oauth42, router]);
+    };
+
+    if (code) {
+      handleCallback();
+    }
+  }, [searchParams, Oauth42, router]);
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen p-4">
@@ -53,8 +53,7 @@ const [error, setError] = useState<string | null>(null);
       </div>
     );
   }
-  
-  
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4">
       {isLoading ? (
@@ -73,5 +72,13 @@ const [error, setError] = useState<string | null>(null);
         </p>
       )}
     </div>
+  );
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CallbackContent />
+    </Suspense>
   );
 }

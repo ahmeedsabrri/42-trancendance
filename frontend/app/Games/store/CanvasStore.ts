@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { GamePlayer, GameBall} from '../PingPong/components/Canvas/Gameinterface'
 
 const GAME_CONSTANTS = {
   CANVAS: {
@@ -20,8 +21,8 @@ const GAME_CONSTANTS = {
 }
 
 interface Player {
-  fullname: string
-  username: string
+  fullname: string | null
+  username: string | null
   x: number
   y: number
   w: number
@@ -41,18 +42,20 @@ interface Ball {
 
 interface GameState {
   countdown: number;
+  invitedCountdown: number;
   game_status: string | null,
   player1info: {
-    avatar: string,
-    fullname: string,
+    avatar: string | null,
+    fullname: string | null,
   },
   player2info: {
-    avatar: string,
-    fullname: string,
+    avatar: string | null,
+    fullname: string | null,
   },
   winner: {
-    fullname: string,
-    avatar: string,
+    fullname: string | null,
+    avatar: string | null,
+    reason: string | null,
   },
   player1: Player
   player2: Player
@@ -63,35 +66,39 @@ interface GameState {
     w: boolean
     s: boolean
   },
-  updatePaddles: (newPlayer1: any, newPlayer2: any) => void
-  updateBall: (ball: any) => void
+  updatePaddles: (newPlayer1: GamePlayer, newPlayer2: GamePlayer) => void
+  updateBall: (ball: GameBall) => void
   setKeyPressed: (key: string, value: boolean) => void
-  setWinner: (winner: any) => void,
-  setGameStatus: (game_status: string | null) => void;
-  setPlayer1info: (player1info: any) => void;
-  setPlayer2info: (player2info: any) => void;
-  setCountdown: (value: number) => void;
-  resetCountdown: () => void;
-  resetPlayersInfo: () => void;
+  setWinner: (winner: GamePlayer | null) => void
+  setGameStatus: (game_status: string | null) => void
+  setPlayer1info: (player1info: Partial<GamePlayer>) => void
+  setPlayer2info: (player2info: Partial<GamePlayer>) => void
+  setCountdown: (value: number) => void
+  resetCountdown: () => void
+  resetPlayersInfo: () => void
+  setinvitedCountdown: (value: number) => void
+  resetInvitedCountdown: () => void
 }
 
-export const useGameStateStore = create<GameState>((set, get) => ({
+export const useGameStateStore = create<GameState>((set) => ({
   countdown: 3,
+  invitedCountdown: 30,
   game_status: "waiting",
   player1info: {
-    avatar: "",
-    fullname: "",
+    avatar: null,
+    fullname: null,
   },
   player2info: {
-    avatar: "",
-    fullname: "",
+    avatar: null,
+    fullname: null,
   },
   winner: {
-    fullname: "",
-    avatar: "",
+    fullname: null,
+    avatar: null,
+    reason: null,
   },
   player1: {
-    fullname: "",
+    fullname: null,
     username: "Player 1",
     x: 0,
     y: GAME_CONSTANTS.CANVAS.HEIGHT / 2 - GAME_CONSTANTS.PLAYER.HEIGHT / 2,
@@ -100,9 +107,8 @@ export const useGameStateStore = create<GameState>((set, get) => ({
     speed: GAME_CONSTANTS.PLAYER.INITIAL_SPEED,
     score: 0,
   },
-
   player2: {
-    fullname: "",
+    fullname: null,
     username: "Player 2",
     x: GAME_CONSTANTS.CANVAS.WIDTH - GAME_CONSTANTS.PLAYER.WIDTH,
     y: GAME_CONSTANTS.CANVAS.HEIGHT / 2 - GAME_CONSTANTS.PLAYER.HEIGHT / 2,
@@ -111,7 +117,6 @@ export const useGameStateStore = create<GameState>((set, get) => ({
     speed: GAME_CONSTANTS.PLAYER.INITIAL_SPEED,
     score: 0,
   },
-
   ball: {
     x: GAME_CONSTANTS.CANVAS.WIDTH / 2,
     y: GAME_CONSTANTS.CANVAS.HEIGHT / 2,
@@ -120,82 +125,78 @@ export const useGameStateStore = create<GameState>((set, get) => ({
     velocityX: GAME_CONSTANTS.BALL.INITIAL_VELOCITY,
     velocityY: GAME_CONSTANTS.BALL.INITIAL_VELOCITY,
   },
-
   keysPressed: {
     ArrowUp: false,
     ArrowDown: false,
     w: false,
     s: false,
   },
-
   setKeyPressed: (key, value) =>
     set((state) => ({
       keysPressed: { ...state.keysPressed, [key]: value },
     })),
-
   updatePaddles: (newPlayer1, newPlayer2) =>
-    set((state) => {
-      return {
-                player1: {
-                  ...state.player1,
-                  fullname: newPlayer1.FULL_NAME,
-                  username: newPlayer1.USERNAME,
-                  x: newPlayer1.X,
-                  y: newPlayer1.Y,
-                  w: newPlayer1.W,
-                  h: newPlayer1.H,
-                  score: newPlayer1.SCORE
-                },
-                player2: {
-                  ...state.player2,
-                  fullname: newPlayer2.FULL_NAME,
-                  username: newPlayer2.USERNAME,
-                  x: newPlayer2.X,
-                  y: newPlayer2.Y,
-                  w: newPlayer2.W,
-                  h: newPlayer2.H,
-                  score: newPlayer2.SCORE,
-                }
-              }
+    set((state) => ({
+      player1: {
+        ...state.player1,
+        fullname: newPlayer1.FULL_NAME,
+        username: newPlayer1.USERNAME,
+        x: newPlayer1.X,
+        y: newPlayer1.Y,
+        w: newPlayer1.W,
+        h: newPlayer1.H,
+        score: newPlayer1.SCORE
       },
-    ),
+      player2: {
+        ...state.player2,
+        fullname: newPlayer2.FULL_NAME,
+        username: newPlayer2.USERNAME,
+        x: newPlayer2.X,
+        y: newPlayer2.Y,
+        w: newPlayer2.W,
+        h: newPlayer2.H,
+        score: newPlayer2.SCORE,
+      }
+    })),
   updateBall: (newBallState) =>
-    set((state) => {
-        return {
-          ball: {
-            ...state.ball,
-            x: newBallState.X,
-            y: newBallState.Y,
-            speed: newBallState.SPEED,
-            velocityX: newBallState.VELOCITY_X,
-            velocityY: newBallState.VELOCITY_Y * (Math.random() > 0.5 ? 1 : -1),
-          },
-        }
-    }),
-    setWinner: (winner: any) => set({ winner: { fullname: winner.FULL_NAME, avatar: winner.avatar,}}),
-    setGameStatus: (game_status: string | null) => set({game_status: game_status}),
-    setPlayer1info: (player1info) => set((state) => {
-      return {
-        player1info: {
-          ...state.player1info,
-          avatar: player1info.avatar,
-          fullname: player1info.FULL_NAME
-        }
-      }
-    }),
-    setPlayer2info: (player2info) => set((state) => {
-      return {
-        player2info: {
-          ...state.player2info,
-          avatar: player2info.avatar,
-          fullname: player2info.FULL_NAME
-        }
-      }
-    }),
-    setCountdown: (value) => set({ countdown: value }),
-    resetCountdown: () => set({ countdown: 3 }),
-    resetPlayersInfo: () => {
-      set({player1info: {avatar: "", fullname: ""}});
-      set({player2info: {avatar: "", fullname: ""}});
-    },
+    set((state) => ({
+      ball: {
+        ...state.ball,
+        x: newBallState.X,
+        y: newBallState.Y,
+        speed: newBallState.SPEED,
+        velocityX: newBallState.VELOCITY_X,
+        velocityY: newBallState.VELOCITY_Y * (Math.random() > 0.5 ? 1 : -1),
+      },
+    })),
+  setWinner: (winner) => set({
+    winner: {
+      fullname: winner?.FULL_NAME ?? null,
+      avatar: winner?.avatar ?? null,
+      reason: winner?.reason ?? null
+    }
+  }),
+  setGameStatus: (game_status) => set({ game_status }),
+  setPlayer1info: (player1info) => set((state) => ({
+    player1info: {
+      ...state.player1info,
+      avatar: player1info.avatar ?? null,
+      fullname: player1info.FULL_NAME ?? null
+    }
+  })),
+  setPlayer2info: (player2info) => set((state) => ({
+    player2info: {
+      ...state.player2info,
+      avatar: player2info.avatar ?? null,
+      fullname: player2info.FULL_NAME ?? null
+    }
+  })),
+  setCountdown: (value) => set({ countdown: value }),
+  setinvitedCountdown: (value) => set({ invitedCountdown: value }),
+  resetCountdown: () => set({ countdown: 3 }),
+  resetInvitedCountdown: () => set({ invitedCountdown: 30 }),
+  resetPlayersInfo: () => set({
+    player1info: { avatar: null, fullname: null },
+    player2info: { avatar: null, fullname: null }
+  }),
 }))

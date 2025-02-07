@@ -4,8 +4,9 @@ import { UserData, useUserStore} from '@/app/store/store';
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import {AddFriends} from './addFriendsComponent';
 import { IsaFriend } from './isaFriendComponent';
-import { Shield, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import Image from 'next/image';
 export interface ProfileHeaderProps {
   userProfile: UserData;
   onBlock: () => void;
@@ -22,12 +23,8 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
   }, [fetchUser]);
   return (
     <div className="relative mb-8">
-      <div className="h-48 w-full overflow-hidden rounded-xl">
-        <img
-          src={"https://images.unsplash.com/photo-1579546929518-9e396f3cc809"}
-          alt="Cover"
-          className="w-full h-full object-cover"
-        />
+      <div className="h-48 w-full rounded-xl overflow-hidden">
+          <Image  src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" alt="Cover" fill={true} className='rounded-xl'/>
       </div>
       
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">
@@ -67,8 +64,8 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
             </button>
           </div> }
       </div>}
-      {userProfile?.connection_type === 'accepted' &&<IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
-      {(userProfile?.connection_type === 'not_connected' || userProfile?.connection_type == 'rejected')  && <AddFriends addFriend={addFriend} onBlock={onBlock} />}
+      {userProfile?.connection_type === 'accepted' && <IsaFriend onBlock={onBlock} onUnfriend={onUnfriend} />}
+      {(userProfile?.connection_type === 'not_connected' || userProfile?.connection_type == 'rejected')  && <AddFriends addFriend={addFriend}/>}
     </div>
   );
 }
