@@ -53,11 +53,7 @@ services:
     build:
       context: ./frontend
       dockerfile: dockerfile
-      # target: runner
     restart: always
-    command: npm run start
-    environment:
-      - NODE_ENV=production
     volumes:
       - ./frontend:/frontend
       - /frontend/node_modules/
