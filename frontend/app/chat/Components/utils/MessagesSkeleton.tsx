@@ -46,7 +46,6 @@ function MessagesSkeleton() {
         // Shuffle the items array
         const shuffledItems = [...items].sort(() => Math.random() - 0.5);
         setItems(shuffledItems);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationSelected]);
 
     return (

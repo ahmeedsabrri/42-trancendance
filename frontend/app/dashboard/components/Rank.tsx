@@ -1,38 +1,62 @@
 import Image from "next/image";
 import avatar from "@/public/Ellipse 209.svg";
+import { UserData } from "@/app/store/store";
 
-interface User {
-    id: number,
-    first_name: string,
-    last_name: string,
-    username: string,
-    email: string,
-    level: number,
+const Tariq: UserData = {
+    id: 1,
+    first_name: "Tariq",
+    last_name: "ben",
+    username: "tben-dal",
+    level: 5,
+    email: "tariq@gamil.com",
+    avatar: "",
+    connection_type: "",
+    status: "",
+    is_online: true,
+    sender:"",
+    otp_uri: "",
+    twofa_enabled:false
 }
 
-const Tariq: User = {
-    id:1,
-    first_name:"tariq",
-    last_name:"ben",
-    username:"tben-dal",
-    email:"tariq@gmail.com",
-    level:7
-} 
-const ali: User = {
-    id:2,
-    first_name:"tariq",
-    last_name:"ben",
-    username:"tben-dal",
-    email:"tariq@gmail.com",
-    level:7
-} 
+const ahmed: UserData = {
+    id: 1,
+    first_name: "ahmen",
+    last_name: "sabri",
+    username: "asabri",
+    level: 5,
+    email: "ahmed@gamil.com",
+    avatar: "",
+    connection_type: "",
+    status: "",
+    is_online: true,
+    sender:"",
+    otp_uri: "",
+    twofa_enabled:false
+}
 
-const users: User[] = [
+const anas: UserData = {
+    id: 1,
+    first_name: "anas",
+    last_name: "itami",
+    username: "aitami",
+    level: 5,
+    email: "anas@gamil.com",
+    avatar: "",
+    connection_type: "",
+    status: "",
+    is_online: true,
+    sender:"",
+    otp_uri: "",
+    twofa_enabled:false
+}
+
+const users = [
     Tariq,
-    ali
-]
+    ahmed,
+    anas
+];
 
-const UserComponent = ({ user, rank }: {user: User, rank: number}) => {
+const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
     return (
         <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 ">
             <h1 className="text-xl text-white">{rank}</h1>
@@ -51,7 +75,6 @@ const UserComponent = ({ user, rank }: {user: User, rank: number}) => {
 };
 
 const Rank = () => {
-
     users.sort((a, b) => b.level - a.level);
 
     return (

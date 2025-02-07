@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import { Conversation } from '@/app/store/chatStore';
 import { UserData } from '@/app/store/store';
-import { UserFriendsData } from '@/app/store/UserFriendsStrore';
-
+import { UserFriendsData } from "@/app/store/UserFriendsStrore";
 
 const secretKey = "f2a55ff22864a0ea4791baed9c1607fa07dcbdcd70dee5e117e35ede141a193f";
 

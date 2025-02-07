@@ -13,13 +13,11 @@ const ConversationMessages = () => {
     const conversationSelected_id = useChatStore((state) => state.conversationSelected?.id);
     const conversationRef = useRef<HTMLDivElement>(null);
 
-
     const { data: fetchedMessages, isLoading, isError } = useQuery({
         queryKey: ["messages", conversationSelected_id],
         queryFn: () => fetchMessages(conversationSelected_id ? conversationSelected_id : 0),
         refetchOnWindowFocus: false,
         enabled: !!conversationSelected_id,
-        staleTime: Infinity,
     });
 
     useEffect(() => {
@@ -56,7 +54,7 @@ const ConversationMessages = () => {
                     isReady ? <MessagesSkeleton/> : isError ? <h1 className="text-xl text-text_message_color">Error</h1> :
                         Array.isArray(fetchedMessages) ? fetchedMessages.map((message: Message) => {
                             return <MessageComp message={message} key={message.id} />
-                        }) : <h1 className="text-xl text-text_message_color">Lets get Started</h1>
+                        }) : <h1 className="text-xl text-text_message_color">Let&apos;s get Started</h1>
                 }
             </ul>
         </div>

@@ -10,7 +10,7 @@ type FormData = {
     password: string;
 };
 export default function UpdateForm() {
-    const { user } = useUserStore();
+    const {user} = useUserStore();
     const { register, handleSubmit } = useForm<FormData>({
         defaultValues: {
             firstName: "",

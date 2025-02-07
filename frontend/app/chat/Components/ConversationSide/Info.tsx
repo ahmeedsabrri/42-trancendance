@@ -11,12 +11,14 @@ import { handleRequestGames } from "../../Tools/apiTools";
 import { useGameStore } from "@/app/Games/store/GameStore";
 import { useUserStore } from "@/app/store/store";
 import { useEffect } from "react";
+import { UserFriendsActions } from "@/app/profile/utils/actions";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
     const {user} = useUserStore();
+    const { handleRequest } = UserFriendsActions();
 
     useEffect(() => {
         console.log("invited_id infooo", invited_id);
@@ -43,13 +45,27 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
         });
     };
 
+    const handleBlock = () => {
+
+        console.log("Blocked");
+        handleRequest(conversationSelected?.userTarget?.username as string, 'block')
+        .then((response) => {
+            console.log(response);
+            notifyAdd(response.data.message);
+        })
+        .catch((err) => {
+            console.log(err);
+            notifyErr(err.response.data.message);
+        });
+    }
+
     return (
         <>
             {showInfo && 
                 <div className="size-fit bg-white/10 backdrop-blur-[100px] rounded-2xl border-t border-l shadow-xl border-white/20 flex flex-col justify-center transition-all absolute top-3 right-4 p-4">
                         <div className="w-full h-full flex justify-start items-center flex-col gap-2 p-2">
                             <div className="w-full h-[30%] flex items-center justify-center">
-                                <Avatar width={100} height={100} avatar={conversationSelected?.userTarget?.avatar || null} />
+                                <Avatar width={100} height={100} avatar={conversationSelected?.userTarget?.avatar || ""} />
                             </div>
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <h1 className="text-3xl text-white font-bold">{conversationSelected?.userTarget?.username}</h1>
@@ -67,7 +83,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
                                 </Link>
                             </div>
                             <div className="size-[60px] flex items-center justify-center">
-                                <Link rel="preload" href="#">
+                                <Link rel="preload" href="#" onClick={handleBlock}>
                                     <Image src={block} alt="info" width={50} className="hover:size-[56px] active:size-[52px] transition-all opacity-75 hover:opacity-100" />
                                 </Link>
                             </div>

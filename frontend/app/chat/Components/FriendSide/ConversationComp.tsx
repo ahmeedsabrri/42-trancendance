@@ -1,8 +1,9 @@
 import { useChatStore, Conversation } from "@/app/store/chatStore";
+import { UserData } from "@/app/store/store";
 import { timeHandle, findTargetUser } from "../utils/utils";
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import React, { memo } from "react";
-import { UserData, useUserStore } from "@/app/store/store";
+import { useUserStore } from "@/app/store/store";
 
 
 interface ConversationCompProps {
@@ -37,5 +38,7 @@ const ConversationComp: React.FC<ConversationCompProps> = memo(({ conversation})
         </div>
     );
 });
+
 ConversationComp.displayName = "ConversationComp";
+
 export default ConversationComp;

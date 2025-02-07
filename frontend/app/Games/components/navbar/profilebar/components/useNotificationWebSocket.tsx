@@ -26,7 +26,8 @@ const useNotificationWebSocket = (url: string) => {
         setInviterId(newNotification.notification.sender.id);
       const data = newNotification.notification
       console.log('New notification:', newNotification);
-      addNotification(data);
+      if (window.location.pathname !== '/chat')
+        addNotification(data);
     }
   }, [lastMessage, addNotification]);
 

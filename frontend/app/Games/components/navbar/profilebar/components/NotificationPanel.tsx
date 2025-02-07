@@ -142,12 +142,24 @@ export function NotificationPanel({
                             e.stopPropagation();
                             onMarkAsRead(notification.id);
                             router.push('/dashboard');
-                            
-                            
                           }}
                           className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
                         >
                           Back To Home
+                        </button>
+                        
+                      </div>
+                    ) || notification.notification_type === 'message' && !notification.read && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMarkAsRead(notification.id);
+                            router.push('/chat');
+                          }}
+                          className="px-3 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-300 hover:bg-green-500/30 transition-colors"
+                        >
+                          Navigate to Chat
                         </button>
                         
                       </div>
