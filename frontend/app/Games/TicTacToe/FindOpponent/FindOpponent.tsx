@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Circle, X, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { useGameStore } from '../../store/GameStore';
+import Image from 'next/image';
 
 const MatchmakingInterface = () => {
   const { TicTacOpponent, setTicTacOpponent } = useGameStore();
@@ -40,7 +41,7 @@ const MatchmakingInterface = () => {
             {TicTacOpponent.avatar ? (
               <div className="flex flex-col justify-center items-center gap-3">
                 <div className="w-32 h-32 border-4 border-gray-700 rounded-full overflow-hidden">
-                  <img src={TicTacOpponent.avatar} alt="Opponent Avatar" className="object-cover w-full h-full" />
+                  <Image src={TicTacOpponent.avatar || ""} alt="Opponent Avatar" fill={true} className="object-cover w-full h-full" />
                 </div>
                 <h1>{TicTacOpponent.username}</h1>
                 <p className="text-xl font-semibold mt-2">Match starting in {count}</p>

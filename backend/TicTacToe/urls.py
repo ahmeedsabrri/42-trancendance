@@ -4,5 +4,5 @@ from django import urls
 from . import views
 
 urlpatterns = [
-    path('match_history/', views.getPlayerMatches)
+    path('match_history/<int:pk>', views.getPlayerMatches)
 ]

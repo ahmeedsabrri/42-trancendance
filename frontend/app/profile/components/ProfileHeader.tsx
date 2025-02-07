@@ -6,6 +6,7 @@ import {AddFriends} from './addFriendsComponent';
 import { IsaFriend } from './isaFriendComponent';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+import Image from 'next/image';
 export interface ProfileHeaderProps {
   userProfile: UserData;
   onBlock: () => void;
@@ -22,12 +23,8 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
   }, [fetchUser]);
   return (
     <div className="relative mb-8">
-      <div className="h-48 w-full overflow-hidden rounded-xl">
-        <img
-          src={"https://images.unsplash.com/photo-1579546929518-9e396f3cc809"}
-          alt="Cover"
-          className="w-full h-full object-cover"
-        />
+      <div className="h-48 w-full rounded-xl overflow-hidden">
+          <Image  src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" alt="Cover" fill={true} className='rounded-xl'/>
       </div>
       
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">

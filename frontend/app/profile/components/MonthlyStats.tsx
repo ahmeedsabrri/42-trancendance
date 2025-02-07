@@ -1,5 +1,5 @@
-import React from 'react';
-import { GameHistory } from '../types';
+import React, { useEffect } from 'react';
+import { useUserStore } from '@/app/store/store';
 import { Trophy, X, Circle } from 'lucide-react';
 
 interface GameStats {
@@ -8,29 +8,29 @@ interface GameStats {
   total: number;
   winRate: number;
 }
-// {
-//   id: 1,
-//   type: 'pingpong',
-//   opponent: { ...mockUser, id: 1, username: 'Jane Smith' },
-//   result: 'win',
-//   date: '2024-03-10',
-//   score: '21-18'
-// },
-interface MonthlyStatsProps {
-  games: GameHistory[];
-}
 
-export function MonthlyStats({ games }: MonthlyStatsProps) {
+export function MonthlyStats({ user_id }: { user_id: number }) {
+  const { MatchHistory, loading, error, fetchMatchHistory} = useUserStore();
+
+  useEffect(() => {
+    fetchMatchHistory(user_id as number);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user_id]);
+
   const getCurrentMonthStats = (gameType: 'pingpong' | 'tictactoe'): GameStats => {
+    if (!MatchHistory) {
+      return { wins: 0, losses: 0, total: 0, winRate: 0 };
+    }
+
     const currentMonth = new Date().getMonth();
-    const monthGames = games.filter(game => {
-      const gameMonth = new Date(game.date).getMonth();
-      return gameMonth === currentMonth && game.type === gameType;
+    const monthGames = MatchHistory.filter(game => {
+      const gameMonth = new Date(game.played_at).getMonth();
+      return gameMonth === currentMonth && game.game_type === gameType;
     });
 
-    const wins = monthGames.filter(game => game.result === 'win').length;
+    const wins = monthGames.filter(game => game.result === 'W').length;
     const total = monthGames.length;
-    
+
     return {
       wins,
       losses: total - wins,
@@ -42,10 +42,14 @@ export function MonthlyStats({ games }: MonthlyStatsProps) {
   const pingPongStats = getCurrentMonthStats('pingpong');
   const ticTacToeStats = getCurrentMonthStats('tictactoe');
 
-  const StatCard = ({ title, stats, icon }: { 
-    title: string; 
-    stats: GameStats; 
-    icon: React.ReactNode 
+  const StatCard = ({
+    title,
+    stats,
+    icon
+  }: {
+    title: string;
+    stats: GameStats;
+    icon: React.ReactNode;
   }) => (
     <div className="backdrop-blur-md bg-black/20 shadow-lg rounded-2xl p-4 ">
       <div className="flex items-center gap-2 mb-3">
@@ -71,18 +75,22 @@ export function MonthlyStats({ games }: MonthlyStatsProps) {
     </div>
   );
 
+  // Loading or error state
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Monthly Statistics</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <StatCard 
-          title="Ping Pong" 
-          stats={pingPongStats} 
+        <StatCard
+          title="Ping Pong"
+          stats={pingPongStats}
           icon={<Trophy className="w-6 h-6 text-yellow-500/70" />}
         />
-        <StatCard 
-          title="Tic Tac Toe" 
-          stats={ticTacToeStats} 
+        <StatCard
+          title="Tic Tac Toe"
+          stats={ticTacToeStats}
           icon={
             <div className="flex">
               <X className="w-6 h-6 text-blue-500" />

@@ -97,6 +97,7 @@ const TicTac = () => {
         if (isWaiting && !isInGame) {
             websocket.current?.close();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
 
@@ -163,6 +164,7 @@ const TicTac = () => {
         }
         handleMessage()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
         , [lastJsonMessage])
 
 
@@ -251,7 +253,7 @@ const TicTac = () => {
                                         <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
                                             {board.map((cell, index) =>
                                                 <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    <img src={(board[index] !== '') ? board[index] : ''} />
+                                                    <Image src={board[index as number] !== '' ? board[index as number] : ''} alt="cell" fill={true} />
                                                 </div>)}
                                         </div>
                                     </div>

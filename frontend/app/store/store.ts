@@ -6,6 +6,19 @@ export const api = axios.create({
     withCredentials: true,
 });
 
+export interface MatchData {
+    id: number;
+    opponent: string;
+    game_type: string;
+    result: string;
+    score: string;
+    played_at: string;
+    user_score: number;
+    status: string;
+}
+
+
+
 export interface UserData {
     id: number;
     username: string;
@@ -24,20 +37,23 @@ export interface UserData {
 
 interface UserStore {
     user: UserData | null;
+    MatchHistory: MatchData[] | null;
     viewedProfile: UserData | null,
     loading: boolean;
     error: string | null;
     isInitialized: boolean;
     fetchUser: () => Promise<void>;
     fetchFriend: (username:string) => Promise<void>;
+    fetchMatchHistory: (id: number) => Promise<void>;
     setError: (error: string | null) => void;
     reset: () => void;
 }
 
 const initialState = {
     user: null,
+    MatchHistory: null,
     viewedProfile: null,
-    loading: false,
+    loading: true,
     error: null,
     isInitialized: false,
 };
@@ -47,8 +63,39 @@ let fetchPromise: Promise<void> | null = null;
 
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
+    fetchMatchHistory: async (id: number) => {
+        
+        fetchPromise = api.get(`/match_history/${id}`)
+            .then(response => {
+                set({ 
+                    MatchHistory: response.data.matches,
+                    loading: false,
+                    isInitialized: true
+                });
+            })
+            .catch(err => {
+                if (axios.isAxiosError(err)) {
+                    set({ 
+                        error: err.response?.data?.message || 'Failed to fetch match history', 
+                        loading: false,
+                        isInitialized: true
+                    });
+                } else {
+                    set({ 
+                        error: 'An unexpected error occurred', 
+                        loading: false,
+                        isInitialized: true
+                    });
+                }
+            })
+            .finally(() => {
+                fetchPromise = null;
+            });
+
+        return fetchPromise;
+    },
     fetchFriend: async (username:string) => {
-        set({ loading: true, error: null });
+   
         
         fetchPromise = api.get<UserData>(`/user/${username}`)
         .then(response => {

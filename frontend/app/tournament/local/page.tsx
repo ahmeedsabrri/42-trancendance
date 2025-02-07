@@ -55,6 +55,7 @@ const Tournament = () => {
             setIsFinished(true)
             setWinner(null)
         }
+        		// eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isStartClickable, tournament_players, setIsTournament, setWinner]);
 
     return (

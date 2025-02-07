@@ -1,7 +1,8 @@
 import { ChartData } from 'chart.js';
-import { GameHistory } from '../types';
+// import { GameHistory } from '../types';÷
+import { MatchData } from '@/app/store/store';
 
-export const getMonthlyGameData = (games: GameHistory[], gameType: 'pingpong' | 'tictactoe'): ChartData<'line'> => {
+export const getMonthlyGameData = (games: MatchData[] | null, gameType: 'pingpong' | 'tictactoe'): ChartData<'line'> => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const daysInMonth = new Date(currentDate.getFullYear(), currentMonth + 1, 0).getDate();
@@ -14,13 +15,13 @@ export const getMonthlyGameData = (games: GameHistory[], gameType: 'pingpong' | 
   }));
 
   // Populate daily stats
-  games.forEach(game => {
-    const gameDate = new Date(game.date);
-    if (gameDate.getMonth() === currentMonth && game.type === gameType) {
+  games?.forEach(game => {
+    const gameDate = new Date(game.played_at);
+    if (gameDate.getMonth() === currentMonth && game.game_type === gameType) {
       const dayIndex = gameDate.getDate() - 1;
-      if (game.result === 'win') {
+      if (game.result === 'W') {
         dailyStats[dayIndex].wins++;
-      } else if (game.result === 'loss') {
+      } else if (game.result === 'L') {
         dailyStats[dayIndex].losses++;
       }
     }

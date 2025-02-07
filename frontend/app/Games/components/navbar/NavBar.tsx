@@ -14,6 +14,7 @@ const NavBar = () => {
     useEffect(() => {
         if (user?.id)
             setUserId(user.id);
+        		// eslint-disable-next-line react-hooks/exhaustive-deps
         }, [user?.id]);
     
     useChatSocket(user?.id || 0);

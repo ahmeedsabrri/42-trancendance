@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
         pathname: '/users/**',
         search: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/photo-1579546929518-9e396f3cc809',
+        search: '',
+      },
     ],
     domains: ['i.ibb.co'], // Add the domain(s) you want to allow
   },

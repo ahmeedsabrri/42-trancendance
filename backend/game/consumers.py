@@ -134,7 +134,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                     loser_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
                     winner_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
 
-                    await save_match_history(group["user2"], self.user, winner_score, loser_score, "PingPong", "Abandoned")
+                    await save_match_history(group["user2"], self.user, winner_score, loser_score, "pingpong", "abandoned")
                     
                     self.winner =  group["PLAYERS"]["PLAYER2"]
                     self.client_name = group["PLAYERS"]["PLAYER2"]["channel_name"]
@@ -142,7 +142,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                     loser_score = group["PLAYERS"]["PLAYER2"]["SCORE"]
                     winner_score = group["PLAYERS"]["PLAYER1"]["SCORE"]
 
-                    await save_match_history(self.user, group["user2"], winner_score, loser_score, "PingPong", "Abandoned")
+                    await save_match_history(self.user, group["user1"], winner_score, loser_score, "pingpong", "abandoned")
                     self.winner =  group["PLAYERS"]["PLAYER1"]
                     self.client_name = group["PLAYERS"]["PLAYER1"]["channel_name"]
 
@@ -159,7 +159,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
             elif (group["game_leader"] == self.channel_name and group["status"] == "Completed"):
                 group = OnlineGameEngine.groups[self.group_id]
 
-                await save_match_history(group["game_winner"], group["game_loser"], self.game_engine.winnerScore, self.game_engine.loserScore, "PingPong", "Finished")
+                await save_match_history(group["game_winner"], group["game_loser"], self.game_engine.winnerScore, self.game_engine.loserScore, "pingpong", "completed")
 
                 group["status"] = "Finished"
 
@@ -262,7 +262,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 print("game abondoned")
 
 @database_sync_to_async
-def save_match_history(winner, loser, winner_score, loser_score, game_type, status='completed'):
+def save_match_history(winner, loser, winner_score, loser_score, game_type, status):
     match_history = MatchHistory.objects.create(
         winner=winner,
         loser=loser,

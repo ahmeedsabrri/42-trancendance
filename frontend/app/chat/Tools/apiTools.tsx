@@ -79,8 +79,8 @@ const fetchMessages = async (conversation_id: number) => {
     source.cancel('Operation canceled by the user.');
 }
 
-const getMatcheHistory = async () => {
-    const response = await api.get(`match_history/`);
+const getMatcheHistory = async (id: number) => {
+    const response = await api.get(`match_history/${id}`);
     console.log(response.data);
     return response.data.matches;
 }

@@ -29,6 +29,7 @@ const useNotificationWebSocket = (url: string) => {
       if (window.location.pathname !== '/chat')
         addNotification(data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage, addNotification]);
 
   // Fetch notifications when the component mounts

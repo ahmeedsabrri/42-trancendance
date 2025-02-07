@@ -11,6 +11,7 @@ const Games = () => {
 
 	useEffect(() => {
 		setWinner(null);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

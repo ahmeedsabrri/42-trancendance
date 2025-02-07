@@ -6,9 +6,6 @@ import { useEffect, useRef, useState } from "react";
 
 const useChatSocket = (user_id: number) => {
 
-    if (user_id === 0)
-        return;
-
     const socket = useRef<WebSocket>(null);
     const queryClient = useQueryClient();
     const [wsActive, setWsActive] = useState(true);

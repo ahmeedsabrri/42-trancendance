@@ -24,8 +24,6 @@ services:
       dockerfile: dockerfile
     env_file:
       - .env
-    ports:
-      - "8000:8000"
     volumes:
       - ./backend:/backend
       - backend_staticfiles:/backend/static
@@ -39,10 +37,10 @@ services:
     container_name: postgres
     image: postgres:latest
     environment:
-      DB_URL: postgresql://${SQL_USER}:${SQL_PASSWORD}@db:5432/${SQL_DB}
-      # POSTGRES_USER: ${SQL_USER}
-      # POSTGRES_PASSWORD: ${SQL_PASSWORD}
-      # POSTGRES_DB: ${SQL_DB}
+      # DB_URL: postgresql://${SQL_USER}:${SQL_PASSWORD}@db:5432/${SQL_DB}
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -54,22 +52,18 @@ services:
     container_name: frontend
     build:
       context: ./frontend
-      # dockerfile: dockerfile
-      target: builder
+      dockerfile: dockerfile
+      # target: runner
     restart: always
-    command: npm run build
+    command: npm run start
     environment:
-      - NODE_ENV=development 
+      - NODE_ENV=production
     volumes:
       - ./frontend:/frontend
       - /frontend/node_modules/
       - /frontend/.next/
-    ports:
-      - 3000:3000
     networks:
       - trancendance-network
-  
-
 networks:
   trancendance-network:
     name: trancendance-network

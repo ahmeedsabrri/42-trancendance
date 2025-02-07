@@ -37,6 +37,7 @@ const FriendConversations = () => {
             }
             // setConversationId(QueryConversationid);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationFetched, user_id]);
 
     const isReady = useDelayedLoading(isLoading, 500);

@@ -6,64 +6,15 @@ import { GameHistoryCard } from '../components/GameHistoryCard';
 import { FriendCard } from '../components/FriendCard';
 import { MonthlyStats } from '../components/MonthlyStats';
 import { GameChart } from '../components/GameChart';
-import { GameHistory } from '../types';
-import { useUserStore } from '../../store/store';
+import { MatchData, useUserStore } from '../../store/store';
 import { useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { UserFriendsActions } from '../utils/actions';
 import { Bounce, toast } from 'react-toastify';
 
-// Mock data
-
-
-const mockUser: any = {
-  id: 5,
-  username: 'john_doe',
-  email: '',
-  first_name: 'John',
-  last_name: 'Doe',
-  level: 42,
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
-  status: 'online',
-  connection_type: 'friend',
-};
-
-const mockGames: GameHistory[] = [
-  {
-    id: 1,
-    type: 'pingpong',
-    opponent: { ...mockUser, id: 1, username: 'Jane Smith' },
-    result: 'win',
-    date: '2024-03-10',
-    score: '21-18',
-  },
-  {
-    id: 2,
-    type: 'tictactoe',
-    opponent: { ...mockUser, id: 2, username: 'Bob Johnson' },
-    result: 'loss',
-    date: '2024-03-09',
-  },
-  {
-    id: 3,
-    type: 'pingpong',
-    opponent: { ...mockUser, id: 4, username: 'Alice Brown' },
-    result: 'win',
-    date: '2024-03-08',
-    score: '21-15',
-  },
-  {
-    id: 4,
-    type: 'tictactoe',
-    opponent: { ...mockUser, id: 5, username: 'Charlie Wilson' },
-    result: 'win',
-    date: '2024-03-07',
-  },
-];
-
 export default function Profile() {
-  const { fetchFriend, user, viewedProfile, loading } = useUserStore();
+  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory} = useUserStore();
   const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
@@ -138,8 +89,10 @@ export default function Profile() {
 
   useEffect(() => {
     const profileToShow = username !== user?.username ? viewedProfile : user;
+    console.log("username of profileToShow his id : ", profileToShow?.username, profileToShow?.id);
     setProfileState(profileToShow);
   }, [user, viewedProfile, username]);
+
   if (!user)
     return ;
   const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend') => {
@@ -187,9 +140,8 @@ export default function Profile() {
   if (!profileState) {
     return <div>Profile not found</div>;
   }
-
   return (
-    <div className="w-full h-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-2 border border-white/10">
+    <div className="w-full h-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-1 border border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
           userProfile={profileState}
@@ -203,11 +155,11 @@ export default function Profile() {
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
               <div className="lg:col-span-2 space-y-8">
-                <MonthlyStats games={mockGames} />
+                <MonthlyStats user_id={profileState.id} />
 
                 <div className="space-y-4">
                   <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Game History</h2>
-                  {mockGames.map((game) => (
+                  {MatchHistory?.map((game: MatchData) => (
                     <GameHistoryCard key={game.id} game={game} />
                   ))}
                 </div>
@@ -227,8 +179,8 @@ export default function Profile() {
             <div className="mt-8 space-y-4">
               <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Monthly Progress</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <GameChart games={mockGames} type="pingpong" title="Ping Pong Progress" />
-                <GameChart games={mockGames} type="tictactoe" title="Tic Tac Toe Progress" />
+                <GameChart games={ MatchHistory || null} type="pingpong" title="Ping Pong Progress" />
+                <GameChart games={MatchHistory || null} type="tictactoe" title="Tic Tac Toe Progress" />
               </div>
             </div>
           </div>

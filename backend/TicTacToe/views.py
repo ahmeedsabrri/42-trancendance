@@ -4,16 +4,20 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import MatchHistorySerializer
 from game.models import MatchHistory
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def getPlayerMatches(request):
+def getPlayerMatches(request, pk):
     try:
-        wins = request.user.match_history_wins.all()
-        losses = request.user.match_history_losses.all()
+        user = User.objects.get(id=pk)
+        wins = user.match_history_wins.all()
+        losses = user.match_history_losses.all()
         matches = wins.union(losses)
         ordered_matches = matches.order_by('played_at')
-        ordered_matches_serialized = MatchHistorySerializer(ordered_matches, many=True)
+        ordered_matches_serialized = MatchHistorySerializer(ordered_matches, many=True, context={'user': user})
 
         return Response({'matches': ordered_matches_serialized.data}, status=status.HTTP_200_OK)
 
