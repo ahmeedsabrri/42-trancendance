@@ -19,6 +19,7 @@ type GameImages = {
     pongTable: string;
     standardBackground: string;
     TicTacToe: string;
+    LandingPage: string;
 }
 
 type ImagePaths = GameIcons & GameImages;
@@ -33,6 +34,7 @@ export const IMAGES: ImagePaths = {
     Ranking: '/game/icons/Ranking.svg',
     Settings: '/game/icons/Settings.svg',
     Stats: '/game/icons/Stats.svg', // Fixed path
+    LandingPage: '/game/images/gameTable.jpeg',
 
     // Game Images
     fontBackground: '/game/images/font_background_picture.png',

@@ -32,9 +32,10 @@ export default function RootLayout({
   const isCallbackRoute = pathname?.startsWith("/auth/callback");
   const isVerifyEmailRoute = pathname?.startsWith("/auth/verify-email");
   const isOtpRoute = pathname?.startsWith("/auth/otp");
+  const isLandingPage = pathname === "/";
 
   // Determine if NavBar and SideBar should be rendered
-  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute || isOtpRoute);
+  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute || isOtpRoute || isLandingPage);
 
   return (
     <html lang="en" className={`${orbitron.variable}`}>

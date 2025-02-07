@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
   const isExcludedRoute =
   pathname.startsWith("/auth/callback") ||
   pathname.startsWith("/auth/verify-email") || 
-  pathname.startsWith("/auth/otp")
+  pathname.startsWith("/auth/otp") || pathname == "/"
 
 
   if (isExcludedRoute) {

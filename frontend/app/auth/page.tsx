@@ -57,7 +57,7 @@ function AuthContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 animate-slide-down">
       <div className="w-full max-w-7xl h-auto md:h-[700px] bg-white/10 rounded-3xl rounded-tl-[8rem] rounded-br-[8rem] overflow-hidden backdrop-blur-md shadow-2xl flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 flex flex-col justify-between relative">
           <Image
