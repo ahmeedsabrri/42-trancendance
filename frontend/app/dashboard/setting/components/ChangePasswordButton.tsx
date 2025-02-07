@@ -19,7 +19,7 @@ export default function ChangePasswordButton() {
                     <DialogHeader>
                         <DialogTitle className="text-white font-bold">Change Password</DialogTitle>
                         <DialogDescription>
-                            Make changes to your Password here. Click save when you're done.
+                            Make changes to your Password here. Click save when you&apos;re done.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">

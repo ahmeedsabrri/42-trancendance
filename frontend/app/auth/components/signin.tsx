@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthActions } from "../utils";
 import { useRouter } from "next/navigation";
-import OTP from "../otp/page";
+import OTP from "../otp/OTP";
 import { Bounce, toast } from "react-toastify";
 
 type FormData = {

@@ -1,12 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 
 import type { Notificationdata } from '../types/notification';
 import Avatar from "../Avatar";
 import { redirect } from 'next/navigation';
-import { useGameStateStore } from '@/app/Games/store/CanvasStore';
 import { useRouter } from 'next/navigation'
-import { useGameStore } from '@/app/Games/store/GameStore';
 
 interface NotificationPanelProps {
   notifications: Notificationdata[];
@@ -31,7 +29,6 @@ export function NotificationPanel({
 }: NotificationPanelProps) {
 
   const router = useRouter();
-  const { setGameMode, resetInvitedId } = useGameStore();
 
   return (
     <div className="absolute top-full right-0 mt-2 w-96 max-h-[32rem] overflow-hidden bg-white/10 backdrop-blur-2xl border border-white/20 rounded-lg shadow-xl flex flex-col z-50">

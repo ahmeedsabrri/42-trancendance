@@ -6,25 +6,12 @@ import { useEffect, useRef } from "react";
 import { useGameStore } from "../../store/GameStore";
 
 const Scores = () => {
-    interface TournamentProps {
-        name: string | null
-    }
 
     interface TournamentPlayers {
         first_player_name: string | null,
         second_player_name: string | null
     }
 
-    const TournamentNames: React.FC<TournamentProps> = ({ name }) => {
-        return (
-            <>
-                <Avatar width={70} height={70} avatar={player1info.avatar} />
-                <span className="text-white font-semibold">
-                    {name}
-                </span>
-            </>
-        )
-    }
     const { player1info, player2info, player1, player2 } = useGameStateStore();
 
     const player1ScoreRef = useRef(player1.score);

@@ -2,34 +2,32 @@
 'use client';
 import Link from 'next/link';
 import ProfileInfo from './ProfileInfo';
-import Cookies from 'js-cookie';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
 import { AuthActions } from '@/app/auth/utils';
 import { useUserStore } from '@/app/store/store';
 import { NotificationBell } from './components/NotificationBell';
 import { NotificationPanel } from './components/NotificationPanel';
-import { use, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CircleChevronDown } from 'lucide-react';
-// import { useRouter } from 'next/router';
 import useNotificationStore from './store/WebsocketNotifStore';
 import { Bounce, toast } from 'react-toastify';
 import { UserFriendsActions } from '@/app/profile/utils/actions';
-import useWebSocket from 'react-use-websocket';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
 import { useGameStore } from '@/app/Games/store/GameStore';
-import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
 
 const Profile = () => {
 
-  const {readyState} = useNotificationWebSocket("wss://localhost/ws/notifications/");
+  useNotificationWebSocket("wss://localhost/ws/notifications/");
+
   const { user } = useUserStore();
   const { logout } = AuthActions();
   const {notifications,markAsRead,unreadCount,removeNotification} = useNotificationStore();
@@ -151,10 +149,6 @@ const Profile = () => {
         notifyErr(err.response.data.message);
       });
   };
-  const handelRmoveNotification = (id:number) => {
-    console.log(`Remove notification with id ${id}`);
-    // notifications.pop(id);
-  }
 
   const handlePanelOpen = () => {
     setIsOpen(!isOpen);

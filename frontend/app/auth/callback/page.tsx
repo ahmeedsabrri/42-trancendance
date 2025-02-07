@@ -7,8 +7,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AuthActions } from "../utils";
 
 
-
-
 export default function CallbackPage() {
 const router = useRouter();
 const [error, setError] = useState<string | null>(null);

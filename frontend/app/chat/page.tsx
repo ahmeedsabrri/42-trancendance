@@ -1,6 +1,5 @@
 "use client";
 
-import useChatSocket from "@/hooks/useChatSocket";
 import ConversationSide from "./Components/ConversationSide/ConversationSide";
 import FriendsSide from "./Components/FriendSide/FriendsSide";
 

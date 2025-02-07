@@ -13,7 +13,7 @@ def getPlayerMatches(request):
         losses = request.user.match_history_losses.all()
         matches = wins.union(losses)
         ordered_matches = matches.order_by('played_at')
-        ordered_matches_serialized = MatchHistorySerializer(ordered_matches, many=True, context={'request': request})
+        ordered_matches_serialized = MatchHistorySerializer(ordered_matches, many=True)
 
         return Response({'matches': ordered_matches_serialized.data}, status=status.HTTP_200_OK)
 

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import CustomButton from "../utils/CutsomButton";
-import ProfileScroller from "../utils/ProfileScroller";
 import { useGameStore } from "../../store/GameStore";
 import { useUserStore } from "@/app/store/store";
 import { useEffect } from "react";
@@ -16,20 +15,20 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
 
   const { currentGame, isReversed, showContent, gameContent, handleGameSwitch, handleCurrentState, label } = useGameStore();
   const { user } = useUserStore();
-  const { resetTournamentPlayer, setTournamentMatch, setIsTournament, resetInvitedId} = useGameStore()
+  const { resetTournamentPlayer, setTournamentMatch, setIsTournament, resetInvitedId } = useGameStore()
 
   const isActive = gameType === 'pingpong' ? !isReversed : isReversed;
   const content = gameContent[gameType];
 
   useEffect(() => {
-      resetInvitedId();
+    resetInvitedId();
   }, []);
 
   return (
     <div
       className={`transition-all duration-700 ease-in-out ${isActive
-          ? 'w-full rounded-3xl'
-          : 'w-14 rounded-lg cursor-pointer overflow-hidden'
+        ? 'w-full rounded-3xl'
+        : 'w-14 rounded-lg cursor-pointer overflow-hidden'
         } h-full relative`}
       onClick={!isActive ? handleGameSwitch : undefined}
     >
@@ -62,7 +61,13 @@ const GamePanel = ({ gameType }: GamePanelProps) => {
               <Link href={content.gameLink}>
                 <CustomButton
                   label="START"
-                  onClick={() => { ((label === "PAUSE" && handleCurrentState()), setIsTournament(false), setTournamentMatch(null)) }}
+                  onClick={() => {
+                    if (label === "PAUSE") {
+                      handleCurrentState();
+                    }
+                    setIsTournament(false);
+                    setTournamentMatch(null);
+                  }}
                   className="text-white text-4xl font-bold bg-gray-800 bg-opacity-30 backdrop-blur-xl px-16 py-5 hover:bg-opacity-10 rounded-3xl border border-white/10"
                 />
               </Link>

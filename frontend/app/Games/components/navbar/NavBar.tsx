@@ -1,24 +1,23 @@
 'use client'
 
-import useChatSocket from "@/hooks/useChatSocket";
-import SearchBar from "./SeachBar";
-import SearchList from "./SearchList";
-import Profile from "./profilebar/Profile";
 import { useUserStore } from "@/app/store/store";
-import { useEffect } from "react";
+import SearchBar from "./SeachBar";
+import Profile from "./profilebar/Profile";
 import { useChatStore } from "@/app/store/chatStore";
+import { useEffect } from "react";
+import useChatSocket from "@/hooks/useChatSocket";
 
 const NavBar = () => {
-
     const {user} = useUserStore();
     const setUserId = useChatStore((state) => state.setUserId);
 
     useEffect(() => {
-        if (user)
+        if (user?.id)
             setUserId(user.id);
-    }, [user?.id]);    
+        }, [user?.id]);
+    
+    useChatSocket(user?.id || 0);
 
-    useChatSocket(user?.id);
 
     return (
         <div className="flex justify-center items-center w-full h-[90px] ">

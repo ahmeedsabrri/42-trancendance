@@ -1,4 +1,4 @@
-import { UserData, useUserStore } from "@/app/store/store";
+import { useUserStore } from "@/app/store/store";
 import { Conversation, useChatStore } from "@/app/store/chatStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { Message } from "postcss";
@@ -6,16 +6,17 @@ import { useEffect, useRef, useState } from "react";
 
 const useChatSocket = (user_id: number) => {
 
+    if (user_id === 0)
+        return;
+
     const socket = useRef<WebSocket>(null);
-    const {user} = useUserStore();
+    const queryClient = useQueryClient();
     const [wsActive, setWsActive] = useState(true);
     
-    const queryClient = useQueryClient();
+    const {user} = useUserStore();
     const {setSocket, setEventMessage, setUserId} = useChatStore();
     
     useEffect(() => {
-
-        console.log("useChatSocket");
 
         socket.current = new WebSocket(`wss://localhost/ws/chat/`);
         
@@ -23,10 +24,10 @@ const useChatSocket = (user_id: number) => {
             return;
 
         socket.current.onopen = () => {
-            // console.log("Chat socket connected");
+            console.log("Chat socket connected");
+
             if (socket.current && user_id)
             {
-                // console.log("Chat socket connected with user_id: ", user_id);
                 setSocket(socket.current);
                 setUserId(user_id);
             }
@@ -35,12 +36,6 @@ const useChatSocket = (user_id: number) => {
         socket.current.onmessage = (e) => {
             setEventMessage(e);
             const message = JSON.parse(e.data);
-            console.log("Message received: ", message);
-            console.log("Messages: ", queryClient.getQueryData(["messages", message.conversation_id])); 
-            if (!queryClient.getQueryData(["messages", message.conversation_id])) {
-                console.log("Invalidating messages");
-                queryClient.invalidateQueries({ queryKey: ["messages", message.conversation_id] });
-            }
             
             queryClient.setQueryData(
                 ["messages", message.conversation_id],
@@ -81,14 +76,12 @@ const useChatSocket = (user_id: number) => {
 
             if (event.wasClean) {
                 console.log(`WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`);
-            } else {
-                console.log("WebSocket connection closed unexpectedly");
             }
 
             setTimeout(() => {
                 setWsActive(false);
             }
-            , 2000);
+            , 4000);
         }
 
         socket.current.onerror = (error) => {
@@ -98,7 +91,7 @@ const useChatSocket = (user_id: number) => {
         return () => {
             socket.current?.close();
         }
-    }, [wsActive, user_id, queryClient, setEventMessage, setSocket, setUserId]);
+    }, [wsActive, user_id]);
 
     return socket.current;
 };

@@ -16,15 +16,15 @@ export interface UserData {
     avatar: string;
     status: string;
     connection_type: string;
-    sender: string;
+    sender: string | null;
     is_online: boolean;
     otp_uri: string;
     twofa_enabled: boolean;
 }
 
 interface UserStore {
-    user: UserData;
-    viewedProfile: UserData,
+    user: UserData | null;
+    viewedProfile: UserData | null,
     loading: boolean;
     error: string | null;
     isInitialized: boolean;

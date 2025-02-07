@@ -45,7 +45,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Build the project
-RUN yarn build
+RUN npm run build
 
 # -----------------------------------------------------------
 # Stage 4: Production-ready image

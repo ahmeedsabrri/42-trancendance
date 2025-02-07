@@ -10,7 +10,7 @@ const Games = () => {
 	const { setWinner } = useGameStateStore();
 
 	useEffect(() => {
-		setWinner('');
+		setWinner(null);
 	}, []);
 
 	return (

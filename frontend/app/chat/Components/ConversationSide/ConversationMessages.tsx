@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import MessageComp from "./MessageComp";
 import { fetchMessages } from "../../Tools/apiTools";
 import { Message, useChatStore} from "@/app/store/chatStore";
 import MessagesSkeleton from "../utils/MessagesSkeleton";
 import useDelayedLoading from "../utils/utils";
-import { set } from "react-hook-form";
 
 const ConversationMessages = () => {
 
@@ -55,7 +54,7 @@ const ConversationMessages = () => {
                     isReady ? <MessagesSkeleton/> : isError ? <h1 className="text-xl text-text_message_color">Error</h1> :
                         Array.isArray(fetchedMessages) ? fetchedMessages.map((message: Message) => {
                             return <MessageComp message={message} key={message.id} />
-                        }) : <h1 className="text-xl text-text_message_color">Let's get Started</h1>
+                        }) : <h1 className="text-xl text-text_message_color">Let&apos;s get Started</h1>
                 }
             </ul>
         </div>

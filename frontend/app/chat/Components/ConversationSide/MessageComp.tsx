@@ -1,5 +1,5 @@
-import Avatar from "@/components/navbar/profilebar/Avatar";
-import {Message} from "@/app/stores/chatStore";
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
+import {Message} from "@/app/store/chatStore";
 import { timeHandle } from "@/app/chat/Components/utils/utils";
 import { memo } from "react";
 import { useUserStore } from "@/app/store/store";
@@ -38,5 +38,7 @@ const MessageComp: React.FC<MessageProps> = memo(({message}) => {
         </div>
     )
 });
+
+MessageComp.displayName = "MessageComp";
 
 export default MessageComp;

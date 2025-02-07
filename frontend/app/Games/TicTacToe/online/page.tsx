@@ -251,7 +251,7 @@ const TicTac = () => {
                                         <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
                                             {board.map((cell, index) =>
                                                 <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    <img src={(board[index] !== '') ? board[index] : null} />
+                                                    <img src={(board[index] !== '') ? board[index] : ''} />
                                                 </div>)}
                                         </div>
                                     </div>

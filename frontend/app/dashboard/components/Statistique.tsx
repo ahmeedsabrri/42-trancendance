@@ -1,28 +1,32 @@
 "use client";
 
-import { BarChart, Bar, ResponsiveContainer, defs, linearGradient, CartesianGrid, XAxis, YAxis, filter, Tooltip } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { useEffect, useState } from 'react';
 import { getMatcheHistory } from '@/app/chat/Tools/apiTools';
-import { timeHandle } from '@/app/chat/Components/utils/utils';
 
 // Custom Tooltip Component
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
-        <p>{`Match: ${label}`}</p>
-        <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
-        <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
-      </div>
-    );
-  }
+// const CustomTooltip = ({ active, payload, label }: {active: string, payload: object, label: string}) => {
+//   if (active && payload && payload.length) {
+//     const data = payload[0].payload;
+//     return (
+//       <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
+//         <p>{`Match: ${label}`}</p>
+//         <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
+//         <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
+//       </div>
+//     );
+//   }
 
-  return null;
-};
+//   return null;
+// };
+
+interface Match {
+  user_score: number;
+  status: string
+}
 
 const Statistique = () => {
-  const [Matches, setMatches] = useState<any>();
+  const [Matches, setMatches] = useState<Match[]>();
 
   useEffect(() => {
     getMatcheHistory().then((data) => {
@@ -32,7 +36,7 @@ const Statistique = () => {
 
   if (!Matches) return null;
 
-  const updatedData = Matches.map((match: any, index: number) => {
+  const updatedData = Matches.map((match: Match, index: number) => {
     return {
       name: `match ${index + 1}`,
       user_score: match.user_score,
@@ -62,10 +66,10 @@ const Statistique = () => {
               </filter>
             </defs>
             <CartesianGrid strokeDasharray="1 8" vertical={false} stroke="rgba(255, 255, 255, 0.25)" />
-            <Tooltip
+            {/* <Tooltip
               content={<CustomTooltip />} // Use the custom tooltip component
               cursor={{fill: "transparent"}}
-            />
+            /> */}
             <XAxis
               dataKey="name"
               interval={0}

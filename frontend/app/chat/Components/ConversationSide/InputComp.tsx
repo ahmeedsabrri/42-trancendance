@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import document_icon from '../../../../public/chat/conversationSide/documents_icon.png';
 import React, { useRef, useState } from 'react';
 import { sendMessage } from '../../Tools/wstools';
 import sendIcon from '../../../../public/chat/conversationSide/Send_hor.svg';
@@ -28,7 +27,7 @@ const InputComp = () => {
             setOkToSend(false);
     }
 
-    const sendFun = (e: any) => {
+    const sendFun = (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
 
         e.preventDefault();
         const msg = message?.trim();

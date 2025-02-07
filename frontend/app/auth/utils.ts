@@ -10,18 +10,17 @@ const api = axios.create({
 });
 
 // src/app/auth/utils.ts
-interface UserInfo {
-  id: number;
-  username: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  twofa_enabled?: boolean;
-  otp_uri: string;
-  level: number;
-}
-
+// interface UserInfo {
+//   id: number;
+//   username: string;
+//   email?: string;
+//   first_name?: string;
+//   last_name?: string;
+//   avatar?: string;
+//   twofa_enabled?: boolean;
+//   otp_uri: string;
+//   level: number;
+// }
 
 const getToken = (type  = "jwt_token") => {
   return cookies.get(type);

@@ -1,15 +1,15 @@
 "use client";
 
-import { useUser } from "@/app/context/userContext";
-import Avatar from "@/components/navbar/profilebar/Avatar";
+import { useUserStore } from "@/app/store/store";
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function UpdateProfile() {
     // const userRef = useRef<HTMLInputElement | null>(null);
     // const [username, setUsername] = useState("");
     const Avatarinput = useRef<HTMLInputElement>(null);
-    const { user } = useUser();
+    const { user } = useUserStore();
     const [showEmail, setShowEmail] = useState(false);
     const [ShowInput, setShowInput] = useState(false);
 
@@ -26,7 +26,7 @@ export default function UpdateProfile() {
         
         
         <div className="w-24 h-20 flex items-center justify-center relative border-2 border-white/10 rounded-full">
-            <Avatar width={90} height={70} avatar={user?.avatar}/>
+            <Avatar width={90} height={70} avatar={user?.avatar || ""}/>
             <input type="file" name="avatar" id="avatar" className="absolute right-[9999px]" ref={Avatarinput}/>
             <Image src="/images/upload.svg" alt="" width={20} height={20} className="absolute top-20 bottom-0 right-0 left-7 opacity-50 cursor-pointer" onClick={()=> {
                 Avatarinput.current?.click();
