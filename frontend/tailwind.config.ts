@@ -60,7 +60,8 @@ export default {
   		},
   		backgroundImage: {
   			'footer-texture': "url('/img/footer-texture.png')",
-  			'background': "url('/images/StandardBackground.png')"
+  			'background': "url('/images/StandardBackground.png')",
+			'landingPage': "url('/images/gameTable.jpeg')",
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

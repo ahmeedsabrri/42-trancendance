@@ -22,11 +22,13 @@ import { UserFriendsActions } from '@/app/profile/utils/actions';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
 import { useGameStore } from '@/app/Games/store/GameStore';
 import { useRouter } from 'next/navigation';
+import { useUserFriendsStore } from '@/app/store/UserFriendsStrore';
 
 
 const Profile = () => {
 
   useNotificationWebSocket("wss://localhost/ws/notifications/");
+  const { fetchOwnFriends } = useUserFriendsStore();
 
   const { user } = useUserStore();
   const { logout } = AuthActions();
@@ -73,6 +75,18 @@ const Profile = () => {
     transition: Bounce,
   });
 
+  const notifUnfriend = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+
   // Handle notification click
   const handleNotificationClick = () => {
     setShowPanel(!showPanel);
@@ -91,6 +105,7 @@ const Profile = () => {
     .then((res) => {
       console.log(res.data.message);
       notifAccept(res.data.message);
+      fetchOwnFriends();
     })
     .catch((err) => {
       notifyErr(err.response.data.message);

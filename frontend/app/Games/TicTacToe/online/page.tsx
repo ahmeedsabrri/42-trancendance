@@ -261,9 +261,10 @@ const TicTac = () => {
                                                 </div>)}
                                         </div>
                                     </div>
-                                    <ExitButton />
                                 </div>
                             )}
+                        <ExitButton />
+
                     </div>
                 </div>
             </main >

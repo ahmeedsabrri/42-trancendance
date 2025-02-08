@@ -9,6 +9,7 @@ import { useUserStore } from "@/app/store/store";
 import { UserFriendsData, useUserFriendsStore } from "@/app/store/UserFriendsStrore";
 import React from "react";
 import FriendsSkeleton from "../utils/FriendsSkeleton";
+import { useEffect } from "react";
 
 const Inputcomponent = () => {
     const setSearch = useChatStore((state) => state.setSearch);
@@ -40,13 +41,14 @@ const FriendShow = () => {
     const setConversationSelected = useChatStore((state) => state.setConversationSelected);
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const search = useChatStore((state) => state.search);
-    const { fetchOwnFriends, UserOwnfriends} = useUserFriendsStore();
-    const friends: UserFriendsData[] = UserOwnfriends || [];
+    const { UserOwnfriends} = useUserFriendsStore();
+    // const friends: UserFriendsData[] = UserOwnfriends || [];
+    const [friends, setFriends] = React.useState<UserFriendsData[]>(UserOwnfriends);
     const [IsLoading] = React.useState(false);
-    
-    React.useEffect(() => {
-      fetchOwnFriends();
-    }, [UserOwnfriends, fetchOwnFriends]);
+
+    useEffect(() => {
+        setFriends(UserOwnfriends);
+    }, [UserOwnfriends]);
 
     const handleNewConversation = async ( currentUser: UserFriendsData ) => {
 

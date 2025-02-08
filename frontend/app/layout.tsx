@@ -12,6 +12,10 @@ import SideBar from "@/components/sidebar/Sidebar";
 import NavBar from "./Games/components/navbar/NavBar";
 import { ToastContainer, Bounce } from "react-toastify";
 import { Orbitron } from 'next/font/google';
+import { useEffect } from "react"; 
+import { useUserStore } from "./store/store";
+import { useUserFriendsStore } from "./store/UserFriendsStrore";
+
 
 // Configure the font
 const orbitron = Orbitron({
@@ -26,20 +30,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { fetchUser, user, isInitialized } = useUserStore();
+  const { fetchOwnFriends } = useUserFriendsStore();
+
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchUser();
+      fetchOwnFriends();
+    }
+  }, [isInitialized, fetchUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Define routes where NavBar and SideBar should not be rendered
   const isAuthRoute = pathname === "/auth";
   const isCallbackRoute = pathname?.startsWith("/auth/callback");
   const isVerifyEmailRoute = pathname?.startsWith("/auth/verify-email");
   const isOtpRoute = pathname?.startsWith("/auth/otp");
+  const isLandingPage = pathname === "/";
 
   // Determine if NavBar and SideBar should be rendered
-  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute || isOtpRoute);
+  const shouldRenderNavAndSideBar = !(isAuthRoute || isCallbackRoute || isVerifyEmailRoute || isOtpRoute || isLandingPage);
 
   return (
     <html lang="en" className={`${orbitron.variable}`}>
       <body className={shouldRenderNavAndSideBar ? "w-screen h-screen font-orbitron overflow-hidden flex justify-center items-center bg-background bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl" : "bg-background font-orbitron bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl"}>
-        {shouldRenderNavAndSideBar && (
+        {shouldRenderNavAndSideBar && user && (
           <>
             <div className="w-[90%] h-[90%] flex justify-start items-center ">
               <QueryClientProvider client={queryClient}>

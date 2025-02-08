@@ -17,7 +17,7 @@ const Game = () => {
 
     const mode = useParams().mode;
 
-    const { winner, game_status, countdown, setWinner } = useGameStateStore();
+    const { winner, game_status, countdown, setWinner, resetCountdown, resetInvitedCountdown, resetPlayersInfo, resetScores } = useGameStateStore();
     const winnerRef = useRef(winner.fullname);
     const avatarRef = useRef(winner.avatar);
 
@@ -48,6 +48,10 @@ const Game = () => {
 
     useEffect(() => {
         return (() => {
+            resetCountdown();
+            resetInvitedCountdown();
+            resetPlayersInfo();
+            resetScores();
             setWinner(null);
         }) // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -61,7 +65,7 @@ const Game = () => {
     }, [winner, game_status]);
 
     const ScoresContent = () => {
-        if (mode === "local" || (game_status === "ready" && countdown == 0))
+        if (mode === "local" || (game_status === "ready" && countdown == 0) || winnerRef.current)
             return <Scores />;
         return null;
     }
@@ -74,7 +78,7 @@ const Game = () => {
                 <Link href={"/tournament/local"}>
                     <CustomButton
                         label="CONTINUE"
-                        className="mt-48 text-white text-4xl font-bold bg-amber-300 bg-opacity-30 backdrop-blur-xl px-16 py-6 hover:bg-opacity-40 rounded-3xl outline-none"
+                        className="mt-28 text-white text-4xl font-bold bg-amber-300 bg-opacity-30 backdrop-blur-xl px-16 py-6 hover:bg-opacity-40 rounded-3xl outline-none"
                         onClick={() => { handleCurrentState() }}
                     />
                 </Link>
@@ -88,7 +92,7 @@ const Game = () => {
                 <Link href={"/Games"}>
                     <CustomButton
                         label="EXIT"
-                        className="mt-48 text-white text-4xl font-bold bg-amber-300 bg-opacity-30 backdrop-blur-xl px-16 py-6 hover:bg-opacity-40 rounded-3xl outline-none"
+                        className="mt-28 text-white text-4xl font-bold bg-amber-300 bg-opacity-30 backdrop-blur-xl px-16 py-6 hover:bg-opacity-40 rounded-3xl outline-none"
                     />
                 </Link>
             )
