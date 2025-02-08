@@ -12,11 +12,6 @@ import { useGameStore } from '../../store/GameStore';
 
 const TicTac = () => {
 
-    const images = {
-        X: '/game/images/X.png',
-        O: '/game/images/O.png',
-    }
-
     type CellValue = string | '';
 
 
@@ -70,8 +65,6 @@ const TicTac = () => {
         }
     }
         , [])
-    if (gameOver)
-        return <Winner winner={winner.current} winner_avatar={null} reason="GAME FINISHED" />
 
     function resetGame() {
         const resetBoard = Array(9).fill('');
@@ -80,17 +73,14 @@ const TicTac = () => {
     function handleClick(index: number): void {
         if (board[index] !== '')
             return;
-        else
-        {
+        else {
             const newBoard: CellValue[] = [...board];
-            if (mark === 'X')
-            {
-                newBoard[index] = images.X
+            if (mark === 'X') {
+                newBoard[index] = IMAGES.X
                 setMark('O')
             }
-            else
-            {
-                newBoard[index] = images.O
+            else {
+                newBoard[index] = IMAGES.O
                 setMark('X')
             }
             setBoard(newBoard);
@@ -140,25 +130,7 @@ const TicTac = () => {
                                 </div>
                             </div>
                         </div>
-                        {gameOver ?
-                            (
-                                <>
-                                    <Winner winner={winner.current} winner_avatar={null} reason="GAME FINISHED" />
-                                    <ExitButton />
-                                </>
-                            )
-                            : (
-                                <div className='h-full w-full flex items-center justify-center flex-col'>
-                                    <div className={` ${GameBoardColor} h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none`}>
-                                        <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
-                                            {board.map((cell, index) =>
-                                                <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    <Image src={board[index] !== '' ? board[index] : ''} alt="cell" fill={true} />
-                                                </div>)}
-                                        </div>
-                                    </div>
-                                    <ExitButton />
-                                </div>)}
+                        {gameOver ?  <Winner winner={winner.current} winner_avatar={null} reason="GAME FINISHED" /> : <ExitButton />}
                     </div>
                 </div>
             </main >

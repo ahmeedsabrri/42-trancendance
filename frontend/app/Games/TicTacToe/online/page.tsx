@@ -40,18 +40,18 @@ const TicTac = () => {
     }
 
     interface WebSocketMessage {
-        action: 'identify_players' | 'game_started' | 'score_update' | 'player_won' | 'board_update' |'draw'; 
+        action: 'identify_players' | 'game_started' | 'score_update' | 'player_won' | 'board_update' | 'draw';
         username: string | null;
         opponent_username: string | null;
         user_avatar: string | null;
         opponent_avatar: string | null;
-        mark: 'X' | 'O'; 
+        mark: 'X' | 'O';
         turn: boolean;
-        position: number; 
+        position: number;
         board: CellValue[];
         score: number;
         opponent_score: number;
-        reason: 'GAME FINISHED' | 'OPPONENT DISCONNECTED'; 
+        reason: 'GAME FINISHED' | 'OPPONENT DISCONNECTED';
         sender: string;
         avatar: string;
     }
@@ -72,8 +72,8 @@ const TicTac = () => {
         onClose: () => console.log('WebSocket disconnected'),
     });
 
-    const { GameBoardColor, setTicTacOpponent} = useGameStore()
-    const [isInGame, setIsInGame] = useState<boolean>(false);
+    const { GameBoardColor, setTicTacOpponent } = useGameStore()
+    // const [isInGame, setIsInGame] = useState<boolean>(false);
     const [isMyTurn, setIsMyTurn] = useState<boolean>(false);
     const [board, setBoard] = useState<CellValue[]>(Array(9).fill(''));
     const [gameOver, setGameOver] = useState<boolean>(false);
@@ -94,11 +94,12 @@ const TicTac = () => {
     const updateBoard = useRef<CellValue[]>(board);
 
     useEffect(() => {
-        if (isWaiting && !isInGame) {
+        if (gameOver) {
+            console.log("disconnect from useEffect")
             websocket.current?.close();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [gameOver, setGameOver])
 
 
     useEffect(() => {
@@ -116,7 +117,7 @@ const TicTac = () => {
 
                 case 'game_started':
                     await new Promise(resolve => setTimeout(resolve, 3000));
-                    setIsInGame(true);
+                    // setIsInGame(true);
                     setIsWaiting(false);
                     if (lastJsonMessage.turn)
                         setIsMyTurn(true)
@@ -126,13 +127,11 @@ const TicTac = () => {
 
                 case 'score_update':
                     const scoreObj: Scores = { score: 0, opponent_score: 0 };
-                    if (lastJsonMessage.sender === user.current.username)
-                    {
+                    if (lastJsonMessage.sender === user.current.username) {
                         scoreObj.score = lastJsonMessage.score;
                         scoreObj.opponent_score = lastJsonMessage.opponent_score;
                     }
-                    else
-                    {
+                    else {
                         scoreObj.score = lastJsonMessage.opponent_score;
                         scoreObj.opponent_score = lastJsonMessage.score
                     }
@@ -164,7 +163,7 @@ const TicTac = () => {
         }
         handleMessage()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         , [lastJsonMessage])
 
 
@@ -178,12 +177,10 @@ const TicTac = () => {
     }
 
     function handleClick(index: number): void {
-        if (!isMyTurn)
-            return;
-        if (board[index] !== '')
+        if (!isMyTurn || board[index] !== '')
             return;
         const newBoard: CellValue[] = [...board];
-        if ( user.current.mark === 'X')
+        if (user.current.mark === 'X')
             newBoard[index] = IMAGES.X
         else
             newBoard[index] = IMAGES.O
@@ -242,24 +239,31 @@ const TicTac = () => {
                                 </div>
                             </div>
                         </div>
-                        {gameOver ?
-                            <>
-                                <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} reason={user.current.winner.reason} />
-                                <ExitButton />
-                            </>
+                        {gameOver ? <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} reason={user.current.winner.reason} />
+
                             : (
                                 <div className='h-full w-full flex items-center justify-center flex-col'>
                                     <div className={` ${GameBoardColor} h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none`}>
                                         <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
                                             {board.map((cell, index) =>
-                                                <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    <Image src={board[index as number] !== '' ? board[index as number] : ''} alt="cell" fill={true} />
+                                                <div key={index} className="flex justify-center items-center border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
+                                                    {cell !== '' ?
+                                                        (
+                                                        <Image
+                                                            src={cell}
+                                                            alt="cell"
+                                                            height={100}
+                                                            width={100}
+                                                        />)
+                                                        :
+                                                        ''
+                                                    }
                                                 </div>)}
                                         </div>
                                     </div>
                                     <ExitButton />
                                 </div>
-                                )}
+                            )}
                     </div>
                 </div>
             </main >
