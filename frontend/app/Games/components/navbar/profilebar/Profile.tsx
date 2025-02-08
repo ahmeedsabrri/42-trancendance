@@ -36,7 +36,7 @@ const Profile = () => {
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setInvitedId, inviter_id, setGameMode} = useGameStore();
+  const { setInvitedId, inviter_id } = useGameStore();
   const router = useRouter();
 
   const notifAccept = (message:string) => toast(message,{
@@ -126,8 +126,7 @@ const Profile = () => {
   };
 
   const handleAcceptInvite = async (username: string) => {
-    
-    setGameMode("online");
+
     setInvitedId(`${user?.id}-${inviter_id}`);
     handleRequest(username, "acceptInvite")
     .then((res) => {

@@ -16,7 +16,7 @@ import { UserFriendsActions } from "@/app/profile/utils/actions";
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
-    const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
+    const {invited_id, setInvitedId, resetInvitedId } = useGameStore();
     const {user} = useUserStore();
     const { handleRequest } = UserFriendsActions();
 
@@ -31,7 +31,6 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
         
         resetInvitedId();
         setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
-        setGameMode("online");
 
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {
