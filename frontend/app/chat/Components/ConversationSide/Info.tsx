@@ -16,7 +16,7 @@ import { UserFriendsActions } from "@/app/profile/utils/actions";
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
-    const {invited_id, setInvitedId, resetInvitedId } = useGameStore();
+    const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
     const {user} = useUserStore();
     const { handleRequest } = UserFriendsActions();
 
@@ -25,12 +25,10 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
     }, [invited_id]);
 
     const handlePingPongNotifyAdd = () => {
-        console.log("user_id info", conversationSelected?.userTarget?.id);
-        // setWinner(null);
-        console.log("manage. stt")
-        
+
         resetInvitedId();
         setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
+        setGameMode("online");
 
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {

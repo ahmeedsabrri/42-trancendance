@@ -1,17 +1,15 @@
 'use client'
 import Link from "next/link";
 import CustomButton from "../components/utils/CutsomButton";
-import { useGameStore } from "../store/GameStore";
 import { IMAGES } from "@/public/index";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useGameStateStore } from "../store/CanvasStore";
+import { useGameStore } from "../store/GameStore";
 
 
 const ChooseBackground = () => {
 
-    const { GameBoardColor, setGameBoardColor, getGamePath } = useGameStore();
-    const invited_id = useGameStateStore();
+    const { GameBoardColor, invited_id, setGameBoardColor, getGamePath } = useGameStore();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [isFirstRender, setIsFirstRender] = useState(true);
 
@@ -36,7 +34,8 @@ const ChooseBackground = () => {
 
 
     const Content = () => {
-        if (invited_id)
+        if (invited_id) {
+            console.log(invited_id);
             return (
                 <Link href={"/Games/PingPong/online"}>
                     <CustomButton
@@ -48,6 +47,7 @@ const ChooseBackground = () => {
                     />
                 </Link>
                 )
+        }
         else {
             return (
                 <Link href={GameBoardColor ? getGamePath() : ""}>
