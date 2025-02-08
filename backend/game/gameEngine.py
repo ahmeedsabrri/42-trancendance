@@ -389,7 +389,7 @@ class OnlineGameEngine:
                     "W": self.GAME_INFO["PLAYER_WIDTH"],
                     "H": self.GAME_INFO["PLAYER_HEIGHT"],
                     "SCORE": 0,
-                    "avatar": f'{user.avatar}',
+                    "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
                 }
                 group_info["status"] = "ready"
@@ -413,7 +413,7 @@ class OnlineGameEngine:
                     "W": self.GAME_INFO["PLAYER_WIDTH"],
                     "H": self.GAME_INFO["PLAYER_HEIGHT"],
                     "SCORE": 0,
-                    "avatar": f'{user.avatar}',
+                    "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
                 },
                 "PLAYER2": None,

@@ -21,10 +21,9 @@ const Game = () => {
     const winnerRef = useRef(winner.fullname);
     const avatarRef = useRef(winner.avatar);
 
-    const {tournament_match, is_tournament, tournament_players, setTournamentPlayers, handleCurrentState} = useGameStore()
+    const { tournament_match, is_tournament, tournament_players, setTournamentPlayers, handleCurrentState } = useGameStore()
 
-    function setWinnerInTournament(player_winner:string|null)
-    {
+    function setWinnerInTournament(player_winner: string | null) {
         if (tournament_match === "first match") {
             if (player_winner === "player1") {
                 setTournamentPlayers(tournament_players[0], 4);
@@ -70,8 +69,8 @@ const Game = () => {
         return null;
     }
 
-    const WinnerCardOrCanvas = winnerRef.current ? <Winner winner={winnerRef.current} winner_avatar={avatarRef.current} reason={winner.reason}/> : <Canvas />;
-    
+    const WinnerCardOrCanvas = winnerRef.current ? <Winner winner={winnerRef.current} winner_avatar={avatarRef.current} reason={winner.reason} /> : <Canvas />;
+
     const Continue = () => {
         if (winnerRef.current) {
             return (
@@ -100,27 +99,27 @@ const Game = () => {
         return null;
     }
 
-return (
-    <div className="py-1 bg-gray-500  bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
-        <main className="w-full h-full flex justify-center items-center gap-x-2 p-2 relative">
-            <div className="w-full h-full rounded-3xl relative flex flex-col justify-center items-center bg-black bg-opacity-20 pb-5">
-                <Image
-                    src={IMAGES.pongTable}
-                    alt="pong game"
-                    fill
-                    className="object-cover rounded-3xl -z-10"
-                    quality={100}
-                    priority
-                />
-                <div className="w-full h-full rounded-3xl relative flex flex-col justify-start items-center">
-                    <ScoresContent />
-                    { WinnerCardOrCanvas }
-                    {is_tournament ? <Continue/> : <ExitButton />}
+    return (
+        <div className="py-1 bg-gray-500  bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
+            <main className="w-full h-full flex justify-center items-center gap-x-2 p-2 relative">
+                <div className="w-full h-full rounded-3xl relative flex flex-col justify-center items-center bg-black bg-opacity-20 pb-5">
+                    <Image
+                        src={IMAGES.pongTable}
+                        alt="pong game"
+                        fill
+                        className="object-cover rounded-3xl -z-10"
+                        quality={100}
+                        priority
+                    />
+                    <div className="w-full h-full rounded-3xl relative flex flex-col justify-start items-center">
+                        <ScoresContent />
+                        {WinnerCardOrCanvas}
+                        {is_tournament ? <Continue /> : <ExitButton />}
+                    </div>
                 </div>
-            </div>
-        </main >
-    </div >
-);
+            </main >
+        </div >
+    );
 };
 
-export default Game; 
+export default Game;
