@@ -75,6 +75,18 @@ const Profile = () => {
     transition: Bounce,
   });
 
+  const notifUnfriend = (message:string) => toast(message,{
+    position: "bottom-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+    transition: Bounce,
+  });
+
   // Handle notification click
   const handleNotificationClick = () => {
     setShowPanel(!showPanel);
@@ -94,7 +106,6 @@ const Profile = () => {
       console.log(res.data.message);
       notifAccept(res.data.message);
       fetchOwnFriends();
-      console.log('Fetching friends Profile');
     })
     .catch((err) => {
       notifyErr(err.response.data.message);

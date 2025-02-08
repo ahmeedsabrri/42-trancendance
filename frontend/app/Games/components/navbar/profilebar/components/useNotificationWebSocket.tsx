@@ -30,7 +30,6 @@ const useNotificationWebSocket = (url: string) => {
         setInviterId(newNotification.notification.sender.id);
       if (
         newNotification.notification.notification_type === "friend_accept"
-        || newNotification.notification.notification_type === "friend_decline"
         || newNotification.notification.notification_type === "unfriend"
       )
       {

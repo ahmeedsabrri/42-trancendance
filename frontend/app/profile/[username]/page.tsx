@@ -123,6 +123,7 @@ export default function Profile() {
             break;
           case 'unfriend':
             notifyCancel(response.data.message);
+            fetchOwnFriends();
             setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'not_connected' } : null);
             break;
         }
