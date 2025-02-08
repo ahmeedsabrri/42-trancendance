@@ -18,6 +18,7 @@ export default function Profile() {
   const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
+  const [friends, setFriends] = useState<UserData[]>(Userfriends);
   const [profileState, setProfileState] = useState<UserData| null>(null);
 
   const notifyAdd = (message: string) =>
@@ -84,8 +85,11 @@ export default function Profile() {
   useEffect(() => {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
-    fetchOwnFriends();
   }, [username, fetchFriend, fetchUserFriends, fetchOwnFriends]);
+
+  useEffect(() => {
+    setFriends(Userfriends);
+  }, [Userfriends]);
 
   useEffect(() => {
     const profileToShow = username !== user?.username ? viewedProfile : user;
@@ -142,7 +146,7 @@ export default function Profile() {
     return <div>Profile not found</div>;
   }
   return (
-    <div className="w-full h-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-1 border border-white/10">
+    <div className="size-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-1 border border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
           userProfile={profileState}
@@ -168,7 +172,7 @@ export default function Profile() {
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Friends</h2>
-                {Userfriends?.map((friend) => (
+                {friends?.map((friend) => (
                   <FriendCard
                     key={friend.id}
                     friend={friend}

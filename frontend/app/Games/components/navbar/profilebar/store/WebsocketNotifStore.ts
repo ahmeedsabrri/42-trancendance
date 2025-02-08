@@ -82,7 +82,7 @@ const useNotificationStore = create<NotificationStore>((set) => ({
   // Remove a notification
   removeNotification: async (notificationId: number) => {
     try {
-      await api.get(`/users/notifications/delete/${notificationId}/`);  // This line is commented out to prevent deletion of notifications
+      await api.delete(`/users/notifications/delete/${notificationId}/`);  // This line is commented out to prevent deletion of notifications
       // Remove the notification from the store
       set((state) => ({
         notifications: state.notifications.filter((n) => n.id !== notificationId),

@@ -2,12 +2,16 @@ import React from "react";
 import Avatar from "./Avatar";
 import { useUserStore } from "@/app/store/store";
 import { Loader2 } from 'lucide-react';
+import { useEffect, useRef } from "react";
 const ProfileInfo = () => {
     
     const { fetchUser, user, isInitialized } = useUserStore();
-  
-    const userRef = React.useRef(user);
-    React.useEffect(() => {
+    useEffect(() => {
+        console.log("user from ProfilInfo: ", user);
+    }, [user]);
+
+    const userRef = useRef(user);
+    useEffect(() => {
     userRef.current = user;    
     }, [user]);
     // Only fetch user data once when component mounts
@@ -16,6 +20,7 @@ const ProfileInfo = () => {
         fetchUser();
     }
   }, [isInitialized, fetchUser]);
+
   if (!isInitialized || !user) {
     return (
         <div className="flex  items-center justify-center">

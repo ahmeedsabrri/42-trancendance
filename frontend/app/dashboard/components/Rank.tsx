@@ -1,66 +1,11 @@
-import Image from "next/image";
-import avatar from "@/public/Ellipse 209.svg";
-import { UserData } from "@/app/store/store";
-
-const Tariq: UserData = {
-    id: 1,
-    first_name: "Tariq",
-    last_name: "ben",
-    username: "tben-dal",
-    level: 5,
-    email: "tariq@gamil.com",
-    avatar: "",
-    connection_type: "",
-    status: "",
-    is_online: true,
-    sender:"",
-    otp_uri: "",
-    twofa_enabled:false
-}
-
-const ahmed: UserData = {
-    id: 2,
-    first_name: "ahmen",
-    last_name: "sabri",
-    username: "asabri",
-    level: 5,
-    email: "ahmed@gamil.com",
-    avatar: "",
-    connection_type: "",
-    status: "",
-    is_online: true,
-    sender:"",
-    otp_uri: "",
-    twofa_enabled:false
-}
-
-const anas: UserData = {
-    id: 3,
-    first_name: "anas",
-    last_name: "itami",
-    username: "aitami",
-    level: 5,
-    email: "anas@gamil.com",
-    avatar: "",
-    connection_type: "",
-    status: "",
-    is_online: true,
-    sender:"",
-    otp_uri: "",
-    twofa_enabled:false
-}
-
-const users = [
-    Tariq,
-    ahmed,
-    anas
-];
+import { UserData, useUserStore } from "@/app/store/store";
+import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 
 const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
     return (
         <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 ">
             <h1 className="text-xl text-white">{rank}</h1>
-            <Image src={avatar} alt="avatar" width={50} height={50} />
+            <Avatar width={50} height={50} avatar={user.avatar} />
             <div className="w-full">
                 <div>
                     <h1 className="font-bold text-white">{user.first_name + " " + user.last_name}</h1>
@@ -75,6 +20,8 @@ const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
 };
 
 const Rank = () => {
+    const { users } = useUserStore();
+
     users.sort((a, b) => b.level - a.level);
 
     return (

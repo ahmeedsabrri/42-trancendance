@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const api = axios.create({
     baseURL: 'https://localhost/api',
@@ -37,6 +38,7 @@ export interface UserData {
 
 interface UserStore {
     user: UserData | null;
+    users: UserData[];
     MatchHistory: MatchData[] | null;
     viewedProfile: UserData | null,
     loading: boolean;
@@ -51,6 +53,7 @@ interface UserStore {
 
 const initialState = {
     user: null,
+    users: [],
     MatchHistory: null,
     viewedProfile: null,
     loading: true,
@@ -63,6 +66,38 @@ let fetchPromise: Promise<void> | null = null;
 
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
+    fetchUsers: async () => {
+
+        fetchPromise = api.get<UserData[]>('/users/')
+            .then(response => {
+                set({ 
+                    users: response.data, 
+                    loading: false, 
+                    isInitialized: true 
+                });
+            })
+            .catch(err => {
+                if (axios.isAxiosError(err)) {
+                    set({ 
+                        error: err.response?.data?.message || 'Failed to fetch users', 
+                        loading: false,
+                        isInitialized: true
+                    });
+                } else {
+                    set({ 
+                        error: 'An unexpected error occurred', 
+                        loading: false,
+                        isInitialized: true
+                    });
+                }
+            })
+            .finally(() => {
+                fetchPromise = null;
+            });
+
+        return fetchPromise;
+    },
+
     fetchMatchHistory: async (id: number) => {
         
         fetchPromise = api.get(`/match_history/${id}`)

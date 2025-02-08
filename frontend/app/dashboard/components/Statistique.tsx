@@ -20,11 +20,13 @@ type CustomTooltipProps = TooltipProps<number, string> & {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    const isWin = data.result === "W" ? "text-green-500/80" : "text-red-500/80";
     return (
       <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
         <p>{`Match: ${label}`}</p>
         <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
         <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
+        <p>Game: <span className={`${isWin}`}>{data.result}</span></p>
       </div>
     );
   }
@@ -43,12 +45,9 @@ const Statistique = () => {
       console.log("data: ", data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
-
-  if (!Matches) return null;
-
-  const updatedData = Matches.map((match: Match) => {
+  const updatedData = Matches?.map((match: Match) => {
     return {
       name: `match ${match.id}`,
       user_score: match.user_score,
@@ -56,7 +55,12 @@ const Statistique = () => {
     };
   });
 
-  const data = updatedData.slice(-10);
+  let data = null;
+
+  if (updatedData)
+    data = updatedData.slice(-10);
+  else
+    data = [];
 
   return (
     <div className="size-full flex flex-col justify-center">

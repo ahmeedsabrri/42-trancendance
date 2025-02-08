@@ -731,10 +731,24 @@ class UserSearchView(generics.ListAPIView):
         return Response(serializer.data)
     
 
+# class DeleteNotificationView(APIView):
+#     permissions_classes = [permissions.IsAuthenticated]
+    
+#     def get(self, request, pk):
+#         notification = get_object_or_404(Notification, id=pk)
+#         notification.delete()
+#         return Response(
+#             {
+#                 "message": "Notification deleted successfully."
+#             },
+#             status=status.HTTP_200_OK
+#         )
+
+
 class DeleteNotificationView(APIView):
     permissions_classes = [permissions.IsAuthenticated]
     
-    def get(self, request, pk):
+    def delete(self, request, pk):
         notification = get_object_or_404(Notification, id=pk)
         notification.delete()
         return Response(
@@ -743,7 +757,6 @@ class DeleteNotificationView(APIView):
             },
             status=status.HTTP_200_OK
         )
-        
 
 
 class UpdateUserView(generics.UpdateAPIView):
