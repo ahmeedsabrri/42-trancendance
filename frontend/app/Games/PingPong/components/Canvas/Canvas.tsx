@@ -50,7 +50,6 @@ const Canvas = () => {
 
                 if (lastJsonMessage.PLAYERS) {
                     const PLAYERS = lastJsonMessage.PLAYERS;
-                    console.log(PLAYERS);
 
                     if (PLAYERS.PLAYER1)
                         setPlayer1info(PLAYERS.PLAYER1 || '');

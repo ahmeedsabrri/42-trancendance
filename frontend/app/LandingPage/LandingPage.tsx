@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import CustomButton from "../Games/components/utils/CutsomButton";
-import Image from "next/image";
-import { IMAGES } from "@/public/index";
 import { useState, useEffect } from "react";
 
 const LandingPage = () => {
@@ -37,11 +35,11 @@ const LandingPage = () => {
             <div className="flex justify-between items-start mt-4 gap-x-10">
                 <div className="flex-1 flex flex-col items-start justify-start  animate-slide-up gap-y-7 ">
                     <div className="w-full flex flex-col items-start gap-y-4 animate-slide-up">
-                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-9xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">WELCOME TO THE</p>
-                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-9xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">PING PONG WEB</p>
-                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-9xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">SITE</p>
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-8xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">WELCOME TO THE</p>
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-8xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">ULTIMATE</p>
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-8xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 w-full">PING PONG ARENA</p>
                     </div>
-                    <div className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-2xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 mt-24 animate-slide-up">
+                    <div className="h-10 text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-500 text-2xl font-extrabold transform transition-all duration-300 hover:text-gray-300/50 mt-24 animate-slide-up">
                         <p>{displayText}</p>
                     </div>
                     <Link href={'/auth'} className="cursor-pointer">
