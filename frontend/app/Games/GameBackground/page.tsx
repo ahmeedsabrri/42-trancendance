@@ -5,11 +5,13 @@ import { useGameStore } from "../store/GameStore";
 import { IMAGES } from "@/public/index";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useGameStateStore } from "../store/CanvasStore";
 
 
 const ChooseBackground = () => {
 
     const { GameBoardColor, setGameBoardColor, getGamePath } = useGameStore();
+    const invited_id = useGameStateStore();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [isFirstRender, setIsFirstRender] = useState(true);
 
@@ -33,6 +35,33 @@ const ChooseBackground = () => {
     }, []); // Empty dependency array, only run once on mount
 
 
+    const Content = () => {
+        if (invited_id)
+            return (
+                <Link href={"/Games/PingPong/online"}>
+                    <CustomButton
+                        label="START"
+                        className={`text-white text-4xl font-bold ${GameBoardColor
+                            ? 'bg-blue-300 bg-opacity-60 hover:bg-opacity-40 cursor-pointer'
+                            : 'bg-gray-400 bg-opacity-40 cursor-not-allowed'
+                            } backdrop-blur-xl px-16 py-6 rounded-3xl`}
+                    />
+                </Link>
+                )
+        else {
+            return (
+                <Link href={GameBoardColor ? getGamePath() : ""}>
+                    <CustomButton
+                        label="START"
+                        className={`text-white text-4xl font-bold ${GameBoardColor
+                            ? 'bg-blue-300 bg-opacity-60 hover:bg-opacity-40 cursor-pointer'
+                            : 'bg-gray-400 bg-opacity-40 cursor-not-allowed'
+                            } backdrop-blur-xl px-16 py-6 rounded-3xl`}
+                    />
+                </Link>
+            )
+        }
+    }
 
     return (
         <div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
@@ -64,15 +93,7 @@ const ChooseBackground = () => {
                         ))}
                     </div>
                     <div className="w-full h-[20%] flex justify-center items-center">
-                        <Link href={GameBoardColor ? getGamePath() : ""}>
-                            <CustomButton
-                                label="START"
-                                className={`text-white text-4xl font-bold ${GameBoardColor
-                                    ? 'bg-blue-300 bg-opacity-60 hover:bg-opacity-40 cursor-pointer'
-                                    : 'bg-gray-400 bg-opacity-40 cursor-not-allowed'
-                                    } backdrop-blur-xl px-16 py-6 rounded-3xl`}
-                            />
-                        </Link>
+                        <Content />
                     </div>
                 </div>
             </main>
