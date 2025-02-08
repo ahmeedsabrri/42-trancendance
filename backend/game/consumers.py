@@ -150,6 +150,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "send.message",
                             "game": {
+                                "PLAYERS": group["PLAYERS"],
                                 "WINNER": self.winner,
                             }
                     }

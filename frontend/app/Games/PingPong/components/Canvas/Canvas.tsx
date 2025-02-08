@@ -18,7 +18,7 @@ const Canvas = () => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { player1, player2, ball } = useGameStateStore();
-    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, resetInvitedCountdown, setPlayer1info, setPlayer2info, resetPlayersInfo, game_status, countdown, invitedCountdown } = useGameStateStore();
+    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, setPlayer1info, setPlayer2info, game_status, countdown, invitedCountdown } = useGameStateStore();
 
     const mode = useParams().mode;
     const currentStateRef = useRef(currentState);
@@ -109,9 +109,6 @@ const Canvas = () => {
         return () => {
             document.removeEventListener('keydown', keydownHandler);
             document.removeEventListener('keyup', keyupHandler);
-            resetCountdown();
-            resetInvitedCountdown();
-            resetPlayersInfo();
         };  // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sendJsonMessage, setKeyPressed]);
 
@@ -148,17 +145,12 @@ const Canvas = () => {
     }, [game_status, invited_id, invitedCountdown, router]);
 
     if (mode === "online") {
-        if (game_status === "waiting" && invited_id && invitedCountdown > 0) {
-            console.log("waiting for fro", invited_id, mode);
+        if (game_status === "waiting" && invited_id && invitedCountdown > 0)
             return <WaitingForPlayer />
-        }
-        else if (game_status === "waiting") {
-            console.log("wainting", invited_id, mode);
+        else if (game_status === "waiting")
             return <WaitingForPlayer />
-        }
-        else if (game_status === "ready" && countdown > 0) {
+        else if (game_status === "ready" && countdown > 0)
             return <WaitingForPlayer />
-        }
     }
 
 

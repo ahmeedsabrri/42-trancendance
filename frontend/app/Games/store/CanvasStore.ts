@@ -78,6 +78,7 @@ interface GameState {
   resetPlayersInfo: () => void
   setinvitedCountdown: (value: number) => void
   resetInvitedCountdown: () => void
+  resetScores: () => void;
 }
 
 export const useGameStateStore = create<GameState>((set) => ({
@@ -198,5 +199,16 @@ export const useGameStateStore = create<GameState>((set) => ({
   resetPlayersInfo: () => set({
     player1info: { avatar: null, fullname: null },
     player2info: { avatar: null, fullname: null }
-  }),
+  }), 
+  resetScores: () =>
+    set((state) => ({
+      player1: {
+        ...state.player1,
+        score: 0,
+      },
+      player2: {
+        ...state.player2,
+        score: 0,
+      }
+    })),
 }))
