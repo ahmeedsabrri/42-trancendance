@@ -452,6 +452,15 @@ class BlockRequestView(APIView):
                 )
             if connection.status == "accepted":
                 connection.block()
+            notification = Notification.create_notification(
+                sender=sender,
+                recipient=receiver,
+                notification_type='block',
+                message=f'{sender.username} blocked you.'
+            )
+            notification_data  = NotificationSerializer(notification).data
+            send_notification(receiver.id, notification_data)
+
             return Response(
                 {
                     "message": "Friend blocked successfully."
@@ -606,6 +615,14 @@ class UnFriendView(APIView):
                 Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
             )
             connection.delete()
+            notification = Notification.create_notification(
+                sender=user,
+                recipient=friend,
+                notification_type='unfriend',
+                message=f'{user.username} unfriended you.'
+            )
+            notification_data  = NotificationSerializer(notification).data
+            send_notification(friend.id, notification_data)
             return Response(
                 {
                     "message": "Friend removed successfully."

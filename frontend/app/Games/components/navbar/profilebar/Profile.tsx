@@ -22,11 +22,13 @@ import { UserFriendsActions } from '@/app/profile/utils/actions';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
 import { useGameStore } from '@/app/Games/store/GameStore';
 import { useRouter } from 'next/navigation';
+import { useUserFriendsStore } from '@/app/store/UserFriendsStrore';
 
 
 const Profile = () => {
 
   useNotificationWebSocket("wss://localhost/ws/notifications/");
+  const { fetchOwnFriends } = useUserFriendsStore();
 
   const { user } = useUserStore();
   const { logout } = AuthActions();
@@ -91,6 +93,8 @@ const Profile = () => {
     .then((res) => {
       console.log(res.data.message);
       notifAccept(res.data.message);
+      fetchOwnFriends();
+      console.log('Fetching friends Profile');
     })
     .catch((err) => {
       notifyErr(err.response.data.message);
