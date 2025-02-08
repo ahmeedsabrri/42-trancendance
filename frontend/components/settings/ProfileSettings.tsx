@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Upload, Camera } from 'lucide-react';
+import { User, Camera } from 'lucide-react';
 import Image from 'next/image';
 import { UserData } from '@/app/store/store';
 import  Avatar  from '../../app/Games/components/navbar/profilebar/Avatar';
@@ -7,13 +7,15 @@ import { useForm } from 'react-hook-form';
 import { handelTwoFactor } from '@/app/dashboard/setting/action';
 import { Bounce, toast } from 'react-toastify';
 import axios from 'axios';
+import api from '@/app/auth/utils';
+
+
 type FormData = {
   username: string;
   password: string;
 };
 export function ProfileSettings( {user}: {user : UserData} ) {
-  // task list
-  // handel form update
+  
   const tostNotify = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
@@ -33,7 +35,7 @@ export function ProfileSettings( {user}: {user : UserData} ) {
     pauseOnHover: true,
     draggable: true,
     progress: undefined,
-    theme: "",
+    theme: "dark",
     transition: Bounce,
   });
   const [formData, setFormData] = useState<FormData>({
@@ -62,14 +64,13 @@ export function ProfileSettings( {user}: {user : UserData} ) {
           console.log("Logged in successfully");
           tostNotify('Profile updated successfully');
         })
-        .catch((err) => {
-          console.log(err);
-          Errotoast(err.error);
-          setError("root", { type   : "manual", message: err.error}); 
+        .catch((error: unknown) => {
+          if (axios.isAxiosError(error)){
+            setError("root", { type   : "manual", message: error.response?.data.message});
+          }
         });
 
       };
-        // handel file upload
         const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
           console.log('File input changed'); 
       
@@ -82,16 +83,15 @@ export function ProfileSettings( {user}: {user : UserData} ) {
       
             try {
               console.log('Uploading file...'); 
-              const response = await axios.put(
-                'https://localhost/api/users/me/upload-avatar/',
+              const response = await api.put(
+                '/users/me/upload-avatar/',
                 formData,
-                { withCredentials: true }
               );
               console.log('Upload response:', response.data); 
               tostNotify('Avatar updated successfully');
-            } catch (error) {
-              console.error('Error uploading avatar:', error); 
-              // Errotoast(error);
+            } catch (error: unknown) {
+              if (axios.isAxiosError(error))
+                Errotoast(error?.response?.data.error);
             }
           } else {
             console.log('No file selected'); 
@@ -108,21 +108,11 @@ export function ProfileSettings( {user}: {user : UserData} ) {
       <div className="space-y-6">
         <div className="relative">
           <Image
-            src={"/images/banner.jpeg"}
+            src={"/images/banner1.jpeg"}
             alt="Cover"
-            width={0}
-            height={0}
-            className="w-full h-32 object-cover rounded-lg"
+            fill={true}
+            className="rounded-xl bg-cover bg-no-repeat object-cover"
           />
-          <label className="absolute bottom-2 right-2 p-2 rounded-lg bg-black/50 hover:bg-black/70 cursor-pointer transition-all">
-            <Upload className="w-4 h-4 text-white" />
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              // onChange={handleFileChange}
-            />
-          </label>
         </div>
 
         <div className="relative inline-block">
@@ -187,13 +177,13 @@ export function ProfileSettings( {user}: {user : UserData} ) {
             onClick={handleSubmit(onSubmit)}
             >
 
-              {errors.root && (
-                <span className="text-xs text-red">{errors.root.message}</span>
-              )}
-            <label htmlFor="" className='text-white'>
               save changes
+            <label htmlFor="" className='text-white'>
             </label>
           </button>
+            {errors.root && (
+              <span className="text-xs text-red-500">{errors.root.message}</span>
+            )}
         </form>
       </div>
     </div>

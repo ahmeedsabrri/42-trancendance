@@ -1,12 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
-
-export const api = axios.create({
-    baseURL: 'https://localhost/api',
-    withCredentials: true,
-});
-
-
+import api from '@/app/auth/utils';
 
 export interface UserFriendsData {
     first_name: string;

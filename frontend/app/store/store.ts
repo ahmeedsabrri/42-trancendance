@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import Cookies from 'js-cookie';
-
-export const api = axios.create({
-    baseURL: 'https://localhost/api',
-    withCredentials: true,
-});
+import api from '@/app/auth/utils';
 
 export interface MatchData {
     id: number;
@@ -67,7 +62,7 @@ let fetchPromise: Promise<void> | null = null;
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
     fetchUsers: async () => {
-
+        // console.log(api);
         fetchPromise = api.get<UserData[]>('/users/')
             .then(response => {
                 set({ 

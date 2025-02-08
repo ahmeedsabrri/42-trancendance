@@ -26,8 +26,11 @@ import { useUserFriendsStore } from '@/app/store/UserFriendsStrore';
 
 
 const Profile = () => {
-
-  useNotificationWebSocket("wss://localhost/ws/notifications/");
+  const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+  if (!base_wws_url) {
+    throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+  }
+  useNotificationWebSocket(base_wws_url + "/notifications/");
   const { fetchOwnFriends } = useUserFriendsStore();
 
   const { user } = useUserStore();
@@ -64,18 +67,6 @@ const Profile = () => {
   });
 
   const notifyErr = (message:string) => toast(message,{
-    position: "bottom-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: false,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "dark",
-    transition: Bounce,
-  });
-
-  const notifUnfriend = (message:string) => toast(message,{
     position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,

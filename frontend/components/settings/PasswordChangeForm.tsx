@@ -2,23 +2,49 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { AuthActions } from '@/app/auth/utils';
 
 
 
 export function PasswordChangeForm() {
+  const {changePassword} = AuthActions();
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
   });
+  const [formData, setFormData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_new_password: '',
+  });
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prevState: FormData) => ({
+      ...prevState,
+      [id]: value,
+    }));
+  };
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field],
     }));
   };
-
+  const handelChangePassword = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const currentPassword = e.currentTarget.elements.namedItem('current_password') as HTMLInputElement;
+    const newPassword = e.currentTarget.elements.namedItem('new_password') as HTMLInputElement;
+    const confirmNewPassword = e.currentTarget.elements.namedItem('confirm_new_password') as HTMLInputElement;
+    changePassword(currentPassword.value, newPassword.value, confirmNewPassword.value)
+      .then((res) => {
+        console.log(res.data.message);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
   return (
     <form className="space-y-4">
       <div>
@@ -92,7 +118,7 @@ export function PasswordChangeForm() {
         <button
           type="submit"
           className="px-4 py-2 rounded-lg transition ease-in-out delay-150 bg-black/20 hover:bg-black/30  font-bold  backdrop-blur-lg  text-white "
-          
+          onClick={handelChangePassword}
         >
           Update Password
         </button>

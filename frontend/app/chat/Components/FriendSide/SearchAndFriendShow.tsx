@@ -42,8 +42,7 @@ const FriendShow = () => {
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const search = useChatStore((state) => state.search);
     const { UserOwnfriends} = useUserFriendsStore();
-    // const friends: UserFriendsData[] = UserOwnfriends || [];
-    const [friends, setFriends] = React.useState<UserFriendsData[]>(UserOwnfriends);
+    const [friends, setFriends] = React.useState<UserFriendsData[] | null>(UserOwnfriends);
     const [IsLoading] = React.useState(false);
 
     useEffect(() => {
@@ -73,7 +72,7 @@ const FriendShow = () => {
         }
         catch (err)
         {
-            console.error("Error creating new conversation:", err);
+            console.log("Error creating new conversation:", err);
         }
     };
    

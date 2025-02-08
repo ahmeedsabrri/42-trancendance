@@ -1,12 +1,7 @@
 import { create } from "zustand";
-import axios from 'axios';
 import type { Notificationdata } from '../types/notification';
-// Base API setup
-const api = axios.create({
-  baseURL: 'https://localhost/api',
-  withCredentials: true,
-});
-
+import api from "@/app/auth/utils";
+import axios from "axios";
 interface NotificationStore {
   notifications: Notificationdata[];
   unreadCount: number;
@@ -45,7 +40,6 @@ const useNotificationStore = create<NotificationStore>((set) => ({
       } else {
         set({ error: 'An unknown error occurred', isLoading: false });
       }
-      console.error('Failed to fetch notifications:', error);
     }
   },
 
@@ -67,12 +61,7 @@ const useNotificationStore = create<NotificationStore>((set) => ({
       } else {
         set({ error: 'An unknown error occurred' });
       }
-      console.error('Failed to mark notification as read:', error);
     }
-    // } catch (error: any) {
-    //   set({ error: error.data.message });
-    //   console.error('Failed to mark notification as read:', error);
-    // }
   },
   addNotification: (newNotification) =>
     set((state) => ({
@@ -96,7 +85,6 @@ const useNotificationStore = create<NotificationStore>((set) => ({
       } else {
         set({ error: 'An unknown error occurred' });
       }
-      console.error('Failed to mark notification as read:', error);
     }    
   },
 

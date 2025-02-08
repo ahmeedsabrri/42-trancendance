@@ -2,13 +2,7 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-
-const api = axios.create({
-
-    baseURL: 'https://localhost/api',
-    withCredentials: true,
-})
+import api from '@/app/auth/utils';
 
 
 export default function VerifyEmail({
@@ -29,7 +23,7 @@ export default function VerifyEmail({
                 console.log('token', token);
 
                 // Send a POST request to the backend to verify the email
-                const response = await api.post('https://localhost/api/auth/verify-email/', {
+                const response = await api.post('/auth/verify-email/', {
                     uid,
                     token,
                 });
