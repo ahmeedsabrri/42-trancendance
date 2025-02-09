@@ -14,7 +14,7 @@ import { UserFriendsActions } from '../utils/actions';
 import { Bounce, toast } from 'react-toastify';
 
 export default function Profile() {
-  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory} = useUserStore();
+  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory, fetchUser} = useUserStore();
   const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
@@ -85,6 +85,7 @@ export default function Profile() {
   useEffect(() => {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
+    fetchUser();
   }, [username, fetchFriend, fetchUserFriends, fetchOwnFriends]);
 
   useEffect(() => {

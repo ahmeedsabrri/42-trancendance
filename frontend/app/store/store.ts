@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
 export const api = axios.create({
     baseURL: 'https://localhost/api',
@@ -44,6 +43,7 @@ interface UserStore {
     loading: boolean;
     error: string | null;
     isInitialized: boolean;
+    fetchUsers: () => Promise<void>;
     fetchUser: () => Promise<void>;
     fetchFriend: (username:string) => Promise<void>;
     fetchMatchHistory: (id: number) => Promise<void>;
