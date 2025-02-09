@@ -1,5 +1,6 @@
 import json
 import asyncio
+from users.models import User
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
@@ -264,42 +265,60 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
 @database_sync_to_async
 def save_match_history(winner, loser, winner_score, loser_score, game_type, status):
-    match_history = MatchHistory.objects.create(
-        winner=winner,
-        loser=loser,
-        score=f"{winner_score}-{loser_score}",
-        game_type=game_type,
-        status=status
-    )
+    try:
+        W_user = User.objects.get(id=winner.id)
+        L_user = User.objects.get(id=loser.id)
 
-    winner_stats, created = PlayerStats.objects.get_or_create(
-        user=winner, 
-        game_type=game_type,
-        defaults={
-            'total_matches': 1,
-            'wins': 1,
-            'win_rate': 100.00
-        }
-    )
+        match_history = MatchHistory.objects.create(
+            winner=winner,
+            loser=loser,
+            score=f"{winner_score}-{loser_score}",
+            game_type=game_type,
+            status=status
+        )
 
-    if not created:
-        winner_stats.total_matches += 1
-        winner_stats.wins += 1
-        winner_stats.win_rate = (winner_stats.wins / winner_stats.total_matches) * 100
-        winner_stats.save()
+        winner_stats, created = PlayerStats.objects.get_or_create(
+            user=winner, 
+            game_type=game_type,
+            defaults={
+                'total_matches': 1,
+                'wins': 1,
+                'win_rate': 100.00
+            }
+        )
 
-    loser_stats, created = PlayerStats.objects.get_or_create(
-        user=loser, 
-        game_type=game_type,
-        defaults={
-            'total_matches': 1,
-            'losses': 1,
-            'win_rate': 0.00
-        }
-    )
+        if not created:
+            winner_stats.total_matches += 1
+            winner_stats.wins += 1
+            winner_stats.win_rate = (winner_stats.wins / winner_stats.total_matches) * 100
+            W_user.xp += 20
+            if W_user.xp >= 100:
+                reminder = W_user.xp % 100
+                W_user.xp = reminder
+                W_user.level += 1
+            winner_stats.save()
+            W_user.save()
 
-    if not created:
-        loser_stats.total_matches += 1
-        loser_stats.losses += 1
-        loser_stats.win_rate = (loser_stats.wins / loser_stats.total_matches) * 100
-        loser_stats.save()
+        loser_stats, created = PlayerStats.objects.get_or_create(
+            user=loser, 
+            game_type=game_type,
+            defaults={
+                'total_matches': 1,
+                'losses': 1,
+                'win_rate': 0.00
+            }
+        )
+
+        if not created:
+            loser_stats.total_matches += 1
+            loser_stats.losses += 1
+            loser_stats.win_rate = (loser_stats.wins / loser_stats.total_matches) * 100
+            L_user.xp += 10
+            if L_user.xp >= 100:
+                reminder = L_user.xp % 100
+                L_user.xp = reminder
+                L_user.level += 1
+            loser_stats.save()
+            L_user.save()
+    except Exception as e:
+            print(f"Error raised while creating player stats: {e}")

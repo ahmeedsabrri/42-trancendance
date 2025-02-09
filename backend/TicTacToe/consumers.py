@@ -49,12 +49,16 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
             Stats.total_matches+=1
             if self.is_winner:
                 Stats.wins += 1
-                user.level += 50
+                user.xp += 20
             else:
                 Stats.losses += 1
-                user.level += 10
+                user.xp += 10
+            if user.xp >= 100:
+                reminder = user.xp % 100
+                user.xp = reminder
+                user.level += 1
+
             Stats.win_rate = (Stats.wins / Stats.total_matches) * 100
-            print("win rate ", Stats.win_rate)
             Stats.save()
             user.save()
         except Exception as e:
