@@ -39,6 +39,7 @@ interface UserStore {
     loading: boolean;
     error: string | null;
     isInitialized: boolean;
+    fetchUsers: () => Promise<void>;
     fetchUser: () => Promise<void>;
     fetchFriend: (username:string) => Promise<void>;
     fetchMatchHistory: (id: number) => Promise<void>;

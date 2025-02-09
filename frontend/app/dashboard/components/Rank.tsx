@@ -1,10 +1,12 @@
 import { UserData, useUserStore } from "@/app/store/store";
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
+import { useEffect } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
     return (
-        <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 ">
-            <h1 className="text-xl text-white">{rank}</h1>
+        <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 snap-start snap-always">
+            <h1 className="text-xl text-white p-2">{rank}</h1>
             <Avatar width={50} height={50} avatar={user.avatar} />
             <div className="w-full">
                 <div>
@@ -20,15 +22,28 @@ const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
 };
 
 const Rank = () => {
-    const { users } = useUserStore();
+
+    const {fetchUsers, users} = useUserStore();
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
 
     users.sort((a, b) => b.level - a.level);
+
+    useEffect (() => {
+        console.log("users before sort", users);
+        users.sort((a, b) => b.level - a.level);
+        console.log("users after sort", users); 
+    }, [users]);
+    
+    console.log("rank, users", users);
 
     return (
         <div className="w-[600px] h-full p-8">
             <h1 className="text-2xl font-bold text-white text_shadow">Rank</h1>
             <div className="size-full flex flex-col justify-start">
-                <ul className="flex flex-col gap-2 p-4 ">
+                <ul className="flex flex-col gap-2 p-4 scrollable-x overflow-x-scroll snap-x snap-mandatory scrollbar scrollbar-thumb-black/30 scrollbar-track-transparent">
                     {users.map((user, index) => (
                         <li key={user.id}>
                             <UserComponent user={user} rank={index + 1} />
