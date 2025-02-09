@@ -56,14 +56,13 @@ const logout = () => {
   return res;
 };
 
-const changePassword = (crnPassword:string,oldPassword: string, newPassword: string) => {
-  const res = api.post("/users/me/change-password/", {
-    current_password: crnPassword,
-    old_password: oldPassword,
-    new_password: newPassword,
-  }, {
-    withCredentials: true,
+const changePassword = (current_password: string, new_password: string, confirm_password:string) => {
+  const res = api.put("/users/me/change-password/", {
+    current_password: current_password,
+    new_password: new_password,
+    confirm_password: confirm_password,
   });
+  console.log(res);
   return res;
 }
 const Oauth42 = (code: string) => {

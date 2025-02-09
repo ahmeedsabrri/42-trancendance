@@ -44,9 +44,6 @@ class PasswordUpdateView(generics.UpdateAPIView):
         self.perform_update(serializer)
         return Response({
             'message': 'Password successfully updated.',
-            'status': 'success',
-            'user_id': instance.id,
-            'username': instance.username
         }, status=status.HTTP_200_OK)
 
 
