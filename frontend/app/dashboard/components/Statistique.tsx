@@ -4,11 +4,14 @@ import { BarChart, Bar, ResponsiveContainer, CartesianGrid, XAxis, YAxis, Toolti
 import { useEffect, useState } from 'react';
 import { getMatcheHistory } from '@/app/chat/Tools/apiTools';
 import { useUserStore } from '@/app/store/store';
+import { timeHandle } from '@/app/chat/Components/utils/utils';
 
 interface Match {
   id: number;
   user_score: number;
   status: string
+  played_at: string;
+  result: string;
 }
 
 type CustomTooltipProps = TooltipProps<number, string> & {
@@ -21,12 +24,14 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const isWin = data.result === "W" ? "text-green-500/80" : "text-red-500/80";
+    console.log("data: ", data);
     return (
       <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
         <p>{`Match: ${label}`}</p>
         <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
         <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
         <p>Game: <span className={`${isWin}`}>{data.result}</span></p>
+        <p>at: <span className="bg-yellow-500/50 p-2 rounded-sm"> {data.played_at}</span> </p>
       </div>
     );
   }
@@ -52,6 +57,8 @@ const Statistique = () => {
       name: `match ${match.id}`,
       user_score: match.user_score,
       status: match.status,
+      played_at: timeHandle(match.played_at),
+      result: match.result
     };
   });
 
