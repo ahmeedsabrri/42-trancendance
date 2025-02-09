@@ -46,7 +46,7 @@ export default function RootLayout({
   const [shouldrender, setShouldRender] = useState(shouldRenderNavAndSideBar);
   const { check_auth } = AuthActions();
 
-  // Run auth check when navigating to protected routes
+
   useEffect(() => {
     if (shouldRenderNavAndSideBar) {
       check_auth().catch(() => {
@@ -54,22 +54,25 @@ export default function RootLayout({
       });
       setShouldRender(!shouldRenderNavAndSideBar);
     }
+    // eslint-disable-next-line
   }, [shouldRenderNavAndSideBar]); 
   return (
     <html lang="en" className={`${orbitron.variable}`}>
-      <body className={shouldrender ? "w-screen h-screen font-orbitron overflow-hidden flex justify-center items-center bg-background bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl" : "bg-background font-orbitron bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl"}>
-        {shouldrender && (
-            <div className="w-[90%] h-[90%] flex justify-start items-center ">
-              <QueryClientProvider client={queryClient}>
-                <SideBar />
-                <div className="w-full h-full flex flex-col justify-start items-center gap-10">
-                  <NavBar />
-                  {children}
-                </div>
-              </QueryClientProvider>
-            </div>
+      <body className={shouldRenderNavAndSideBar ? "w-screen h-screen font-orbitron overflow-hidden flex justify-center items-center bg-background bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl" : "bg-background font-orbitron bg-center bg-no-repeat bg-cover bg-black bg-opacity-50 backdrop-blur-3xl"}>
+        {shouldRenderNavAndSideBar && (
+             <>
+             <div className="w-[90%] h-[90%] flex justify-start items-center">
+               <QueryClientProvider client={queryClient}>
+                 <SideBar />
+                 <div className="w-full h-full flex flex-col justify-start items-center gap-10">
+                   <NavBar />
+                   {children}
+                 </div>
+               </QueryClientProvider>
+             </div>
+           </>
         )}
-        {!shouldrender && children}
+        {!shouldRenderNavAndSideBar && children}
         <ToastContainer
           position="top-right"
           autoClose={5000}
