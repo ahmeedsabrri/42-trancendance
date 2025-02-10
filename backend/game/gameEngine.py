@@ -1,4 +1,4 @@
-import math
+import math, asyncio
 from users.models import Connection
 from channels.db import database_sync_to_async
 from django.db.models import Q
@@ -216,31 +216,28 @@ class OnlineGameEngine:
     def __str__(self) -> str:
         return 'init game engine'
 
-    def update_paddles(self, group_id):
-        channel_name = OnlineGameEngine.groups[group_id]["channel_name"]
-        player1 = OnlineGameEngine.groups[group_id]["PLAYERS"]["PLAYER1"]
-        player2 = OnlineGameEngine.groups[group_id]["PLAYERS"]["PLAYER2"]
-        key_states = OnlineGameEngine.groups[group_id]["key_states"]
+    def update_paddles(self, group_id, p_key):
+        player = OnlineGameEngine.groups[group_id]["PLAYERS"][p_key]
+        # player2 = OnlineGameEngine.groups[group_id]["PLAYERS"]["PLAYER2"]
+        # key_states = OnlineGameEngine.groups[group_id]["key_states"]
 
-        # Player 1 movement
-        if player1["channel_name"] == channel_name:
-            if key_states["ArrowUp"] and player1["Y"] > 0:
-                player1["Y"] = max(0, player1["Y"] - self.GAME_INFO["PLAYER_SPEED"])
-            if key_states["ArrowDown"] and player1["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
-                player1["Y"] = min(
-                    self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
-                    player1["Y"] + self.GAME_INFO["PLAYER_SPEED"]
-                )
+        if player["key_states"]["ArrowUp"] and player["Y"] > 0:
+            player["Y"] = max(0, player["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        if player["key_states"]["ArrowDown"] and player["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+            player["Y"] = min(
+                self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+                player["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+            )
 
-        # Player 2 movement
-        if player2 and player2["channel_name"] == channel_name:
-            if key_states["ArrowUp"] and player2["Y"] > 0:
-                player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
-            if key_states["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
-                player2["Y"] = min(
-                    self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
-                    player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
-                )
+        # # Player 2 movement
+        # if player2 and player2["channel_name"] == channel_name:
+        #     if key_states["ArrowUp"] and player2["Y"] > 0:
+        #         player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        #     if key_states["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+        #         player2["Y"] = min(
+        #             self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+        #             player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+        #         )
 
     def get_collision_details(self, ball, player):
         # Calculate the ball's next position
@@ -401,6 +398,7 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                 }
                 group_info["status"] = "ready"
                 group_info["user2"] = user
@@ -425,18 +423,19 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                 },
                 "PLAYER2": None,
             },
             "channel_name": None,
             "game_leader": channel_name,
-            "key_states": {"ArrowUp": False, "ArrowDown": False, "w": False, "s": False},
             "running": False,
             "user1": user,
             "user2": None,
             "invited_id": invited_id,
             "game_winner": None,
             "game_loser": None,
+            "lock": asyncio.Lock()
         }
         return group_id
 
