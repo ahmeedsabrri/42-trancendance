@@ -102,7 +102,6 @@ class LocalGameEngine:
             self.BALL["X"] = player["X"] - self.BALL["RADIUS"]
         
         # Use the collision point to determine the reflection angle
-        # Map the collision point from [-1, 1] to [-π/3, π/3] for more realistic angles
         angle_rad = collision_details["collision_point"] * (math.pi / 3)
         direction = 1 if player_key == "PLAYER1" else -1
         
@@ -323,9 +322,15 @@ class OnlineGameEngine:
         if self.BALL["X"] - self.BALL["RADIUS"] < 0:
             PLAYERS["PLAYER2"]["SCORE"] += 1
             self.reset_ball()
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
         elif self.BALL["X"] + self.BALL["RADIUS"] > self.GAME_INFO["CANVAS"]["WIDTH"]:
             PLAYERS["PLAYER1"]["SCORE"] += 1
             self.reset_ball()
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
 
         # Winner check and game status update
         if PLAYERS["PLAYER1"]["SCORE"] == 3:

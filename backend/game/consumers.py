@@ -102,10 +102,6 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
             self.user = self.scope["user"]
             self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id", None)
 
-            # if (self.invite_id):
-                # self.invite_id = int(self.invite_id)
-            print(self.invite_id)
-
             self.game_engine = OnlineGameEngine()
 
             self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)

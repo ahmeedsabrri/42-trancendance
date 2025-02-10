@@ -10,7 +10,7 @@ from users.utils import send_notification
 from users.models import Notification
 
 logger = logging.getLogger(__name__)
-User = get_user_model()
+  = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
