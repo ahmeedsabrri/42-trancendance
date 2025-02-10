@@ -104,7 +104,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
             self.game_engine = OnlineGameEngine()
 
-            self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
+            self.group_id = await self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
 
             self.room_group_name = f'online_game_{self.group_id}'
 

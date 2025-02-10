@@ -1,4 +1,7 @@
 import math
+from users.models import Connection
+from channels.db import database_sync_to_async
+from django.db.models import Q
 
 # for the local game
 class LocalGameEngine:
@@ -374,7 +377,7 @@ class OnlineGameEngine:
         self.reset_ball()
         OnlineGameEngine.groups[group_id]["status"] = "ready"
 
-    def join_group_or_add_one(self, user, channel_name, invited_id):
+    async def join_group_or_add_one(self, user, channel_name, invited_id):
         # Look for an available group
         for group_id, group_info in OnlineGameEngine.groups.items():
             if group_info["status"] == "waiting":
@@ -383,7 +386,9 @@ class OnlineGameEngine:
                 if (group_info["invited_id"] and group_info["invited_id"] != invited_id):
                     print(f'users the same = {group_info["invited_id"]} {invited_id}')
                     continue
-                # Join existing group as player 2
+                is_blocked = await check_user_blocked(group_info["user1"], user)
+                if is_blocked:
+                    break
                 group_info["PLAYERS"]["PLAYER2"] = {
                     "channel_name": channel_name,
                     "user_id": user.id,
@@ -434,3 +439,12 @@ class OnlineGameEngine:
             "game_loser": None,
         }
         return group_id
+
+@database_sync_to_async
+def check_user_blocked(sender, receiver):
+    try:
+        return Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists()
+    except Connection.DoesNotExist:
+        return False
+    
+# Q is a query object in Django's ORM that allows you to build complex queries using logical operators like AND and OR.
