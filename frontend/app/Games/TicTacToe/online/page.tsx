@@ -55,8 +55,11 @@ const TicTac = () => {
         sender: string;
         avatar: string;
     }
-
-    const WS_URL = "wss://localhost/ws/TicTac/remote/";
+    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+    if (!base_wws_url) {
+        throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+    }
+    const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
 
     const websocket = useRef<WebSocket | null>(null)
 

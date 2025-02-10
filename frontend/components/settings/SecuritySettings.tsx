@@ -23,7 +23,7 @@ export function SecuritySettings({ user }: { user: UserData }) {
       console.log(error);
     }
   };
-
+  const isStudent = user.email?.toLowerCase().endsWith("@student.1337.ma");
   const tostNotify = (message: string) =>
     toast(message, {
       position: "bottom-right",
@@ -193,13 +193,15 @@ export function SecuritySettings({ user }: { user: UserData }) {
         </div>
       </Modal>
 
-      <Modal
-        isOpen={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
-        title="Change Password"
-      >
-        <PasswordChangeForm />
-      </Modal>
+      {!isStudent && (
+        <Modal
+          isOpen={isPasswordModalOpen}
+          onClose={() => setIsPasswordModalOpen(false)}
+          title="Change Password"
+        >
+          <PasswordChangeForm />
+        </Modal>
+      )}
     </>
   );
 }

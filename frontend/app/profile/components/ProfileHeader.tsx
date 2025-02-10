@@ -14,9 +14,10 @@ export interface ProfileHeaderProps {
   addFriend: () => void;
   onAccepte: () => void;
   onDecline: () => void;
+  onCancel: () => void;
 }
 
-export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onAccepte, onDecline}: ProfileHeaderProps) {
+export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onAccepte, onDecline,onCancel}: ProfileHeaderProps) {
   const {user, fetchUser} = useUserStore();
   useEffect(() => {
     fetchUser();
@@ -24,7 +25,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
   return (
     <div className="relative mb-8">
       <div className="h-48 w-full rounded-xl overflow-hidden">
-          <Image  src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" alt="Cover" fill={true} className='rounded-xl'/>
+          <Image  src="/images/banner1.jpeg" alt="Cover" fill={true} className='rounded-xl bg-cover bg-no-repeat object-cover'/>
       </div>
       
       <div className="absolute -bottom-6 left-8 flex items-end gap-4">
@@ -47,7 +48,7 @@ export function ProfileHeader({ userProfile, onBlock, onUnfriend, addFriend, onA
         {userProfile.sender == user?.username ? 
           <button
             className="flex items-center gap-2 px-4 py-2 transition ease-in-out delay-150 bg-black/20 hover:bg-black/30 rounded-lg"
-            onClick={onUnfriend}
+            onClick={onCancel}
           >
             <X className="text-white" />
             <span className="text-white">Cancel</span>

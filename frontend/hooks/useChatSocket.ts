@@ -14,8 +14,11 @@ const useChatSocket = (user_id: number) => {
     const {setSocket, setEventMessage, setUserId} = useChatStore();
     
     useEffect(() => {
-
-        socket.current = new WebSocket(`wss://localhost/ws/chat/`);
+        const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+        if (!base_wws_url) {
+            throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+        }
+        socket.current = new WebSocket(base_wws_url+`/chat/`);
         
         if (socket.current === null)
             return;

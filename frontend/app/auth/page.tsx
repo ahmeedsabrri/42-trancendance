@@ -11,12 +11,15 @@ import OTP from './otp/OTP';
 import { AuthActions } from './utils';
 import { LuArrowRight } from "react-icons/lu";
 import { Bounce, toast } from 'react-toastify';
+import { useRouter } from 'next/navigation'
 
 function AuthContent() {
+  
   const [isSignUp, setIsSignUp] = useState(false);
   const [otpRequired, setOtpRequired] = useState(false);
-
+  
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const notifToast = (message: string) => toast(message, {
     position: "bottom-right",
@@ -32,9 +35,8 @@ function AuthContent() {
 
   useEffect(() => {
     const otpRequiredParam = searchParams.get('otp_code');
-    if (otpRequiredParam === 'requried') {
+    if (otpRequiredParam === "required") {
       setOtpRequired(true);
-      console.log('OTP is required');
     }
   }, [searchParams]);
 
@@ -45,7 +47,7 @@ function AuthContent() {
       .then((res) => {
         console.log("Logged in successfully");
         notifToast(res.data.message);
-        window.location.href = '/';
+        router.push('/dashboard');
       })
       .catch((error) => {
         notifToast(error.response.data[0]);

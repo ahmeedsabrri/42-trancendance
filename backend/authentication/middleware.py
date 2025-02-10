@@ -13,27 +13,27 @@ class JWTCookieMiddleware:
 
     def __call__(self, request):
         # process request
+        invalid_token = False
         jwt_token = request.COOKIES.get("jwt_token", None)
         if jwt_token is not None:
             try:
                 user = self.get_user(request.COOKIES.get("jwt_token"),request=request)
             except Exception:
-                request.user = AnonymousUser()
-                pass
-
+                request.user = None
+                invalid_token = True 
         response = self.get_response(request)
+        if invalid_token:
+            response.delete_cookie("jwt_token")
         return response
 
     def get_user(self,token,request):
-        try:
-            t = SlidingToken(token)
-            user_id = t["user_id"]
-            user = User.objects.get(id=user_id)
-            setattr(request, "_auth", [user, token])
-            request.user = user
-            return user
-        except:
-            return AnonymousUser()
+        t = SlidingToken(token)
+        user_id = t["user_id"]
+        user = User.objects.get(id=user_id)
+        setattr(request, "_auth", [user, token])
+        request.user = user
+        return user
+
 
 
 

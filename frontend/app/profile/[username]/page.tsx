@@ -7,18 +7,18 @@ import { FriendCard } from '../components/FriendCard';
 import { MonthlyStats } from '../components/MonthlyStats';
 import { GameChart } from '../components/GameChart';
 import { MatchData, useUserStore } from '../../store/store';
-import { useUserFriendsStore } from '../../store/UserFriendsStrore';
+import { UserFriendsData, useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { UserFriendsActions } from '../utils/actions';
 import { Bounce, toast } from 'react-toastify';
 
 export default function Profile() {
-  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory} = useUserStore();
+  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory, fetchUser} = useUserStore();
   const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
-  const [friends, setFriends] = useState<UserData[]>(Userfriends);
+  const [friends, setFriends] = useState<UserFriendsData[] | null>(Userfriends);
   const [profileState, setProfileState] = useState<UserData| null>(null);
 
   const notifyAdd = (message: string) =>
@@ -85,6 +85,7 @@ export default function Profile() {
   useEffect(() => {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
+    fetchUser();
   }, [username, fetchFriend, fetchUserFriends, fetchOwnFriends]);
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function Profile() {
 
   if (!user)
     return ;
-  const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend') => {
+  const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend' | 'cancel') => {
     handleRequest(username as string, action)
       .then((response) => {
         console.log(response);
@@ -130,6 +131,10 @@ export default function Profile() {
             fetchOwnFriends();
             setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'not_connected' } : null);
             break;
+          case 'cancel':
+            notifyCancel(response.data.message);
+            setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'not_connected' } : null);
+            break;
         }
       })
       .catch((err) => {
@@ -155,6 +160,7 @@ export default function Profile() {
           addFriend={() => handleAction('send')}
           onAccepte={() => handleAction('accept')}
           onDecline={() => handleAction('decline')}
+          onCancel={() => handleAction('cancel')}
         />
         {profileState.connection_type !== 'blocked' ? (
           <div>

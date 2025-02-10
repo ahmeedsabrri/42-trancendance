@@ -2,12 +2,7 @@
 
 import axios, {AxiosResponse} from "axios";
 import { sortConversationsByDate } from "../Components/utils/utils";
-
-const api = axios.create({
-    baseURL: 'https://localhost/api/',
-    withCredentials: true,
-});
-
+import api from "@/app/auth/utils";
 const source = axios.CancelToken.source();
 
 const getNotifications = async () => {
@@ -29,7 +24,7 @@ const getNotifications = async () => {
 
 const newConversation = async (user: number) => {
     try {
-        const response = await api.post(`chat/new_conversation/${user}`);
+        const response = await api.post(`/chat/new_conversation/${user}/`);
         // console.log(response.data);
         return response.data;
     }
@@ -46,7 +41,7 @@ const newConversation = async (user: number) => {
 
 const fetchConversations = async () => {
     try {
-        const response : AxiosResponse = await api.get(`chat/conversations`);
+        const response : AxiosResponse = await api.get(`/chat/conversations/`);
         if (!response.data) {
             return [];
         }
@@ -65,7 +60,7 @@ const fetchConversations = async () => {
 
 const fetchMessages = async (conversation_id: number) => {
     try {
-        const response : AxiosResponse = await api.get(`chat/conversation/${conversation_id}/messages`);
+        const response : AxiosResponse = await api.get(`/chat/conversation/${conversation_id}/messages/`);
         return response.data;
     }
     catch (error) {
@@ -80,13 +75,13 @@ const fetchMessages = async (conversation_id: number) => {
 }
 
 const getMatcheHistory = async (id: number) => {
-    const response = await api.get(`match_history/${id}`);
+    const response = await api.get(`/match_history/${id}/`);
     console.log(response.data);
     return response.data.matches;
 }
 
 const handleRequestGames = async (username:string, type:string) => {
-    const response = await api.get(`users/request/${type}/${username}/`);
+    const response = await api.get(`/users/request/${type}/${username}/`);
     return response;
 }
 
