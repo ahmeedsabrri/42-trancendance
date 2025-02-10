@@ -23,6 +23,7 @@ services:
       context: ./backend
       dockerfile: dockerfile
     env_file:
+      - ./backend/.env
       - .env
     volumes:
       - ./backend:/backend
@@ -58,6 +59,13 @@ services:
       - ./frontend:/frontend
       - /frontend/node_modules/
       - /frontend/.next/
+    networks:
+      - trancendance-network
+    
+
+  redis:
+    container_name: redis
+    image: redis:latest
     networks:
       - trancendance-network
 networks:

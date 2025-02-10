@@ -5,7 +5,7 @@ import { Message } from "postcss";
 import { useEffect, useRef, useState } from "react";
 
 const useChatSocket = (user_id: number) => {
-
+    
     const socket = useRef<WebSocket>(null);
     const queryClient = useQueryClient();
     const [wsActive, setWsActive] = useState(true);
@@ -32,7 +32,7 @@ const useChatSocket = (user_id: number) => {
                 setUserId(user_id);
             }
         }
-
+       
         socket.current.onmessage = (e) => {
             setEventMessage(e);
             const message = JSON.parse(e.data);
@@ -91,8 +91,8 @@ const useChatSocket = (user_id: number) => {
         return () => {
             socket.current?.close();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wsActive, user_id]);
-
     return socket.current;
 };
 

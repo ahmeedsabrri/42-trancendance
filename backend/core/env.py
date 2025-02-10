@@ -6,6 +6,3 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 env = environ.Env()
-
-# reading .env file
-environ.Env.read_env(BASE_DIR / '.env')

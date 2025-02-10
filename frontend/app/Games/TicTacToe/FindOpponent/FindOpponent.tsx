@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Circle, X, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { useGameStore } from '../../store/GameStore';
-import Image from 'next/image';
 import Avatar from '../../components/navbar/profilebar/Avatar';
 
 const MatchmakingInterface = () => {

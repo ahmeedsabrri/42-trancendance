@@ -11,7 +11,6 @@ export function middleware(request: NextRequest) {
   pathname.startsWith("/auth/verify-email") || 
   pathname.startsWith("/auth/otp") || pathname == "/"
 
-
   if (isExcludedRoute) {
     return NextResponse.next();
   }

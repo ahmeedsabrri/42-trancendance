@@ -95,7 +95,7 @@ class Notification(models.Model):
     message = models.TextField(blank=True)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=now)
-    
+
     def __str__(self):
         return f"Notification for {self.recipient.username} ({self.notification_type})"
 

@@ -13,8 +13,7 @@ const NavBar = () => {
     const [userIsReady, setUserIsReady] = useState(false);
     const setUserId = useChatStore((state) => state.setUserId);
     const fetchOwnFriends = useUserFriendsStore((state) => state.fetchOwnFriends);
-
-
+    
     useEffect(() => {
         const initializeUser = async () => {
             if (!user) {
@@ -24,20 +23,22 @@ const NavBar = () => {
                 setUserIsReady(true);
             }
         };
-
+        
         initializeUser();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
+    
     useEffect(() => {
         if (user) {
             setUserId(user.id);
             fetchUsers();
             fetchOwnFriends();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, userIsReady]);
+    
+    useChatSocket(user?.id ?? 0);
 
-    useChatSocket(user?.id);
 
     if (!userIsReady) {
         return null;

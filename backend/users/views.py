@@ -5,11 +5,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import SearchUserSerializer, UpdateUsernameSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
-from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from .utils.utils import send_notification 
+from django.http import Http404
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from PIL import Image as PilImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import requests
 
 User = get_user_model()
 
@@ -447,8 +453,12 @@ class BlockRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if connection.status == "accepted":
-                connection.block()
+            if connection.status != "blocked":
+                connection.sender = sender
+                connection.receiver = receiver
+                connection.status = "blocked"
+                connection.save()
+
             notification = Notification.create_notification(
                 sender=sender,
                 recipient=receiver,
@@ -778,26 +788,16 @@ class UserSearchView(generics.ListAPIView):
         return Response(serializer.data)
     
 
-# class DeleteNotificationView(APIView):
-#     permissions_classes = [permissions.IsAuthenticated]
-    
-#     def get(self, request, pk):
-#         notification = get_object_or_404(Notification, id=pk)
-#         notification.delete()
-#         return Response(
-#             {
-#                 "message": "Notification deleted successfully."
-#             },
-#             status=status.HTTP_200_OK
-#         )
-
-
 class DeleteNotificationView(APIView):
     permissions_classes = [permissions.IsAuthenticated]
     
     def delete(self, request, pk):
-        notification = get_object_or_404(Notification, id=pk)
-        notification.delete()
+        try:
+            Notification.objects.filter(recipient=request.user).get(id=pk).delete()
+        except Notification.DoesNotExist:
+            raise Http404("Notification does not exist")
+        # notification = get_object_or_404(Notification, id=pk)
+        # notification.delete()
         return Response(
             {
                 "message": "Notification deleted successfully."
@@ -819,17 +819,8 @@ class UpdateUserView(generics.UpdateAPIView):
         
 
 
-# views.py
-from rest_framework.generics import UpdateAPIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from django.conf import settings
-from PIL import Image as PilImage
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
-import requests
 
-class ImageUploadView(UpdateAPIView):
+class ImageUploadView(generics.UpdateAPIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [permissions.IsAuthenticated]
     def get_object(self):
@@ -854,8 +845,7 @@ class ImageUploadView(UpdateAPIView):
             user.save()
             return Response({'message': 'Upload happened successfully'}, status=200)
         except Exception as e:
-            print(f"Error: {e}")
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': "invalid format or large file, only .png, .jpeg, .jpg that are allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
     def resize_image(self, file, width, height):
         """Resize the uploaded image to the specified dimensions."""

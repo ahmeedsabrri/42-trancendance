@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import useNotificationStore from '../store/WebsocketNotifStore';
 import { useGameStore } from '@/app/Games/store/GameStore';
-import useChatSocket from '@/hooks/useChatSocket';
-import { useChatStore } from '@/app/store/chatStore';
 import { useUserFriendsStore } from '@/app/store/UserFriendsStrore';
 
 

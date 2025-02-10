@@ -6,9 +6,7 @@ import SideBarItem from "./SideBarItems";
 const Pattern = [
     {src: IMAGES.HomePage, alt: "home page", title: "Home" , link: "/dashboard"},
     {src: IMAGES.Game, alt: "Game page", title: "Game", link: "/Games"},
-    {src: IMAGES.Ranking, alt: "Raking page", title: "Ranking", link: "/ranking"},
     {src: IMAGES.Chat, alt: "Chat page", title: "Chat", link: "/chat"},
-    {src: IMAGES.Stats, alt: "Stats page", title: "Stats", link: "/stats"},
     {src: IMAGES.Settings, alt: "Settings page", title: "Settings", link: "/dashboard/setting"},
 ];
 const SideBar = () => {

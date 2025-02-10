@@ -52,7 +52,6 @@ const loginWithOtp = async (username: string, password: string, otpCode: string)
 const logout = () => {
   const res = api.get("/auth/logout/", { withCredentials: true });
 
-  console.log(res);
   return res;
 };
 
@@ -62,12 +61,10 @@ const changePassword = (current_password: string, new_password: string, confirm_
     new_password: new_password,
     confirm_password: confirm_password,
   });
-  console.log(res);
   return res;
 }
 const Oauth42 = (code: string) => {
   const res = api.post("/auth/42/callback/", { code: code });
-  console.log(res);
   return res;
 };
 

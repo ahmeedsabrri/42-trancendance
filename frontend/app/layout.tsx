@@ -11,7 +11,7 @@ import SideBar from "@/components/sidebar/Sidebar";
 import NavBar from "./Games/components/navbar/NavBar";
 import { ToastContainer, Bounce } from "react-toastify";
 import { Orbitron } from 'next/font/google';
-import { useEffect, useState} from "react"; 
+import { useEffect} from "react"; 
 import { AuthActions } from "./auth/utils";
 
 
@@ -43,7 +43,6 @@ export default function RootLayout({
     isOtpRoute || 
     isLandingPage
   );
-  const [shouldrender, setShouldRender] = useState(shouldRenderNavAndSideBar);
   const { check_auth } = AuthActions();
 
 
@@ -52,7 +51,6 @@ export default function RootLayout({
       check_auth().catch(() => {
         window.location.href = "/auth";
       });
-      setShouldRender(!shouldRenderNavAndSideBar);
     }
     // eslint-disable-next-line
   }, [shouldRenderNavAndSideBar]); 

@@ -100,7 +100,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 logger.error("Invalid sender or receiver ID")
                 return
 
-            if await self.check_user_blocked(sender, receiver):
+            if await self.check_user_blocked(sender, receiver):  
                 logger.error("User is blocked")
                 return
             message_data = {

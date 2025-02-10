@@ -86,6 +86,7 @@ export default function Profile() {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
     fetchUser();
+    // eslint-disable-next-line
   }, [username, fetchFriend, fetchUserFriends, fetchOwnFriends]);
 
   useEffect(() => {

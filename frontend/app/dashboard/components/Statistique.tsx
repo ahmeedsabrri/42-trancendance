@@ -49,11 +49,11 @@ const Statistique = () => {
       setMatches(data);
       console.log("data: ", data);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const updatedData = Matches?.map((match: Match) => {
     return {
+      id: match.id,
       name: `match ${match.id}`,
       user_score: match.user_score,
       status: match.status,
@@ -62,12 +62,10 @@ const Statistique = () => {
     };
   });
 
-  let data = null;
+  let data: Match[] = [];
 
   if (updatedData)
     data = updatedData.slice(-10);
-  else
-    data = [];
 
   return (
     <div className="size-full flex flex-col justify-center">

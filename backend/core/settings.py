@@ -9,7 +9,9 @@ import os
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
 # CORS
 CORS_ALLOWED_ORIGINS = ["https://localhost"]
 CORS_ALLOW_CREDENTIALS = True
@@ -78,16 +80,15 @@ TEMPLATES = [
 ASGI_APPLICATION = "core.asgi.application"
 
 
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [('redis', 6379)],
-#         },
-#     },
-# }
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    },
+}
 
-CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 AUTH_USER_MODEL = "users.User"
 
 # Database
@@ -97,14 +98,12 @@ AUTH_USER_MODEL = "users.User"
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('SQL_DB'),
-        'USER': os.environ.get('SQL_USER'),
-        'PASSWORD': os.environ.get('SQL_PASSWORD'),
-        'HOST': os.environ.get('SQL_HOST'),
-        'PORT': os.environ.get('SQL_PORT'),
+        'NAME': os.environ['SQL_DB'],
+        'USER': os.environ['SQL_USER'],
+        'PASSWORD': os.environ['SQL_PASSWORD'],
+        'HOST': os.environ['SQL_HOST'],
+        'PORT': os.environ['SQL_PORT'],
     }
 }
 
@@ -179,7 +178,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 # Frontend URL for verification link
-FRONTEND_URL = 'http://localhost:3000'
 
 OAUTH_CLIENT_ID = env("42_OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
@@ -187,11 +185,11 @@ OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sabriahmeed1@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'kmoudscyrfclewus'  # Use the generated App Password here
-DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Default sender email
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # Your Gmail address
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use the generated App Password here
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")  # Default sender email
 
-IMGBB_API_KEY = '053f132b8b449609833ef0da83ad84fa'
+IMGBB_API_KEY = env("IMGBB_API_KEY")
