@@ -24,6 +24,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         self.game_state = None
         self.is_winner = False
         self.is_game_owner = False
+        self.is_turn = False
 
     #FUNCTION TO CREATE THE GAME
     @database_sync_to_async
@@ -93,8 +94,6 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error raised while sending group message : {e}")
 
-
-
 #--------------------------------------------------------------------------------------------#
     #SOCKET MAIN FUNCTIONS (CONNECT, RECEIVE, DISCONNECT)
     async def connect(self):
@@ -113,13 +112,16 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                 else:
                     RemoteTicTacToeConsumer.waiting_users.remove(player1)
                     RemoteTicTacToeConsumer.waiting_users.remove(player2)
+
                     player1.opponent = player2
-                    player2.opponent = player1
                     player1.mark = 'X'
-                    player2.mark = 'O'
                     player1.game_state = 'started'
-                    player2.game_state = 'started'
                     player1.is_game_owner = True
+                    player1.is_turn = True
+
+                    player2.opponent = player1
+                    player2.mark = 'O'
+                    player2.game_state = 'started'
                     
 
                     await player1.send_json({'action' : 'identify_players',
@@ -145,23 +147,52 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
 
                     await player1.send_json({
                         'action' : 'game_started',
-                        'turn': True
+                        'turn': player1.is_turn
                     })
 
                     await player2.send_json({
                         'action' : 'game_started',
-                        'turn': False
+                        'turn': player2.is_turn
                     })
         except Exception as e:
             logger.error(f"Error raised while connecting to the consumer : {e}")
 
+
+
+    def checkInfosBeforSending(self, data):
+        if 'position' not in data:
+            raise Exception("Missing required field: 'position'")
+        if data.position < 0 or data.position > 9:
+            raise Exception(f"The position givn out of bound: 'position = {data.position}'")
+
+
     async def receive(self, text_data):
         try:
+            if not self.is_turn:
+                return
             move_data = json.loads(text_data)
-            await self.opponent.send_json(move_data)
+            #check data here, if its not valid an exception is thrown
+            self.checkInfosBeforeSending(move_data)
+            # await self.opponent.send_json(move_data)
             position = move_data['position']
             self.board[position] = self.mark
             self.opponent.board[position] = self.mark
+            self.is_turn = False
+            self.opponent.is_turn = True
+            message  = {
+                'action': 'board_update',
+                'board': self.board,
+                'sender': self.scope['user'].username,
+                'my_turn': self.is_turn,
+                'opponent_turn': self.opponent.is_turn
+            }
+            await self.channel_layer.group_send(
+                    self.game_group,
+                    {
+                        'type' : 'send_message_group',
+                        'message' : message
+                    }
+            )
             result = self.check_winner()
             if result == 'X' or result == 'O':
                 self.board = [None] * 9

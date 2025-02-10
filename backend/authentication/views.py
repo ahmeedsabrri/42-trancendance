@@ -101,7 +101,7 @@ class RegisterView(APIView):
                 error_message = "An error occurred during registration."
             return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"message": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OauthCallBackView(APIView):

@@ -9,7 +9,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from .utils.utils import send_notification 
+from .utils.utils import send_notification, is_blocked
 
 User = get_user_model()
 
@@ -104,6 +104,22 @@ class SendGameInviteView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if Connection.objects.filter( Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_200_OK
+                )
+            if not Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is not your friend."
+                    },
+                    status=status.HTTP_200_OK
+                )
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
                 sender=sender,
@@ -135,7 +151,7 @@ class SendGameInviteView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class SendRequestView(APIView):
@@ -206,7 +222,7 @@ class SendRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 class AcceptRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -276,7 +292,7 @@ class AcceptRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class AcceptInviteRequestView(APIView):
@@ -286,10 +302,15 @@ class AcceptInviteRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.accept(sender)
-            
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -327,7 +348,7 @@ class AcceptInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineInviteRequestView(APIView):
@@ -378,7 +399,7 @@ class DeclineInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineRequestView(APIView):
@@ -432,7 +453,7 @@ class DeclineRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class BlockRequestView(APIView):
@@ -486,10 +507,10 @@ class BlockRequestView(APIView):
         except Exception as e:
             return Response(
                 {
-                    "error": "Server error",
+                    "error": "Error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -651,7 +672,7 @@ class UnFriendView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 class UnBlockUserView(APIView):
@@ -693,7 +714,7 @@ class UnBlockUserView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 
@@ -730,20 +751,6 @@ class UserSearchView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
-
-# class DeleteNotificationView(APIView):
-#     permissions_classes = [permissions.IsAuthenticated]
-    
-#     def get(self, request, pk):
-#         notification = get_object_or_404(Notification, id=pk)
-#         notification.delete()
-#         return Response(
-#             {
-#                 "message": "Notification deleted successfully."
-#             },
-#             status=status.HTTP_200_OK
-#         )
-
 
 class DeleteNotificationView(APIView):
     permissions_classes = [permissions.IsAuthenticated]
@@ -804,7 +811,7 @@ class ImageUploadView(UpdateAPIView):
             return Response({'message': 'Upload happened successfully'}, status=200)
         except Exception as e:
             print(f"Error: {e}")
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': str(e)}, status=400)
 
     def resize_image(self, file, width, height):
         """Resize the uploaded image to the specified dimensions."""

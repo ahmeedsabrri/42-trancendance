@@ -36,6 +36,10 @@ const useNotificationWebSocket = (url: string) => {
         fetchOwnFriends();
         console.log('Fetching friends');
       }
+      if (newNotification.notification.notification_type === "block")
+      {
+        console.log('Blocked');
+      }
       console.log('New notification type :', newNotification.notification.notification_type);
       const data = newNotification.notification;
       console.log('New notification:', newNotification);

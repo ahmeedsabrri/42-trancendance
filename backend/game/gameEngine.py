@@ -1,4 +1,7 @@
-import math
+import math, asyncio
+from users.models import Connection
+from channels.db import database_sync_to_async
+from django.db.models import Q
 
 # for the local game
 class LocalGameEngine:
@@ -102,7 +105,6 @@ class LocalGameEngine:
             self.BALL["X"] = player["X"] - self.BALL["RADIUS"]
         
         # Use the collision point to determine the reflection angle
-        # Map the collision point from [-1, 1] to [-π/3, π/3] for more realistic angles
         angle_rad = collision_details["collision_point"] * (math.pi / 3)
         direction = 1 if player_key == "PLAYER1" else -1
         
@@ -215,30 +217,34 @@ class OnlineGameEngine:
         return 'init game engine'
 
     def update_paddles(self, group_id):
-        channel_name = OnlineGameEngine.groups[group_id]["channel_name"]
         player1 = OnlineGameEngine.groups[group_id]["PLAYERS"]["PLAYER1"]
         player2 = OnlineGameEngine.groups[group_id]["PLAYERS"]["PLAYER2"]
-        key_states = OnlineGameEngine.groups[group_id]["key_states"]
 
-        # Player 1 movement
-        if player1["channel_name"] == channel_name:
-            if key_states["ArrowUp"] and player1["Y"] > 0:
-                player1["Y"] = max(0, player1["Y"] - self.GAME_INFO["PLAYER_SPEED"])
-            if key_states["ArrowDown"] and player1["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
-                player1["Y"] = min(
-                    self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
-                    player1["Y"] + self.GAME_INFO["PLAYER_SPEED"]
-                )
+        if player1["key_states"]["ArrowUp"] and player1["Y"] > 0:
+            player1["Y"] = max(0, player1["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        if player1["key_states"]["ArrowDown"] and player1["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+            player1["Y"] = min(
+                self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+                player1["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+            )
 
-        # Player 2 movement
-        if player2 and player2["channel_name"] == channel_name:
-            if key_states["ArrowUp"] and player2["Y"] > 0:
-                player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
-            if key_states["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
-                player2["Y"] = min(
-                    self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
-                    player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
-                )
+        if player2["key_states"]["ArrowUp"] and player2["Y"] > 0:
+            player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        if player2["key_states"]["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+            player2["Y"] = min(
+                self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+                player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+            )
+
+        # # Player 2 movement
+        # if player2 and player2["channel_name"] == channel_name:
+        #     if key_states["ArrowUp"] and player2["Y"] > 0:
+        #         player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        #     if key_states["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+        #         player2["Y"] = min(
+        #             self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+        #             player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+        #         )
 
     def get_collision_details(self, ball, player):
         # Calculate the ball's next position
@@ -323,9 +329,15 @@ class OnlineGameEngine:
         if self.BALL["X"] - self.BALL["RADIUS"] < 0:
             PLAYERS["PLAYER2"]["SCORE"] += 1
             self.reset_ball()
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
         elif self.BALL["X"] + self.BALL["RADIUS"] > self.GAME_INFO["CANVAS"]["WIDTH"]:
             PLAYERS["PLAYER1"]["SCORE"] += 1
             self.reset_ball()
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
 
         # Winner check and game status update
         if PLAYERS["PLAYER1"]["SCORE"] == 3:
@@ -369,7 +381,7 @@ class OnlineGameEngine:
         self.reset_ball()
         OnlineGameEngine.groups[group_id]["status"] = "ready"
 
-    def join_group_or_add_one(self, user, channel_name, invited_id):
+    async def join_group_or_add_one(self, user, channel_name, invited_id):
         # Look for an available group
         for group_id, group_info in OnlineGameEngine.groups.items():
             if group_info["status"] == "waiting":
@@ -378,7 +390,9 @@ class OnlineGameEngine:
                 if (group_info["invited_id"] and group_info["invited_id"] != invited_id):
                     print(f'users the same = {group_info["invited_id"]} {invited_id}')
                     continue
-                # Join existing group as player 2
+                is_blocked = await check_user_blocked(group_info["user1"], user)
+                if is_blocked:
+                    break
                 group_info["PLAYERS"]["PLAYER2"] = {
                     "channel_name": channel_name,
                     "user_id": user.id,
@@ -391,6 +405,7 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                 }
                 group_info["status"] = "ready"
                 group_info["user2"] = user
@@ -415,17 +430,27 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                 },
                 "PLAYER2": None,
             },
             "channel_name": None,
             "game_leader": channel_name,
-            "key_states": {"ArrowUp": False, "ArrowDown": False, "w": False, "s": False},
             "running": False,
             "user1": user,
             "user2": None,
             "invited_id": invited_id,
             "game_winner": None,
             "game_loser": None,
+            "lock": asyncio.Lock()
         }
         return group_id
+
+@database_sync_to_async
+def check_user_blocked(sender, receiver):
+    try:
+        return Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists()
+    except Connection.DoesNotExist:
+        return False
+    
+# Q is a query object in Django's ORM that allows you to build complex queries using logical operators like AND and OR.

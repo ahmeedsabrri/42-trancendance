@@ -54,9 +54,16 @@ const TicTac = () => {
         reason: 'GAME FINISHED' | 'OPPONENT DISCONNECTED';
         sender: string;
         avatar: string;
+        my_turn: boolean;
+        opponent_turn: boolean;
     }
+    // const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+    // if (!base_wws_url) {
+    //     throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+    // }
 
-    const WS_URL = "wss://localhost/ws/TicTac/remote/";
+    // const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
+    const WS_URL = 'wss:/localhost/TicTac/remote/';
 
     const websocket = useRef<WebSocket | null>(null)
 
@@ -73,7 +80,6 @@ const TicTac = () => {
     });
 
     const { GameBoardColor, setTicTacOpponent } = useGameStore()
-    // const [isInGame, setIsInGame] = useState<boolean>(false);
     const [isMyTurn, setIsMyTurn] = useState<boolean>(false);
     const [board, setBoard] = useState<CellValue[]>(Array(9).fill(''));
     const [gameOver, setGameOver] = useState<boolean>(false);
@@ -95,7 +101,6 @@ const TicTac = () => {
 
     useEffect(() => {
         if (gameOver) {
-            console.log("disconnect from useEffect")
             websocket.current?.close();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,12 +122,8 @@ const TicTac = () => {
 
                 case 'game_started':
                     await new Promise(resolve => setTimeout(resolve, 3000));
-                    // setIsInGame(true);
                     setIsWaiting(false);
-                    if (lastJsonMessage.turn)
-                        setIsMyTurn(true)
-                    else
-                        setIsMyTurn(false)
+                    setIsMyTurn(lastJsonMessage.turn ? true : false)
                     break;
 
                 case 'score_update':
@@ -141,7 +142,9 @@ const TicTac = () => {
 
                 case 'board_update':
                     setBoard([...lastJsonMessage.board]);
-                    setIsMyTurn(true);
+                    setIsMyTurn(lastJsonMessage.sender === user.current.username
+                                ? lastJsonMessage.my_turn
+                                : lastJsonMessage.opponent_turn)
                     break;
 
                 case 'player_won':
@@ -153,8 +156,8 @@ const TicTac = () => {
                     }
                     user.current.winner.username = lastJsonMessage.sender;
                     user.current.winner.avatar = lastJsonMessage.avatar;
-                    user.current.winner.reason = lastJsonMessage.reason;
                     setGameOver(true);
+                    user.current.winner.reason = lastJsonMessage.reason;
                     break;
 
                 case 'draw':
@@ -179,21 +182,11 @@ const TicTac = () => {
     function handleClick(index: number): void {
         if (!isMyTurn || board[index] !== '')
             return;
-        const newBoard: CellValue[] = [...board];
-        if (user.current.mark === 'X')
-            newBoard[index] = IMAGES.X
-        else
-            newBoard[index] = IMAGES.O
-        setBoard(newBoard);
-        updateBoard.current = [...newBoard];
         const data = {
             "action": "board_update",
             "position": index,
-            "board": updateBoard.current,
-            "mark": user.current.mark
         }
         sendJsonMessage(data);
-        setIsMyTurn(false);
     }
 
     if (isWaiting)
@@ -250,7 +243,7 @@ const TicTac = () => {
                                                     {cell !== '' ?
                                                         (
                                                         <Image
-                                                            src={cell}
+                                                            src={cell === "X" ? IMAGES.X : IMAGES.O}
                                                             alt="cell"
                                                             height={100}
                                                             width={100}

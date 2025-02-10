@@ -12,6 +12,7 @@ import { useGameStore } from "@/app/Games/store/GameStore";
 import { useUserStore } from "@/app/store/store";
 import { useEffect } from "react";
 import { UserFriendsActions } from "@/app/profile/utils/actions";
+import { useRouter } from "next/navigation";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
@@ -19,6 +20,7 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
     const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
     const {user} = useUserStore();
     const { handleRequest } = UserFriendsActions();
+    const router = useRouter();
 
     useEffect(() => {
         console.log("invited_id infooo", invited_id);
@@ -26,19 +28,22 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const handlePingPongNotifyAdd = () => {
 
-        resetInvitedId();
-        setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
-        setGameMode("online");
-
+        
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {
-          console.log(response);
-          notifyAdd(response.data.message);
-    
+            console.log(response);
+            if (response.data.message === "Game invite sent successfully.")
+            {
+                resetInvitedId();
+                setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
+                setGameMode("online");
+                router.push("Games/GameBackground");
+            }
+            notifyAdd(response.data.message);
         })
         .catch((err) => {
           console.log(err);
-          notifyErr(err.response.data.message);
+          notifyErr(err.response?.data?.message);
         });
     };
 
@@ -74,15 +79,11 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
                                     <Image src={profile} alt="info" width={50} className="hover:size-[56px] active:size-[52px] transition-all opacity-75 hover:opacity-100" />
                                 </Link>
                             </div>
-                            <div className="size-[60px] flex items-center justify-center">
-                                <Link rel="preload" href="Games/GameBackground" onClick={handlePingPongNotifyAdd}>
-                                    <Image src={pingPong} alt="info" width={40} className="hover:size-[46px] active:size-[42px] transition-all opacity-75 hover:opacity-100" />
-                                </Link>
+                            <div className="size-[60px] flex items-center justify-center" onClick={handlePingPongNotifyAdd}>
+                                <Image src={pingPong} alt="info" width={40} className="hover:size-[46px] active:size-[42px] transition-all opacity-75 hover:opacity-100" />
                             </div>
-                            <div className="size-[60px] flex items-center justify-center">
-                                <Link rel="preload" href="#" onClick={handleBlock}>
-                                    <Image src={block} alt="info" width={50} className="hover:size-[56px] active:size-[52px] transition-all opacity-75 hover:opacity-100" />
-                                </Link>
+                            <div className="size-[60px] flex items-center justify-center" onClick={handleBlock}>
+                                <Image src={block} alt="info" width={50} className="hover:size-[56px] active:size-[52px] transition-all opacity-75 hover:opacity-100" />
                             </div>
                         </div>
                     </div>

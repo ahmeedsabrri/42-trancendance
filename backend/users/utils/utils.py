@@ -11,3 +11,9 @@ def send_notification(recipient_id, notification_data):
             'notification': NotificationSerializer(notification_data).data,
         }
     )
+
+def is_blocked(user, blocked_user):
+    try:
+        return Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists()
+    except Connection.DoesNotExist:
+        return False

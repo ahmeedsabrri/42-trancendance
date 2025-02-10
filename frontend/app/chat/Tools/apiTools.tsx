@@ -80,14 +80,40 @@ const fetchMessages = async (conversation_id: number) => {
 }
 
 const getMatcheHistory = async (id: number) => {
-    const response = await api.get(`match_history/${id}`);
-    console.log(response.data);
-    return response.data.matches;
+    try {
+        const response = await api.get(`match_history/${id}`);
+        return response.data.matches;
+
+    }
+    catch (error) {
+        if (axios.isCancel(error)) {
+            console.log('Request canceled', error.message);
+        }
+        else {
+            console.log('Error', error);
+        }
+    }
 }
 
 const handleRequestGames = async (username:string, type:string) => {
-    const response = await api.get(`users/request/${type}/${username}/`);
-    return response;
+    
+    try {
+        const response = await api.get(`users/request/${type}/${username}/`).then((response) => {
+            return response;
+        })
+        .catch((error) => {
+            return error;
+        });
+        return response;
+    }
+    catch (error) {
+        if (axios.isCancel(error)) {
+            console.log('Request canceled', error.message);
+        }
+        else {
+            console.log('Error', error);
+        }
+    }
 }
 
 export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames, getMatcheHistory };

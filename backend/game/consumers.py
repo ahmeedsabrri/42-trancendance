@@ -102,13 +102,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
             self.user = self.scope["user"]
             self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id", None)
 
-            # if (self.invite_id):
-                # self.invite_id = int(self.invite_id)
-            print(self.invite_id)
-
             self.game_engine = OnlineGameEngine()
 
-            self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
+            self.group_id = await self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
 
             self.room_group_name = f'online_game_{self.group_id}'
 
@@ -118,7 +114,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
             print("SERVER CONNECTED SUCCESSFULLY...")
 
+            self.p_key = "PLAYER2"
             if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
+                self.p_key = "PLAYER1"
                 self.task = asyncio.create_task(self.game_loop())
         except Exception as e:
             print("Error connecting to server: <error> ", e)
@@ -185,19 +183,14 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 key_event = json.loads(text_data)
                 key = key_event["key"]
                 is_pressed = key_event["isPressed"]
+                
+                assert key in ["ArrowUp", "ArrowDown"]
 
-                OnlineGameEngine.groups[self.group_id]["channel_name"] = self.channel_name
-        
-                if key in OnlineGameEngine.groups[self.group_id]["key_states"]:
-                    OnlineGameEngine.groups[self.group_id]["key_states"][key] = is_pressed
+                OnlineGameEngine.groups[self.group_id]["PLAYERS"][self.p_key]["key_states"][key] = is_pressed
 
             if self.action == "StartGame" and OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name:
                 OnlineGameEngine.groups[self.group_id]["running"] = True
-
-            # if self.action == "PLAY":
-            #     self.game_engine.running = True
-            # elif self.action == "PAUSE":
-            #     self.game_engine.running = False
+    
         except Exception as e:
             print("Error processing input:", e)
 
