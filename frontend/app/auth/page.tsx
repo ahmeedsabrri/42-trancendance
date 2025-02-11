@@ -45,7 +45,6 @@ function AuthContent() {
   const onOtpSubmit = (otp_code: string) => {
     loginWithOtp('', '', otp_code)
       .then((res) => {
-        console.log("Logged in successfully");
         notifToast(res.data.message);
         router.push('/dashboard');
       })

@@ -60,7 +60,8 @@ const changePassword = (current_password: string, new_password: string, confirm_
     current_password: current_password,
     new_password: new_password,
     confirm_password: confirm_password,
-  });
+  }, { withCredentials: true });
+  console.log(res);
   return res;
 }
 const Oauth42 = (code: string) => {

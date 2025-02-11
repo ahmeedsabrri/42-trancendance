@@ -42,8 +42,6 @@ export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
         }
 
         set({ loading: true, error: null });
-        
-        console.log('fetching friends')
         fetchUserPromise = api.get<UserFriendsData[]>(`/users/friends/${username}`)
             .then(response => {
                 set({ 
@@ -63,7 +61,6 @@ export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
             return fetchUserPromise;
     },
     fetchOwnFriends: async () => {
-        console.log('fetching own friends')
         if (fetchOwnPromise) {
             return fetchOwnPromise;
         }

@@ -25,7 +25,6 @@ export default function UpdateForm() {
         if (!data.lastName) {
             data.lastName = user?.last_name || "";
         }
-        console.log(data);
     });
     return (
         <>

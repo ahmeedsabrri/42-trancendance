@@ -7,61 +7,66 @@ const source = axios.CancelToken.source();
 
 const getNotifications = async () => {
     try {
-        const response = await api.get(`/notifications/`);
+        const response = await api.get(`/notifications/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-
-    }
+    catch {}
 }
 
 const newConversation = async (user: number) => {
     try {
-        const response = await api.post(`/chat/new_conversation/${user}/`);
+        const response = await api.post(`/chat/new_conversation/${user}/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-    }
+    catch {}
 }
 
 const fetchConversations = async () => {
     try {
-        const response : AxiosResponse = await api.get(`/chat/conversations/`);
+        const response : AxiosResponse = await api.get(`/chat/conversations/`,{
+            withCredentials: true,
+          });
         if (!response.data) {
             return [];
         }
         return sortConversationsByDate(response.data);
     }
-    catch (error) {
-    }
+    catch {}
 };
 
 const fetchMessages = async (conversation_id: number) => {
     try {
-        const response : AxiosResponse = await api.get(`/chat/conversation/${conversation_id}/messages/`);
+        const response : AxiosResponse = await api.get(`/chat/conversation/${conversation_id}/messages/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-    }
+    catch  {}
 }
 
 const getMatcheHistory = async (id: number) => {
     try {
-        const response = await api.get(`match_history/${id}`);
+        const response = await api.get(`match_history/${id}`,{
+            withCredentials: true,
+          });
         return response.data.matches;    
     }
-    catch (error) {
-    }
+    catch  {}
 }
 
 const handleRequestGames = async (username:string, type:string) => {
     
     try {
-        const response = await api.get(`users/request/${type}/${username}/`);
+        const response: AxiosResponse = await api.get(`users/request/${type}/${username}/`,{
+            withCredentials: true,
+          });
         return response;
     }
-    catch (error) {
-    }
+    catch {}
 }
 
 source.cancel('Operation canceled by the user.');

@@ -22,10 +22,9 @@ User = get_user_model()
 class VerifyEmailView(APIView):
     permission_classes = []
     def post(self, request):
-        print(request.data)
-        uid = request.data.get('uid')
-        token = request.data.get('token')
         try:
+            uid = request.data.get('uid')
+            token = request.data.get('token')
             uid = force_str(urlsafe_base64_decode(uid))
             user = User.objects.get(pk=uid);
             if default_token_generator.check_token(user, token):

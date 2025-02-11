@@ -34,7 +34,6 @@ const useChatSocket = (user_id: number) => {
         socket.current.onmessage = (e) => {
             setEventMessage(e);
             const message = JSON.parse(e.data);
-            
             queryClient.setQueryData(
                 ["messages", message.conversation_id],
                 (oldData: Message[] = []) => {

@@ -12,8 +12,8 @@ const useNotificationWebSocket = (url: string) => {
   const { fetchOwnFriends } = useUserFriendsStore();
 
   const { lastMessage, readyState } = useWebSocket(url, {
-    onOpen: () => console.log('WebSocket connected'),
-    onClose: () => console.log('WebSocket disconnected'),
+    onOpen: () => {},
+    onClose: () =>{},
     shouldReconnect: () => true,
     reconnectInterval: 50000,
   });

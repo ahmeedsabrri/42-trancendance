@@ -75,7 +75,6 @@ const handleTwoFactorEnable = async (otpCode: string) => {
   }
 };
 
-// Disable 2FA function
 const handleTwoFactorDisable = async (otpCode: string) => {
   try {
     const response = await api.post<TwoFAResponse>('/auth/2fa/disable/', {

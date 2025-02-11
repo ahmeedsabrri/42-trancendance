@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { AuthActions } from '@/app/auth/utils';
 import { useForm } from "react-hook-form";
+import { Bounce, toast } from 'react-toastify';
 
 
 type FormData = {
@@ -12,6 +13,18 @@ type FormData = {
   confirm_password: string;
 };
 export function PasswordChangeForm() {
+  const notify = (message: string) =>
+    toast(message, {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
   const {changePassword} = AuthActions();
   const [showPasswords, setShowPasswords] = useState({
     current: false,
@@ -42,13 +55,43 @@ export function PasswordChangeForm() {
   const {formState: { errors },setError,} = useForm<FormData>();
 
   const onSubmit = () => {
+    
+    if (formData.new_password !== formData.confirm_password) {
+      setError("root", {
+        type: "manual",
+        message: "Passwords do not match",
+      });
+      return;
+    }
      changePassword(formData.current_password, formData.new_password, formData.confirm_password)
-      .then((res) => {
-        console.log(res.data.message);
+      .then(() => {
+        notify("Password changed successfully");
       })
       .catch((error) => {
-        console.log(error);
-        setError('root', {  message: error.response.data.message });
+        if (error.response.status === 400 && error.response.data?.current_password) {
+          setError("root", {
+            type: "manual",
+            message: "current password is unvalid",
+          });
+        }
+          
+       else if (error.response.status === 400 && error.response.data?.new_password){
+          setError("root", {
+            type: "manual",
+            message: "new password is unvalid",
+          });
+       } 
+        else if (error.response.status === 400 && error.response.data?.confirm_password) {
+          setError("root", {
+            type: "manual",
+            message: "confirm password is unvalid",
+          });
+        }
+        else
+          setError("root", {
+            type: "manual",
+            message: "An error occurred",
+          });
       });
   };
   return (

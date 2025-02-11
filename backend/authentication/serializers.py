@@ -7,7 +7,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .utils.utils import send_email_verification_link
 from django.db import IntegrityError
-
+from rest_framework_simplejwt.serializers import TokenObtainSlidingSerializer
 User = get_user_model()
 
 
@@ -59,13 +59,13 @@ class OuathCallBackSerializer(serializers.Serializer):
                 redirect_uri=settings.OAUTH_REDIRECT_URI,
             )
             token = oauth.fetch_token(
-                token_url="https://api.intra.42.fr/oauth/token",
+                token_url=settings.OAUTH_TOKEN_URL,
                 code=attrs["code"],
                 client_secret=settings.OAUTH_CLIENT_SECRET,
                 include_client_id=True,
             )
 
-            user_info = oauth.get("https://api.intra.42.fr/v2/me")
+            user_info = oauth.get(settings.OAUTH_GET_INFO_URL)
             user_info.raise_for_status()
             user_info_json = user_info.json()
 
@@ -119,7 +119,7 @@ class TwoFatorAuthcSerializer(serializers.Serializer):
         }
 
 
-from rest_framework_simplejwt.serializers import TokenObtainSlidingSerializer
+
 
 
 class MyTokenObtainSerializer(TokenObtainSlidingSerializer):
@@ -187,35 +187,3 @@ class ProfileSerializer(serializers.ModelSerializer):
                   'level',
                   'friends',
                   ]
-        
-        
-# class PasswordUpateSerializer(serializers.ModelSerializer):
-#     current_password = serializers.CharField(
-#         required=True,
-#         write_only=True,
-#         style={'input_type': 'password'}
-#     )
-#     new_password = serializers.CharField(
-#         required=True,
-#         write_only=True,
-#         style={'input_type': 'password'}
-#     )
-#     confirm_password = serializers.CharField(
-#         required=True,
-#         write_only=True,
-#         style={'input_type': 'password'}
-#     )
-#     class Meta:
-#         model = User 
-#         fields = ['current_password', 'new_password', 'confirm_password']
-        
-#     def validate(self, attrs):
-#         if attrs['new_password'] != attrs['confirm_password']:
-#             raise serializers.ValidationError('Passwords do not match.')
-#         if attrs['current_password'] == attrs['new_password']:
-#             raise serializers.ValidationError('New password must be different from current password.')
-
-#         return attrs
-        
-    
-    

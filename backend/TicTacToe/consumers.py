@@ -159,15 +159,16 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
 
 
 
-    def checkInfosBeforSending(self, data):
+    def checkInfosBeforeSending(self, data):
         if 'position' not in data:
             raise Exception("Missing required field: 'position'")
-        if data.position < 0 or data.position > 9:
-            raise Exception(f"The position givn out of bound: 'position = {data.position}'")
+        if data['position'] < 0 or data['position'] > 9:
+            raise Exception(f"The position givn out of bound: 'position = {data['position']}'")
 
 
     async def receive(self, text_data):
         try:
+            print('turn is : ', self.is_turn)
             if not self.is_turn:
                 return
             move_data = json.loads(text_data)
@@ -243,6 +244,7 @@ class RemoteTicTacToeConsumer(AsyncJsonWebsocketConsumer):
                 )
         except Exception as e:
             logger.error(f"Error raised while receiving a message : {e}")
+            await self.close()
 
     async def disconnect(self, close_code):
         try:
@@ -284,6 +286,7 @@ class LocalTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         self.board = [None] * 9
         self.left_score = 0
         self.right_score = 0
+        self.mark = 'X'
         self.mark_is_x = True
 
     def check_winner(self):
@@ -320,14 +323,27 @@ class LocalTicTacToeConsumer(AsyncJsonWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error raised while connecting in local game : {e}")
 
+    def checkInfosBeforeSending(self, data):
+        if 'position' not in data:
+            raise Exception("Missing required field: 'position'")
+        if data['position'] < 0 or data['position'] > 9:
+            raise Exception(f"The position givn out of bound: 'position = {data['position']}'")
   
     #RECEIVE
     async def receive(self, text_data):
         try:
             move_data = json.loads(text_data)
-            self.mark_is_x = not self.mark_is_x
+            self.checkInfosBeforeSending(move_data)
             position = move_data['position']
             self.board[position] = move_data['mark']
+            self.mark_is_x = not self.mark_is_x
+            message  = {
+                'action': 'board_update',
+                'board': self.board,
+                'mark': self.mark_is_x
+            }
+            await self.send_json(message)
+
             result = self.check_winner()
             if result == 'X' or result == 'O':
                 if result == 'X':

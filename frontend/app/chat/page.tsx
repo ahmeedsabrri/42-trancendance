@@ -11,10 +11,8 @@ const Chat = () => {
     const {notifications, markAsRead} = useNotificationStore();
 
     useEffect(() => {
-        console.log('Notifications:', notifications);
         notifications.forEach((notification: Notificationdata) => {
             if (notification.notification_type === 'message') {
-                console.log('Notification_id :', notification.id);
                 if (notification)
                     markAsRead(notification.id);
             }

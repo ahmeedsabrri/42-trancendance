@@ -1,15 +1,14 @@
 import json
-import logging
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-from .serializers import MessagesSerializer, ConversationsSerializer
 from .models import Conversation, Message
 from users.utils import send_notification
 from users.models import Notification, Connection
 from django.db.models import Q
-logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -22,14 +21,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        logger.info(f"WebSocket connected for user {self.user_id}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name
         )
-        logger.info(f"WebSocket disconnected for user {self.user_id}")
 
     @database_sync_to_async
     def get_user(self, user_id):
@@ -115,7 +112,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 },
                 'message': new_message.message,
                 'conversation_id': new_message.conversation.id,
-                'time': new_message.time,
+                'time': new_message.time.isoformat(),
             }
             
             for group_name in [
@@ -124,13 +121,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             ]:
                 await self.channel_layer.group_send(group_name, response_data)
             notification =  await self.create_notif(message_data)
-            if not new_message:
+            if not notification:
                 return
             await sync_to_async(send_notification)(receiver.id,notification)
         except json.JSONDecodeError:
-            logger.error("Invalid JSON received")
+            pass 
         except Exception as e:
-            logger.error(f"Error processing message: {str(e)}")
+            pass
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
@@ -139,7 +136,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'sender': event['sender'],
             'message': event['message'],
             'conversation_id': event['conversation_id'],
-            'time': event['time'].isoformat(),
+            'time': event['time'],
         }))
 
     @database_sync_to_async
@@ -149,6 +146,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_text = data.get('message')
         notification = Notification.create_notification(sender,receiver,"message",message_text)
         if not all([sender, receiver, message_text]):
-            logger.error("Missing required message data")
             return None
         return notification

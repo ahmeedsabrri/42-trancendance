@@ -33,9 +33,9 @@ const Canvas = () => {
         lastJsonMessage,
     } = useWebSocket<GameState>(socketUrl, {
         shouldReconnect: () => false,
-        onError: (event) => console.log('WebSocket error:', event),
-        onOpen: () => console.log('WebSocket connected'),
-        onClose: () => console.log('WebSocket disconnected'),
+        onError: () => {},
+        onOpen: () => {},
+        onClose: () => {},
     });
 
     useEffect(() => {
@@ -111,7 +111,7 @@ const Canvas = () => {
         return () => {
             document.removeEventListener('keydown', keydownHandler);
             document.removeEventListener('keyup', keyupHandler);
-        };  // eslint-disable-next-line react-hooks/exhaustive-deps
+        };
     }, [sendJsonMessage, setKeyPressed]);
 
     useEffect(() => {

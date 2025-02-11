@@ -41,17 +41,13 @@ class JWTCookieMiddleware:
 class WebSocketJWTAuthMiddleware:
     def __init__(self, app):
         self.app = app
-
     async def __call__(self, scope, receive, send):
-
         scope["user"] = AnonymousUser()
-
         for k, v in scope.get("headers", []):
             if k == b"cookie":
                 cookies = parse_cookie(v.decode())
                 scope["user"] = await self.get_user(cookies.get("jwt_token"))
         return await self.app(scope, receive, send)
-
     @database_sync_to_async
     def get_user(self, token):
         try:

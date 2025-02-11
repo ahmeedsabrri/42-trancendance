@@ -10,14 +10,13 @@ import { notifyErr } from "@/app/chat/Tools/wstools";
 import { handleRequestGames } from "../../Tools/apiTools";
 import { useGameStore } from "@/app/Games/store/GameStore";
 import { useUserStore } from "@/app/store/store";
-import { useEffect } from "react";
 import { UserFriendsActions } from "@/app/profile/utils/actions";
 import { useRouter } from "next/navigation";
 
 const Info = ( {showInfo}: {showInfo:boolean} ) => {
 
     const conversationSelected = useChatStore((state) => state.conversationSelected);
-    const {invited_id, setInvitedId, resetInvitedId, setGameMode} = useGameStore();
+    const { setInvitedId, resetInvitedId, setGameMode} = useGameStore();
     const {user} = useUserStore();
     const { handleRequest } = UserFriendsActions();
     const router = useRouter();
@@ -26,14 +25,14 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
         
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {
-            if (response.data.message === "Game invite sent successfully.")
+            if (response?.data.message === "Game invite sent successfully.")
             {
                 resetInvitedId();
                 setInvitedId(`${conversationSelected?.userTarget?.id}-${user?.id}`);
                 setGameMode("online");
                 router.push("Games/GameBackground");
             }
-            notifyAdd(response.data.message);
+            notifyAdd(response?.data.message);
         })
         .catch((err) => {
             notifyErr(err.response?.data?.message);

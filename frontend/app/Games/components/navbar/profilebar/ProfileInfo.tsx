@@ -7,7 +7,6 @@ const ProfileInfo = () => {
     
     const { fetchUser, user, isInitialized } = useUserStore();
     useEffect(() => {
-        console.log("user from ProfilInfo: ", user);
     }, [user]);
 
     const userRef = useRef(user);

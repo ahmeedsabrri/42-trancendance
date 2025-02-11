@@ -45,7 +45,7 @@ const TicTac = () => {
         opponent_username: string | null;
         user_avatar: string | null;
         opponent_avatar: string | null;
-        mark: 'X' | 'O';
+        mark: 'X' | 'O'| null;
         turn: boolean;
         position: number;
         board: CellValue[];
@@ -57,21 +57,12 @@ const TicTac = () => {
         my_turn: boolean;
         opponent_turn: boolean;
     }
-<<<<<<< HEAD
-    // const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
-    // if (!base_wws_url) {
-    //     throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
-    // }
-
-    // const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
-    const WS_URL = 'wss:/localhost/TicTac/remote/';
-=======
     const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
     if (!base_wws_url) {
         throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
     }
+
     const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
->>>>>>> f8fa36a9c722e7de39453c4ac4d375d9be663dba
 
     const websocket = useRef<WebSocket | null>(null)
 
@@ -89,7 +80,7 @@ const TicTac = () => {
 
     const { GameBoardColor, setTicTacOpponent } = useGameStore()
     const [isMyTurn, setIsMyTurn] = useState<boolean>(false);
-    const [board, setBoard] = useState<CellValue[]>(Array(9).fill(''));
+    const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
     const [gameOver, setGameOver] = useState<boolean>(false);
     const [isWaiting, setIsWaiting] = useState<boolean>(true);
     const [scores, setScores] = useState<Scores>({
@@ -105,19 +96,18 @@ const TicTac = () => {
         mark: null,
         winner: { username: null, avatar: null, reason: null }
     });
-    const updateBoard = useRef<CellValue[]>(board);
 
     useEffect(() => {
         if (gameOver) {
             websocket.current?.close();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gameOver, setGameOver])
 
 
     useEffect(() => {
         if (!lastJsonMessage) return;
         const handleMessage = async () => {
+            console.log('message : ', lastJsonMessage)
             switch (lastJsonMessage.action) {
                 case 'identify_players':
                     user.current.username = lastJsonMessage.username;
@@ -179,19 +169,14 @@ const TicTac = () => {
 
 
     function resetGame() {
-        const resetBoard = Array(9).fill('');
+        const resetBoard = Array(9).fill(null);
         setBoard([...resetBoard]);
-        if (user.current.mark === 'X')
-            setIsMyTurn(true);
-        else
-            setIsMyTurn(false);
     }
 
     function handleClick(index: number): void {
-        if (!isMyTurn || board[index] !== '')
+        if (!isMyTurn || board[index] !== null)
             return;
         const data = {
-            "action": "board_update",
             "position": index,
         }
         sendJsonMessage(data);
@@ -248,10 +233,10 @@ const TicTac = () => {
                                         <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
                                             {board.map((cell, index) =>
                                                 <div key={index} className="flex justify-center items-center border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    {cell !== '' ?
+                                                    {cell !== null ?
                                                         (
                                                         <Image
-                                                            src={cell === "X" ? IMAGES.X : IMAGES.O}
+                                                            src={cell === 'X' ? IMAGES.X : IMAGES.O}
                                                             alt="cell"
                                                             height={100}
                                                             width={100}

@@ -145,7 +145,8 @@ token_generator = PasswordResetTokenGenerator()
 def generate_verification_url(user, request=None):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    return f"https://localhost/auth/verify-email/{uid}/{token}/"
+    email_verification_url = settings.EMAIL_VERIFICATION_URL
+    return f"{email_verification_url}/{uid}/{token}/"
 
 def send_email_verification_link(inactive_user, request):
     """

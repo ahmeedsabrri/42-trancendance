@@ -362,9 +362,8 @@ class DeclineInviteRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.decline()
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return 
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -558,58 +557,8 @@ class ListUserNotificationView(generics.ListAPIView):
         user = self.request.user
         notifications = Notification.objects.filter(recipient=user).select_related('sender').order_by('-created_at')
         return notifications
-    
-    
-class ListBlockedUsersView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    def get(self, request):
-        blocked_users = self.get_queryset()
-        serializer = self.serializer_class(blocked_users, many=True)
-        return Response(serializer.data)
 
-    def get_queryset(self):
-        user = self.request.user
-        blocked_users = Connection.objects.filter(
-            Q(sender=user, status="blocked") | Q(receiver=user, status="blocked")
-        ).select_related('sender', 'receiver')
-        
-        # Collect the users who are blocked (excluding the current user)
-        blocked_user_list = []
-        for connection in blocked_users:
-            if connection.sender != user:
-                blocked_user_list.append(connection.sender)
-            else:
-                blocked_user_list.append(connection.receiver)
-        return blocked_user_list
-    
-    
-class ListConnectionsUsersView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    def get(self, request):
-        connections = self.get_queryset()
-        serializer = self.serializer_class(connections, many=True)
-        return Response(serializer.data)
 
-    def get_queryset(self):
-        user = self.request.user
-        connections = Connection.objects.filter(
-            Q(sender=user) | Q(receiver=user)
-        ).select_related('sender', 'receiver')
-        
-        connection_users = []
-        for connection in connections:
-            if connection.sender != user:
-                connection_users.append(connection.sender)
-            else:
-                connection_users.append(connection.receiver)
-        return connection_users
-    
-
-# list of friends by username
 class FriendsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FriendsSerializer
@@ -904,7 +853,7 @@ class ImageUploadView(generics.UpdateAPIView):
             import base64
             encoded_file = base64.b64encode(file_data).decode('utf-8')
             response = requests.post(
-                'https://api.imgbb.com/1/upload',
+                settings.IMGBB_API_URL,
                 data={
                     'key': settings.IMGBB_API_KEY,
                     'image': encoded_file,

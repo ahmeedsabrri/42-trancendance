@@ -90,11 +90,9 @@ const Profile = () => {
 
   // Handle accepting a friend request
   const handleAcceptFriend = (username: string) => {
-    console.log(`Accepted friend request from user ${username}`);
-    
+
     handleRequest(username, 'accept')
     .then((res) => {
-      console.log(res.data.message);
       notifAccept(res.data.message);
       fetchOwnFriends();
     })
@@ -105,10 +103,8 @@ const Profile = () => {
 
   // Handle rejecting a friend request
   const handleRejectFriend = (username: string) => {
-    console.log(`Rejected friend request from user ${username}`);
     handleRequest(username, 'decline')
     .then((res) => {
-      console.log(res.data.message);
       notifDecilne(res.data.message);
     })
     .catch((err) => {
@@ -132,10 +128,8 @@ const Profile = () => {
   };
 
   const handleDeclineInvite = (username: string) => {
-    console.log(`Rejected Invite request from user ${username}`);
     handleRequest(username, 'declineInvite')
     .then((res) => {
-      console.log(res.data.message);
       notifDecilne(res.data.message);
     })
     .catch((err) => {
@@ -146,8 +140,7 @@ const Profile = () => {
   // Handle logout
   const handleLogout = () => {
     logout()
-      .then((res) => {
-        console.log(res.data.message);
+      .then(() => {
          window.location.href = '/auth';
       })
       .catch((err) => {

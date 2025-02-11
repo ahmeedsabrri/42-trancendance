@@ -1,14 +1,11 @@
 from rest_framework.response import Response
-from django.http import HttpResponse
-from .models import Conversation, Message
+from .models import Conversation
 from django.contrib.auth import get_user_model
 from rest_framework import permissions
 from chat.serializers import ConversationsSerializer, MessagesSerializer, UserSerializer
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-from datetime import datetime
-import logging
 from django.db.models import Q
 
 User = get_user_model()
@@ -47,7 +44,6 @@ def get_user(request, user_id):
 
 @api_view(['GET'])
 def get_conversations(request):
-    logger.info("I am in get_conversations")
     try:
         conversations_user1 = request.user.conversations_user1.filter(last_message__isnull=False)
         conversations_user2 = request.user.conversations_user2.filter(last_message__isnull=False)

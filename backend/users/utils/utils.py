@@ -2,6 +2,7 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from users.serializers import NotificationSerializer
+
 def send_notification(recipient_id, notification_data):
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(

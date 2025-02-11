@@ -23,17 +23,13 @@ function CallbackContent() {
       return;
     }
     const handleCallback = () => {
-      console.log("Code: ", code);
       Oauth42(code as string)
-        .then((res) => {
-          console.log(res.data.message);
-          console.log("Logged in successfully");
+        .then(() => {
           router.push('/dashboard');
         })
         .catch((error) => {
           if (error.response && error.response.status === 400) {
             const errorData = error.response.data;
-            console.log(errorData);
             if (errorData.otp_code) {
               redirect(`/auth?otp_code=required`); 
             } else {

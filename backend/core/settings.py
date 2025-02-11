@@ -2,24 +2,25 @@ from datetime import timedelta
 from core.env import env, BASE_DIR
 import os
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangocore.com/en/4.2/howto/deployment/checklist/
-
+DOMAIN = env("DOMAIN_NAME")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost"]
 
 # CORS
-CORS_ALLOWED_ORIGINS = ["https://localhost"]
+CORS_ALLOWED_ORIGINS = [DOMAIN]
 CORS_ALLOW_CREDENTIALS = True
-# CORS_EXPOSE_HEADERS = ["Set-Cookie"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://localhost",
+    DOMAIN,
 ]
+
+
+
+
 
 INSTALLED_APPS = [
     "daphne",
@@ -92,7 +93,6 @@ CHANNEL_LAYERS = {
 AUTH_USER_MODEL = "users.User"
 
 # Database
-# https://docs.djangocore.com/en/4.2/ref/settings/#databases
 
 # DATABASES = {"default": env.db("DB_URL", default="sqlite:///db.sqlite3")}
 
@@ -182,14 +182,19 @@ SIMPLE_JWT = {
 OAUTH_CLIENT_ID = env("42_OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
 OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
+OAUTH_GET_INFO_URL = env("42_GET_INFO_URL")
+OAUTH_TOKEN_URL = env("42_TOKEN_URL")
 
+
+
+EMAIL_VERIFICATION_URL = env("EMAIL_VERIFICATION_URL")
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # Your Gmail address
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use the generated App Password here
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")  # Default sender email
-
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+IMGBB_API_URL = env("IMGBB_API_URL")
 IMGBB_API_KEY = env("IMGBB_API_KEY")

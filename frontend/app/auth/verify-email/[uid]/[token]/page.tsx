@@ -2,6 +2,7 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/app/auth/utils';
 
 
@@ -10,32 +11,27 @@ export default function VerifyEmail({
 }: {
     params: Promise<{ uid: string; token: string }>;
 }) {
-    // Unwrap the params Promise using React.use()
+
     const { uid, token } = React.use(params);
 
     const [message, setMessage] = useState<string>('Verifying your email...');
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const router = useRouter();
     useEffect(() => {
         const verifyEmail = async () => {
             try {
-                console.log('uid', uid);
-                console.log('token', token);
-
-                // Send a POST request to the backend to verify the email
                 const response = await api.post('/auth/verify-email/', {
                     uid,
                     token,
                 });
 
-                window.location.href = '/auth'; // Redirect to the login page
+                router.push('/auth');
                 setMessage(response.data.message);
             } catch (err: unknown) {
                 if (err instanceof Error) {
-                    console.log(err.message);
                     setError(err.message || 'An error occurred during verification.');
                 } else {
-                    console.log('An unknown error occurred');
                     setError('An unknown error occurred during verification.');
                 }
             } finally {
@@ -46,6 +42,7 @@ export default function VerifyEmail({
         if (uid && token) {
             verifyEmail();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [uid, token]);
 
     return (

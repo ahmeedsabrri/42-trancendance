@@ -19,8 +19,7 @@ export function SecuritySettings({ user }: { user: UserData }) {
   const handleOtpEnable = () => {
     try {
       setIsOtpEnabled(!isOtpEnabled);
-    } catch (error) {
-      console.log(error);
+    } catch {
     }
   };
   const isStudent = user.email?.toLowerCase().endsWith("@student.1337.ma");
@@ -75,9 +74,7 @@ export function SecuritySettings({ user }: { user: UserData }) {
     }
   };
   const handleOtpSubmit = () => {
-    console.log(isOtpEnabled);
     const otpCode = otp.join("");
-    console.log(otpCode);
     if (isOtpEnabled) {
       handleTwoFactorEnable(otpCode).then((res) => {
         if (res.success) {
@@ -88,7 +85,6 @@ export function SecuritySettings({ user }: { user: UserData }) {
       });
     } else {
       handleTwoFactorDisable(otpCode).then((res) => {
-        console.log(res);
         if (res.success) {
           tostNotify("Two-Factor Authentication disabled successfully");
         } else {

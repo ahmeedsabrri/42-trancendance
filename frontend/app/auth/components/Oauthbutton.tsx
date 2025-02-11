@@ -1,9 +1,12 @@
-
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Oauthbutton() {
+    const router = useRouter();
     const handleOAuthClick = () => {
-      const authUrl = `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-e0b27076535bda63355c2ba257e25f2b10ea28d9172f2c153dc56448c7e928a2&redirect_uri=https%3A%2F%2Flocalhost%2Fauth%2Fcallback&response_type=code`;
-        window.location.href = authUrl;
+      const authUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+      if (authUrl) 
+        router.push(authUrl);
     };
   
     return (

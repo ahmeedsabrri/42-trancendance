@@ -3,13 +3,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-"""
-
-This file contains the filters for the users app.
-
-"""
-
-
 class UserFilter(filters.FilterSet):
     username = filters.CharFilter(lookup_expr='icontains')
     first_name = filters.CharFilter(lookup_expr='icontains')

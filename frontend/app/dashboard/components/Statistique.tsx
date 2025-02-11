@@ -23,7 +23,6 @@ type CustomTooltipProps = TooltipProps<number, string> & {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
   if (active && payload && payload.length) {
-
       const data = payload[0].payload;
       const isWin = data.result === "W" ? "text-green-500/80" : "text-red-500/80";
     

@@ -95,7 +95,6 @@ export default function Profile() {
 
   useEffect(() => {
     const profileToShow = username !== user?.username ? viewedProfile : user;
-    console.log("username of profileToShow his id : ", profileToShow?.username, profileToShow?.id);
     setProfileState(profileToShow);
   }, [user, viewedProfile, username]);
 
@@ -104,7 +103,6 @@ export default function Profile() {
   const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend' | 'cancel') => {
     handleRequest(username as string, action)
       .then((response) => {
-        console.log(response);
         switch (action) {
           case 'accept':
             notifyAdd(response.data.message);
@@ -117,7 +115,6 @@ export default function Profile() {
           case 'block':
             notifyBlock(response.data.message);
             setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'blocked' } : null);
-            console.log("Blocked");
             break;
           case 'unblock':
             notifyUnblock(response.data.message);
@@ -139,7 +136,6 @@ export default function Profile() {
         }
       })
       .catch((err) => {
-        console.log(err);
         notifyErr(err.response.data.message);
       });
   };

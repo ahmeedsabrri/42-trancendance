@@ -63,7 +63,6 @@ let fetchPromise: Promise<void> | null = null;
 export const useUserStore = create<UserStore>((set) => ({
     ...initialState,
     fetchUsers: async () => {
-        // console.log(api);
         fetchPromise = api.get<UserData[]>('/users/')
             .then(response => {
                 set({ 

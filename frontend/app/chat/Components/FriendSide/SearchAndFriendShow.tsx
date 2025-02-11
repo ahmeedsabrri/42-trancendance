@@ -53,22 +53,18 @@ const FriendShow = () => {
 
         if (!currentUser || !user)
             return;
-        try
-        {
-            const conversation: Conversation | null = findConversation(currentUser.id, user.id, conversations);
 
-            if (conversation)
-                setConversationSelected(conversation);
-            else
-            {
-                const newConversationCreated: Conversation = await newConversation(currentUser.id);
-                if (!newConversationCreated)
-                    return;
-                setConversationSelected(newConversationCreated);
-                queryClient.setQueryData<Conversation[]>(["conversations"], [newConversationCreated, ...conversations]);
-            }
+        const conversation: Conversation | null = findConversation(currentUser.id, user.id, conversations);
+        if (conversation)
+            setConversationSelected(conversation);
+        else
+        {
+            const newConversationCreated: Conversation = await newConversation(currentUser.id);
+            if (!newConversationCreated)
+                return;
+            setConversationSelected(newConversationCreated);
+            queryClient.setQueryData<Conversation[]>(["conversations"], [newConversationCreated, ...conversations]);
         }
-        catch (err) {}
     };
    
     return (

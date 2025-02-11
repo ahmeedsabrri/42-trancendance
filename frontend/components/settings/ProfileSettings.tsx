@@ -14,6 +14,7 @@ type FormData = {
   password: string;
 };
 export function ProfileSettings({ user }: { user: UserData }) {
+  const isStudent = user.email?.toLowerCase().endsWith("@student.1337.ma");
   const tostNotify = (message: string) =>
     toast(message, {
       position: "bottom-right",
@@ -69,7 +70,10 @@ export function ProfileSettings({ user }: { user: UserData }) {
               type: "manual",
               message: "username is unvalid",
             });
-          else if (error.response?.status === 400 && error.response.data?.password)
+          else if (
+            error.response?.status === 400 &&
+            error.response.data?.password
+          )
             setError("root", {
               type: "manual",
               message: error.response.data?.password[0],
@@ -85,20 +89,13 @@ export function ProfileSettings({ user }: { user: UserData }) {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    console.log("File input changed");
-
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      console.log("Selected file:", file.name);
-
       const formData = new FormData();
-      // if (!file.size > )
       formData.append("avatar", file);
 
       try {
-        console.log("Uploading file...");
-        const response = await api.put("/users/me/upload-avatar/", formData);
-        console.log("Upload response:", response.data);
+        await api.put("/users/me/upload-avatar/", formData);
         tostNotify("Avatar updated successfully");
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -107,7 +104,6 @@ export function ProfileSettings({ user }: { user: UserData }) {
         }
       }
     } else {
-      console.log("No file selected");
     }
   };
 
@@ -146,15 +142,15 @@ export function ProfileSettings({ user }: { user: UserData }) {
             <label className="block text-sm font-medium text-gray-300 mb-1">
               Display Username
             </label>
-            <input
-              type="text"
-              value={formData.username}
-              name="username"
-              onChange={handleChange}
-              placeholder="username"
-              className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/40"
-              required
-            />
+              <input
+                type="text"
+                value={formData.username}
+                name="username"
+                onChange={handleChange}
+                placeholder="username"
+                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/40"
+                required
+              />
           </div>
 
           <div>
@@ -184,13 +180,24 @@ export function ProfileSettings({ user }: { user: UserData }) {
               required
             />
           </div>
-          <button
-            className="w-full px-4 py-2 bg-black/20 hover:bg-black/30 rounded-lg text-white transition-all"
-            onClick={handleSubmit(onSubmit)}
-          >
-            save changes
-            <label htmlFor="" className="text-white"></label>
-          </button>
+          {isStudent ? (
+            <button
+              className="w-full px-4 py-2 bg-black/20 hover:bg-black/30 rounded-lg text-white transition-all"
+              onClick={handleSubmit(onSubmit)}
+              disabled
+            >
+              save changes
+              <label htmlFor="" className="text-white"></label>
+            </button>
+          ) : (
+            <button
+              className="w-full px-4 py-2 bg-black/20 hover:bg-black/30 rounded-lg text-white transition-all"
+              onClick={handleSubmit(onSubmit)}
+            >
+              save changes
+              <label htmlFor="" className="text-white"></label>
+            </button>
+          )}
           {errors.root && (
             <span className="text-xs text-red-500">{errors.root.message}</span>
           )}

@@ -9,7 +9,7 @@ import ExitButton from "../ExitButton/ExitButton";
 import { useGameStore } from "../../store/GameStore";
 
 const TicTac = () => {
-  type CellValue = string | "";
+  type CellValue = string | null;
 
   interface Scores {
     left_score: number;
@@ -17,9 +17,8 @@ const TicTac = () => {
   }
 
   const [isInGame, setIsInGame] = useState<false | true>(false);
-  const [board, setBoard] = useState<CellValue[]>(Array(9).fill(""));
+  const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
   const [gameOver, setGameOver] = useState<true | false>(false);
-  const [mark, setMark] = useState<"X" | "O">("X");
   const [scores, setScores] = useState<Scores>({
     left_score: 0,
     right_score: 0,
@@ -27,32 +26,43 @@ const TicTac = () => {
   const winner = useRef<string>("");
   const socket = useRef<null | WebSocket>(null);
   const { GameBoardColor } = useGameStore();
+  const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+  if (!base_wws_url) {
+      throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+  }
 
-  const updateBoard = useRef<CellValue[]>(board);
+  const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/local/`;
 
   useEffect(() => {
-    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
-    if (!base_wws_url) {
-      throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
-    }
-    socket.current = new WebSocket(base_wws_url + "/TicTac/local/");
+    socket.current = new WebSocket(WS_URL);
 
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.action === "game_started") setIsInGame(true);
-      else if (message.action === "score_update") {
-        const scoreObj: Scores = { left_score: 0, right_score: 0 };
-        scoreObj.left_score = message.left_score;
-        scoreObj.right_score = message.right_score;
-        setScores(scoreObj);
-        setMark("X");
-        resetGame();
-      } else if (message.action === "player_won") {
-        socket.current?.close();
-        if (message.winner === "left_player") winner.current = "Player 1";
-        else winner.current = "Player2";
-        setGameOver(true);
-      } else if (message.action === "draw") resetGame();
+      switch (message) {
+        case "game_started":
+          setIsInGame(true);
+          break;
+
+        case "score_update":
+          const scoreObj: Scores = { left_score: 0, right_score: 0 };
+          scoreObj.left_score = message.left_score;
+          scoreObj.right_score = message.right_score;
+          setScores(scoreObj);
+          resetGame();
+          break;
+
+        case "board_update":
+          setBoard(message.board);
+        case "player_won":
+          if (message.winner === "left_player") winner.current = "Player 1";
+          else winner.current = "Player2";
+          socket.current?.close();
+          setGameOver(true);
+          break;
+
+        case "draw":
+          resetGame();
+      }
     };
     return () => {
       socket.current?.close();
@@ -60,34 +70,19 @@ const TicTac = () => {
   }, []);
 
   function resetGame() {
-    const resetBoard = Array(9).fill("");
+    const resetBoard = Array(9).fill(null);
     setBoard([...resetBoard]);
   }
   function handleClick(index: number): void {
-    if (board[index] !== "") return;
-    else {
-      const newBoard: CellValue[] = [...board];
-      if (mark === "X") {
-        newBoard[index] = IMAGES.X;
-        setMark("O");
-      } else {
-        newBoard[index] = IMAGES.O;
-        setMark("X");
-      }
-      setBoard(newBoard);
-      updateBoard.current = [...newBoard];
-      const data = {
-        action: "board_update",
-        position: index,
-        board: updateBoard.current,
-        mark: mark,
-      };
-      socket.current?.send(JSON.stringify(data));
-    }
+    if (board[index] !== null) return;
+    const data = {
+      position: index,
+    };
+    socket.current?.send(JSON.stringify(data));
   }
-  if (!isInGame) {
-    return;
-  }
+
+  if (!isInGame) return;
+
   return (
     <div className="py-1 bg-gray-500  bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2">
       <main className="w-full h-full flex justify-center items-center gap-x-2 p-2 relative">
@@ -142,14 +137,16 @@ const TicTac = () => {
                         className="flex justify-center items-center border border-white/50 transition-all duration-500 hover:cursor-pointer"
                         onClick={() => handleClick(index)}
                       >
-                        {cell !== "" ? (
+                        {cell !== null ? (
                           <Image
-                            src={cell}
+                            src={cell === "X" ? IMAGES.X : IMAGES.O}
                             alt="cell"
                             height={100}
                             width={100}
                           />
-                        ) : ''}
+                        ) : (
+                          ""
+                        )}
                       </div>
                     ))}
                   </div>

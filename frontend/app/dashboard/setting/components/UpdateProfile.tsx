@@ -6,21 +6,10 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 
 export default function UpdateProfile() {
-    // const userRef = useRef<HTMLInputElement | null>(null);
-    // const [username, setUsername] = useState("");
     const Avatarinput = useRef<HTMLInputElement>(null);
     const { user } = useUserStore();
     const [showEmail, setShowEmail] = useState(false);
     const [ShowInput, setShowInput] = useState(false);
-
-    // const handelusername = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     setUsername(e.target.value);
-    //     console.log(username);
-    // }
-    // useEffect(() => {
-    //     setUsername(user?.username || "");
-    // }
-    // , [user]);
     return (<>
     <div className="w-1/2 h-full flex flex-row  items-center gap-4">
         
