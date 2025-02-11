@@ -98,7 +98,6 @@ const TicTac = () => {
 
     useEffect(() => {
         if (gameOver) {
-            console.log("disconnect from useEffect")
             websocket.current?.close();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

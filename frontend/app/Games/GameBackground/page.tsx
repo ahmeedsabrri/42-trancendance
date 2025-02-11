@@ -35,7 +35,6 @@ const ChooseBackground = () => {
 
     const Content = () => {
         if (invited_id) {
-            console.log(invited_id);
             return (
                 <Link href={"/Games/PingPong/online"}>
                     <CustomButton

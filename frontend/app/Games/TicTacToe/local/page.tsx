@@ -86,7 +86,6 @@ const TicTac = () => {
     }
   }
   if (!isInGame) {
-    console.log("not in game");
     return;
   }
   return (

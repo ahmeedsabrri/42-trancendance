@@ -40,7 +40,6 @@ const Canvas = () => {
 
     useEffect(() => {
         if (!countdown && mode === "online") {
-            console.log("send the game to be updated");
             handleCurrentState();
             sendJsonMessage({ "Action": "StartGame" });
         }

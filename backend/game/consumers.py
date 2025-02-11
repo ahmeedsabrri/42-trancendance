@@ -12,8 +12,6 @@ class LocalGameConsumer(AsyncWebsocketConsumer):
         try:
             await self.accept()
 
-            # self.invite = self.scope["url"]["kwargs"][""]
-
             print("SERVER CONNECTED SUCCESSFULLY...")
             self.user = self.scope["user"]
 
@@ -164,7 +162,6 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 group["status"] = "Finished"
 
             elif (group["status"] == "Abandoned"):
-                print("then here")
                 group["status"] = "Finished"
     
             await self.channel_layer.group_discard(
@@ -246,15 +243,6 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 "PLAYERS": OnlineGameEngine.groups[self.group_id]["PLAYERS"],
             }
         ))
-    async def close_task(self):
-        if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
-            if hasattr(self, 'task') and not self.task.done():
-                self.task.cancel()
-                try:
-                    await self.task
-                except asyncio.CancelledError:
-                    print("Task cancelled successfully.")
-                print("game abondoned")
 
 @database_sync_to_async
 def save_match_history(winner, loser, winner_score, loser_score, game_type, status):
