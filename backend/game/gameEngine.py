@@ -210,6 +210,13 @@ class OnlineGameEngine:
                 self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
                 player1["Y"] + self.GAME_INFO["PLAYER_SPEED"]
             )
+        if player1["key_states"]["ArrowUp"] and player1["Y"] > 0:
+            player1["Y"] = max(0, player1["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        if player1["key_states"]["ArrowDown"] and player1["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+            player1["Y"] = min(
+                self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+                player1["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+            )
 
         if player2["key_states"]["ArrowUp"] and player2["Y"] > 0:
             player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
@@ -218,6 +225,23 @@ class OnlineGameEngine:
                 self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
                 player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
             )
+        if player2["key_states"]["ArrowUp"] and player2["Y"] > 0:
+            player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        if player2["key_states"]["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+            player2["Y"] = min(
+                self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+                player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+            )
+
+        # # Player 2 movement
+        # if player2 and player2["channel_name"] == channel_name:
+        #     if key_states["ArrowUp"] and player2["Y"] > 0:
+        #         player2["Y"] = max(0, player2["Y"] - self.GAME_INFO["PLAYER_SPEED"])
+        #     if key_states["ArrowDown"] and player2["Y"] < self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"]:
+        #         player2["Y"] = min(
+        #             self.GAME_INFO["CANVAS"]["HEIGHT"] - self.GAME_INFO["PLAYER_HEIGHT"],
+        #             player2["Y"] + self.GAME_INFO["PLAYER_SPEED"]
+        #         )
 
     def get_collision_details(self, ball, player):
 
@@ -294,9 +318,15 @@ class OnlineGameEngine:
             PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
                 self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
             )
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
         elif self.BALL["X"] + self.BALL["RADIUS"] > self.GAME_INFO["CANVAS"]["WIDTH"]:
             PLAYERS["PLAYER1"]["SCORE"] += 1
             self.reset_ball()
+            PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
+                self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
+            )
             PLAYERS["PLAYER1"]["Y"] = PLAYERS["PLAYER2"]["Y"] = (
                 self.GAME_INFO["CANVAS"]["HEIGHT"] / 2 - self.GAME_INFO["PLAYER_HEIGHT"] / 2
             )
@@ -355,6 +385,9 @@ class OnlineGameEngine:
                 is_blocked = await check_user_blocked(group_info["user1"], user)
                 if is_blocked:
                     break
+                is_blocked = await check_user_blocked(group_info["user1"], user)
+                if is_blocked:
+                    break
                 group_info["PLAYERS"]["PLAYER2"] = {
                     "channel_name": channel_name,
                     "user_id": user.id,
@@ -367,6 +400,7 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                     "key_states": {"ArrowUp": False, "ArrowDown": False},
                 }
                 group_info["status"] = "ready"
@@ -392,6 +426,7 @@ class OnlineGameEngine:
                     "SCORE": 0,
                     "avatar": user.avatar if user.avatar else None,
                     "reason": "OPPONENT DISCONNECTED",
+                    "key_states": {"ArrowUp": False, "ArrowDown": False},
                     "key_states": {"ArrowUp": False, "ArrowDown": False},
                 },
                 "PLAYER2": None,

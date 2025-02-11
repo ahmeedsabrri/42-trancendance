@@ -51,8 +51,6 @@ const FriendShow = () => {
 
     const handleNewConversation = async ( currentUser: UserFriendsData ) => {
 
-        console.log("currentUser", currentUser);
-
         if (!currentUser || !user)
             return;
         try
@@ -70,10 +68,7 @@ const FriendShow = () => {
                 queryClient.setQueryData<Conversation[]>(["conversations"], [newConversationCreated, ...conversations]);
             }
         }
-        catch (err)
-        {
-            console.log("Error creating new conversation:", err);
-        }
+        catch (err) {}
     };
    
     return (

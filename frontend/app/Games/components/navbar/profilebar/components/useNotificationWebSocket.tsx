@@ -19,30 +19,27 @@ const useNotificationWebSocket = (url: string) => {
   });
 
   useEffect(() => {
-    if (lastMessage !== null) {
-      const newNotification = JSON.parse(lastMessage.data);
-
-      if (newNotification.notification.notification_type === "game_decline")
-        resetInvitedId();
-      if (newNotification.notification.notification_type === "game_invite")
-        setInviterId(newNotification.notification.sender.id);
-      if (
-        newNotification.notification.notification_type === "friend_accept"
-        || newNotification.notification.notification_type === "unfriend"
-      )
-      {
-        fetchOwnFriends();
-        console.log('Fetching friends');
-      }
-      console.log('New notification type :', newNotification.notification.notification_type);
-      const data = newNotification.notification;
-      console.log('New notification:', newNotification);
-      if (window.location.pathname === '/chat' && data.notification_type === 'message')
-      {
-        removeNotification(data.id);
-        return;
-      }
-      addNotification(data);
+        if (lastMessage !== null) {
+          const newNotification = JSON.parse(lastMessage.data);
+        
+        if (newNotification.notification.notification_type === "game_decline")
+          resetInvitedId();
+        if (newNotification.notification.notification_type === "game_invite")
+          setInviterId(newNotification.notification.sender.id);
+        if (
+          newNotification.notification.notification_type === "friend_accept"
+          || newNotification.notification.notification_type === "unfriend"
+        )
+        {
+          fetchOwnFriends();
+        }
+        const data = newNotification.notification;
+        if ((window.location.pathname === '/chat' && data.notification_type === 'message') || newNotification.notification.notification_type === "block")
+        {
+          removeNotification(data.id);
+          return;
+        }
+        addNotification(data);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastMessage, addNotification]);

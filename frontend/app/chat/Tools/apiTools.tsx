@@ -8,35 +8,20 @@ const source = axios.CancelToken.source();
 const getNotifications = async () => {
     try {
         const response = await api.get(`/notifications/`);
-
         return response.data;
     }
     catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
+
     }
-    source.cancel('Operation canceled by the user.');
 }
 
 const newConversation = async (user: number) => {
     try {
         const response = await api.post(`/chat/new_conversation/${user}/`);
-        // console.log(response.data);
         return response.data;
     }
     catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
     }
-    source.cancel('Operation canceled by the user.');
 }
 
 const fetchConversations = async () => {
@@ -48,14 +33,7 @@ const fetchConversations = async () => {
         return sortConversationsByDate(response.data);
     }
     catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
     }
-    source.cancel('Operation canceled by the user.');
 };
 
 const fetchMessages = async (conversation_id: number) => {
@@ -64,25 +42,28 @@ const fetchMessages = async (conversation_id: number) => {
         return response.data;
     }
     catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
     }
-    source.cancel('Operation canceled by the user.');
 }
 
 const getMatcheHistory = async (id: number) => {
-    const response = await api.get(`/match_history/${id}/`);
-    console.log(response.data);
-    return response.data.matches;
+    try {
+        const response = await api.get(`match_history/${id}`);
+        return response.data.matches;    
+    }
+    catch (error) {
+    }
 }
 
 const handleRequestGames = async (username:string, type:string) => {
-    const response = await api.get(`/users/request/${type}/${username}/`);
-    return response;
+    
+    try {
+        const response = await api.get(`users/request/${type}/${username}/`);
+        return response;
+    }
+    catch (error) {
+    }
 }
+
+source.cancel('Operation canceled by the user.');
 
 export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames, getMatcheHistory };

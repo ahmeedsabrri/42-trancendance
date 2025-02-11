@@ -9,20 +9,19 @@ import { useGameStateStore } from '../../store/CanvasStore';
 import Winner from '../components/VictoryCard';
 import Canvas from '../components/Canvas/Canvas';
 import Scores from '../components/Scores';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useGameStore } from '../../store/GameStore';
-import { useRouter } from 'next/navigation';
 
 const Game = () => {
 
     const router = useRouter();
     const mode = useParams().mode;
 
-    useEffect(() => {   
+    useEffect(() => {
         if (mode !== "local" && mode !== "online") {
             router.replace("/Games/PingPong/local");
         }
-    }, [mode, router]);
+    }, [mode, router])
 
     const { winner, game_status, countdown, setWinner, resetCountdown, resetInvitedCountdown, resetPlayersInfo, resetScores } = useGameStateStore();
     const winnerRef = useRef(winner.fullname);

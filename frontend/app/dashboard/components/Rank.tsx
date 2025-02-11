@@ -2,7 +2,6 @@ import { UserData, useUserStore } from "@/app/store/store";
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import { useEffect } from "react";
 
-
 const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
     return (
         <div className="w-full min-w[300px] h-[70px] flex items-center p-[10px] rounded-3xl border-white/50 border gap-[10px] shadow-xl duration-300 transition-all hover:bg-white/20 snap-start snap-always">
@@ -33,12 +32,8 @@ const Rank = () => {
     users.sort((a, b) => b.level - a.level);
 
     useEffect (() => {
-        console.log("users before sort", users);
         users.sort((a, b) => b.level - a.level);
-        console.log("users after sort", users); 
     }, [users]);
-    
-    console.log("rank, users", users);
 
     return (
         <div className="w-[600px] h-full p-8">

@@ -21,19 +21,21 @@ type CustomTooltipProps = TooltipProps<number, string> & {
 };
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const isWin = data.result === "W" ? "text-green-500/80" : "text-red-500/80";
-    console.log("data: ", data);
-    return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
-        <p>{`Match: ${label}`}</p>
-        <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
-        <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
-        <p>Game: <span className={`${isWin}`}>{data.result}</span></p>
-        <p>at: <span className="bg-yellow-500/50 p-2 rounded-sm"> {data.played_at}</span> </p>
-      </div>
-    );
+
+      const data = payload[0].payload;
+      const isWin = data.result === "W" ? "text-green-500/80" : "text-red-500/80";
+    
+      return (
+        <div className="custom-tooltip" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '10px', borderRadius: '15px', color: 'rgba(255, 255, 255, 0.7)' }}>
+          <p>{`Match: ${label}`}</p>
+          <p>Score: <span className="text-picton_blue/80">{data.user_score}</span></p>
+          <p>Status:<span className={`${data.status === "Finished" ? "text-green-500/80" : "text-red-500/80"}`}> {data.status}</span> </p>
+          <p>Game: <span className={`${isWin}`}>{data.result}</span></p>
+          <p>at: <span className="bg-yellow-500/50 p-2 rounded-sm"> {data.played_at}</span> </p>
+        </div>
+      );
   }
 
   return null;
@@ -47,7 +49,6 @@ const Statistique = () => {
     if (!user) return;
     getMatcheHistory(user.id).then((data) => {
       setMatches(data);
-      console.log("data: ", data);
     });
   }, [user]);
 

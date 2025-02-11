@@ -107,6 +107,22 @@ class SendGameInviteView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if Connection.objects.filter( Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_200_OK
+                )
+            if not Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is not your friend."
+                    },
+                    status=status.HTTP_200_OK
+                )
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
                 sender=sender,
@@ -138,7 +154,7 @@ class SendGameInviteView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class SendRequestView(APIView):
@@ -209,7 +225,7 @@ class SendRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 class AcceptRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -279,7 +295,7 @@ class AcceptRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class AcceptInviteRequestView(APIView):
@@ -289,10 +305,15 @@ class AcceptInviteRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.accept(sender)
-            
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -330,7 +351,7 @@ class AcceptInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineInviteRequestView(APIView):
@@ -357,7 +378,7 @@ class DeclineInviteRequestView(APIView):
                 {
                     "message": "Game invite declined successfully."
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_400_BAD_REQUEST
             )
         except User.DoesNotExist:
             return Response(
@@ -381,7 +402,7 @@ class DeclineInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineRequestView(APIView):
@@ -435,7 +456,7 @@ class DeclineRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class BlockRequestView(APIView):
@@ -493,10 +514,10 @@ class BlockRequestView(APIView):
         except Exception as e:
             return Response(
                 {
-                    "error": "Server error",
+                    "error": "Error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -708,7 +729,7 @@ class UnFriendView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 class UnBlockUserView(APIView):
@@ -750,7 +771,7 @@ class UnBlockUserView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 
@@ -786,6 +807,7 @@ class UserSearchView(generics.ListAPIView):
             )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
     
 
 class DeleteNotificationView(APIView):

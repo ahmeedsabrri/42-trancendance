@@ -24,8 +24,6 @@ const useChatSocket = (user_id: number) => {
             return;
 
         socket.current.onopen = () => {
-            console.log("Chat socket connected");
-
             if (socket.current && user_id)
             {
                 setSocket(socket.current);
@@ -72,20 +70,12 @@ const useChatSocket = (user_id: number) => {
             
         }
 
-        socket.current.onclose = (event) => {
-
-            if (event.wasClean) {
-                console.log(`WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`);
-            }
+        socket.current.onclose = () => {
 
             setTimeout(() => {
                 setWsActive(false);
             }
             , 4000);
-        }
-
-        socket.current.onerror = (error) => {
-            console.log("Chat socket error: ", error);
         }
 
         return () => {
