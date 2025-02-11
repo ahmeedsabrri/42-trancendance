@@ -44,9 +44,6 @@ class PasswordUpdateView(generics.UpdateAPIView):
         self.perform_update(serializer)
         return Response({
             'message': 'Password successfully updated.',
-            'status': 'success',
-            'user_id': instance.id,
-            'username': instance.username
         }, status=status.HTTP_200_OK)
 
 
@@ -375,7 +372,7 @@ class DeclineInviteRequestView(APIView):
                 {
                     "message": "Game invite declined successfully."
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_400_BAD_REQUEST
             )
         except User.DoesNotExist:
             return Response(
@@ -462,7 +459,7 @@ class BlockRequestView(APIView):
         try:
             receiver = User.objects.get(username=username)
             sender = request.user
-            connection = Connection.objects.get(sender=sender, receiver=receiver)
+            connection = Connection.objects.get(Q(sender=sender,receiver=receiver) | Q(receiver=sender,sender=receiver))
             if connection.status == "blocked" or connection.status == "rejected":
                 return Response(
                     {
@@ -623,6 +620,56 @@ class FriendsListView(generics.ListAPIView):
                 friend_users.append(connection.receiver)
         return friend_users
 
+
+class CancelRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, username):
+        try:
+            sender = request.user
+            receiver = User.objects.get(username=username)
+            connection = Connection.objects.get(
+                Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
+            )
+            if connection and  connection.status == "accepted":
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            connection.delete()
+            return Response(
+                {
+                    "message": "Request cancelled successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid receiver",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No friend request found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class UnFriendView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -803,6 +850,10 @@ class ImageUploadView(UpdateAPIView):
             return Response({'error': 'No file uploaded'}, status=400)
         print(f"Uploaded file: {uploaded_file.name}, Size: {uploaded_file.size} bytes")
         try:
+            avatar_format = uploaded_file.content_type
+            valid_formats = ['image/png', 'image/jpeg', 'image/jpg']
+            if avatar_format not in valid_formats:
+                return Response({'error': 'Invalid file format. Only PNG and JPEG are allowed.'}, status=400)
             resized_file = self.resize_image(uploaded_file, 128, 128)
             print("Image resized successfully")
             image_url = self.upload_to_imgbb(resized_file)

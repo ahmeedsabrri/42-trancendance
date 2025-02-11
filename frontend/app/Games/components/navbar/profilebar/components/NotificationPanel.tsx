@@ -197,7 +197,7 @@ const formatTime = (dateString: string) => {
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   } catch (error) {
-    console.error('Error formatting date:', error);
+    console.log('Error formatting date:', error);
     return 'Just now';
   }
 };

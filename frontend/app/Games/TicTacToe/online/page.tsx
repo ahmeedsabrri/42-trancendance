@@ -57,6 +57,7 @@ const TicTac = () => {
         my_turn: boolean;
         opponent_turn: boolean;
     }
+<<<<<<< HEAD
     // const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
     // if (!base_wws_url) {
     //     throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
@@ -64,6 +65,13 @@ const TicTac = () => {
 
     // const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
     const WS_URL = 'wss:/localhost/TicTac/remote/';
+=======
+    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+    if (!base_wws_url) {
+        throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+    }
+    const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
+>>>>>>> f8fa36a9c722e7de39453c4ac4d375d9be663dba
 
     const websocket = useRef<WebSocket | null>(null)
 

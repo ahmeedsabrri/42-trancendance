@@ -1,9 +1,7 @@
 "use client";
-import { useEffect } from "react";
 import Game from "./components/Game";
 import Rank from "./components/Rank";
 import Statistique from "./components/Statistique";
-import { useGameStore } from "../Games/store/GameStore";
 
 export default function Dashboard() {
   return (

@@ -1,7 +1,6 @@
 import { UserData, useUserStore } from "@/app/store/store";
 import Avatar from "@/app/Games/components/navbar/profilebar/Avatar";
 import { useEffect } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
 
 const UserComponent = ({ user, rank }: {user: UserData, rank: number}) => {
     return (
@@ -32,12 +31,8 @@ const Rank = () => {
     users.sort((a, b) => b.level - a.level);
 
     useEffect (() => {
-        console.log("users before sort", users);
         users.sort((a, b) => b.level - a.level);
-        console.log("users after sort", users); 
     }, [users]);
-    
-    console.log("rank, users", users);
 
     return (
         <div className="w-[600px] h-full p-8">

@@ -22,7 +22,11 @@ const Canvas = () => {
 
     const mode = useParams().mode;
     const currentStateRef = useRef(currentState);
-    const socketUrl = `wss://localhost/ws/game/${mode}Game/${invited_id ? invited_id : ''}`;
+    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+  if (!base_wws_url) {
+    throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+  }
+    const socketUrl = `${base_wws_url.replace(/\/$/, '')}/game/${mode}Game/${invited_id ? invited_id : ''}`;
 
     const {
         sendJsonMessage,

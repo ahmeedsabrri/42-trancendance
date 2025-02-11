@@ -15,6 +15,13 @@ function CallbackContent() {
 
   useEffect(() => {
     const code = searchParams.get('code');
+    const error = searchParams.get('error');
+    // const errorDescription = searchParams.get('error_description');
+
+    if (error === 'access_denied') {
+      redirect('/auth');
+      return;
+    }
     const handleCallback = () => {
       console.log("Code: ", code);
       Oauth42(code as string)
@@ -26,6 +33,7 @@ function CallbackContent() {
         .catch((error) => {
           if (error.response && error.response.status === 400) {
             const errorData = error.response.data;
+            console.log(errorData);
             if (errorData.otp_code) {
               redirect(`/auth?otp_code=required`); 
             } else {

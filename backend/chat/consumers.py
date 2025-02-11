@@ -14,8 +14,6 @@ User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        """Handle WebSocket connection setup"""
-        logger.info("User in Scope: %s", self.scope['user'])
         self.user_id = self.scope['user'].id
         self.group_name = f'chat_user_{self.user_id}' 
 
@@ -27,7 +25,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         logger.info(f"WebSocket connected for user {self.user_id}")
 
     async def disconnect(self, close_code):
-        """Handle WebSocket disconnection cleanup"""
         await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name
@@ -36,7 +33,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_user(self, user_id):
-        """Fetch user by ID with error handling"""
         try:
             return User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -50,7 +46,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         conversation_id = data.get('conversation_id')
 
         if not all([sender, receiver, message_text, conversation_id]):
-            logger.error("Missing required message data")
             return None
 
         conversation, created = Conversation.objects.get_or_create(
@@ -84,22 +79,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def receive(self, text_data):
         try:
-            logger.info(f"Received message: {text_data}")
             data = json.loads(text_data)
             if data['type'] != 'chat_message':
-                logger.error("Invalid message type")
-                print("user blocked")
+                return
 
             sender = self.scope['user']
             receiver = await self.get_user(data['reciever_id'])
 
             if not sender or not receiver:
-                logger.error(f"sender: {sender}, receiver: {receiver}")
-                logger.error("Invalid sender or receiver ID")
                 return
 
             if await self.check_user_blocked(sender, receiver):
-                logger.error("User is blocked")
                 return
             message_data = {
                 'sender': sender,
@@ -109,7 +99,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
             new_message = await self.create_message(message_data)
             if not new_message:
-                logger.error("Failed to create message")
                 return
 
             response_data = {
@@ -136,7 +125,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(group_name, response_data)
             notification =  await self.create_notif(message_data)
             if not new_message:
-                logger.error("Failed to create notification")
                 return
             await sync_to_async(send_notification)(receiver.id,notification)
         except json.JSONDecodeError:
@@ -156,13 +144,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def create_notif(self,data):
-        """
-            notif data 
-            sender: Any,
-            recipient: Any,
-            notification_type: Any,
-            message: Any
-        """
         sender = data.get('sender')
         receiver = data.get('receiver')
         message_text = data.get('message')

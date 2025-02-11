@@ -22,16 +22,10 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
     const { handleRequest } = UserFriendsActions();
     const router = useRouter();
 
-    useEffect(() => {
-        console.log("invited_id infooo", invited_id);
-    }, [invited_id]);
-
     const handlePingPongNotifyAdd = () => {
-
         
         handleRequestGames(conversationSelected?.userTarget?.username as string, 'invite')
         .then((response) => {
-            console.log(response);
             if (response.data.message === "Game invite sent successfully.")
             {
                 resetInvitedId();
@@ -42,21 +36,17 @@ const Info = ( {showInfo}: {showInfo:boolean} ) => {
             notifyAdd(response.data.message);
         })
         .catch((err) => {
-          console.log(err);
-          notifyErr(err.response?.data?.message);
+            notifyErr(err.response?.data?.message);
         });
     };
 
     const handleBlock = () => {
 
-        console.log("Blocked");
         handleRequest(conversationSelected?.userTarget?.username as string, 'block')
         .then((response) => {
-            console.log(response);
             notifyAdd(response.data.message);
         })
         .catch((err) => {
-            console.log(err);
             notifyErr(err.response.data.message);
         });
     }

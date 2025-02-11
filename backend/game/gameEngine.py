@@ -1,4 +1,4 @@
-import math, asyncio
+import math
 from users.models import Connection
 from channels.db import database_sync_to_async
 from django.db.models import Q
@@ -442,7 +442,6 @@ class OnlineGameEngine:
             "invited_id": invited_id,
             "game_winner": None,
             "game_loser": None,
-            "lock": asyncio.Lock()
         }
         return group_id
 

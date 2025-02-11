@@ -56,7 +56,6 @@ export default function SignInForm() {
           });
         }
       } else {
-        // console.error(error.response.data);
         setError("root", {
           type: "manual",
           message: error.response.data.detail
