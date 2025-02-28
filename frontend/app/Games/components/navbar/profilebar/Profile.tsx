@@ -22,11 +22,16 @@ import { UserFriendsActions } from '@/app/profile/utils/actions';
 import useNotificationWebSocket from './components/useNotificationWebSocket';
 import { useGameStore } from '@/app/Games/store/GameStore';
 import { useRouter } from 'next/navigation';
+import { useUserFriendsStore } from '@/app/store/UserFriendsStrore';
 
 
 const Profile = () => {
-
-  useNotificationWebSocket("wss://localhost/ws/notifications/");
+  const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+  if (!base_wws_url) {
+    throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+  }
+  useNotificationWebSocket(base_wws_url + "/notifications/");
+  const { fetchOwnFriends } = useUserFriendsStore();
 
   const { user } = useUserStore();
   const { logout } = AuthActions();
@@ -34,7 +39,7 @@ const Profile = () => {
   const {handleRequest} = UserFriendsActions();
   const [showPanel, setShowPanel] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setInvitedId, inviter_id, setGameMode} = useGameStore();
+  const { setInvitedId, inviter_id } = useGameStore();
   const router = useRouter();
 
   const notifAccept = (message:string) => toast(message,{
@@ -85,12 +90,11 @@ const Profile = () => {
 
   // Handle accepting a friend request
   const handleAcceptFriend = (username: string) => {
-    console.log(`Accepted friend request from user ${username}`);
-    
+
     handleRequest(username, 'accept')
     .then((res) => {
-      console.log(res.data.message);
       notifAccept(res.data.message);
+      fetchOwnFriends();
     })
     .catch((err) => {
       notifyErr(err.response.data.message);
@@ -99,10 +103,8 @@ const Profile = () => {
 
   // Handle rejecting a friend request
   const handleRejectFriend = (username: string) => {
-    console.log(`Rejected friend request from user ${username}`);
     handleRequest(username, 'decline')
     .then((res) => {
-      console.log(res.data.message);
       notifDecilne(res.data.message);
     })
     .catch((err) => {
@@ -111,8 +113,7 @@ const Profile = () => {
   };
 
   const handleAcceptInvite = async (username: string) => {
-    
-    setGameMode("online");
+
     setInvitedId(`${user?.id}-${inviter_id}`);
     handleRequest(username, "acceptInvite")
     .then((res) => {
@@ -127,10 +128,8 @@ const Profile = () => {
   };
 
   const handleDeclineInvite = (username: string) => {
-    console.log(`Rejected Invite request from user ${username}`);
     handleRequest(username, 'declineInvite')
     .then((res) => {
-      console.log(res.data.message);
       notifDecilne(res.data.message);
     })
     .catch((err) => {
@@ -141,8 +140,7 @@ const Profile = () => {
   // Handle logout
   const handleLogout = () => {
     logout()
-      .then((res) => {
-        console.log(res.data.message);
+      .then(() => {
          window.location.href = '/auth';
       })
       .catch((err) => {

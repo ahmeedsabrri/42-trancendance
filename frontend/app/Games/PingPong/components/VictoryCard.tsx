@@ -69,7 +69,7 @@ const Winner: React.FC<WinnerProp> = ({ winner, winner_avatar, reason}) => {
                 <h1 className='text-5xl font-bold'>{is_tournament ? tournamentMatchWinner.current : winner}</h1>
             </div>
             <h1
-                className='text-xl font-bold mt-16'
+                className='absolute text-5xl font-bold -top-0 text-black'
                 style={headerStyle} >
                 {is_tournament ? "" : (reason ? reason : "")}
             </h1>

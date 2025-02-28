@@ -1,12 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
-
-export const api = axios.create({
-    baseURL: 'https://localhost/api',
-    withCredentials: true,
-});
-
-
+import api from '@/app/auth/utils';
 
 export interface UserFriendsData {
     first_name: string;
@@ -49,8 +42,6 @@ export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
         }
 
         set({ loading: true, error: null });
-        
-        console.log('fetching friends')
         fetchUserPromise = api.get<UserFriendsData[]>(`/users/friends/${username}`)
             .then(response => {
                 set({ 
@@ -70,7 +61,6 @@ export const useUserFriendsStore = create<UserFriendsStore>((set) => ({
             return fetchUserPromise;
     },
     fetchOwnFriends: async () => {
-        console.log('fetching own friends')
         if (fetchOwnPromise) {
             return fetchOwnPromise;
         }

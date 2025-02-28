@@ -5,22 +5,10 @@ import axios from 'axios';
 
 // Base API setup for making HTTP requests
 const api = axios.create({
-  baseURL: 'https://localhost/api',
+  baseURL:process.env.NEXT_PUBLIC_BASE_URL,
   withCredentials: true,
 });
-
-// src/app/auth/utils.ts
-// interface UserInfo {
-//   id: number;
-//   username: string;
-//   email?: string;
-//   first_name?: string;
-//   last_name?: string;
-//   avatar?: string;
-//   twofa_enabled?: boolean;
-//   otp_uri: string;
-//   level: number;
-// }
+export default api;
 
 const getToken = (type  = "jwt_token") => {
   return cookies.get(type);
@@ -28,7 +16,7 @@ const getToken = (type  = "jwt_token") => {
 
 
 const register = (first_name: string, last_name: string, email: string, username: string, password: string) => {
-  const res = axios.post("https://localhost/api/auth/register/", {
+  const res = api.post("/auth/register/", {
     first_name: first_name,
     last_name: last_name,
     email: email,
@@ -41,7 +29,7 @@ const register = (first_name: string, last_name: string, email: string, username
   };
   
 const login = async (username: string, password: string) => {
-  const res = axios.post("https://localhost/api/auth/login/", {
+  const res = api.post("/auth/login/", {
     username: username,
     password: password,
   }, {
@@ -51,7 +39,7 @@ const login = async (username: string, password: string) => {
 };
 
 const loginWithOtp = async (username: string, password: string, otpCode: string) => {
-  const res = axios.post("https://localhost/api/auth/login/", {
+  const res = api.post("/auth/login/", {
     username: username,
     password: password,
     otp_code: otpCode,
@@ -62,21 +50,28 @@ const loginWithOtp = async (username: string, password: string, otpCode: string)
 };
 
 const logout = () => {
-  const res = axios.get("https://localhost/api/auth/logout/", { withCredentials: true });
+  const res = api.get("/auth/logout/", { withCredentials: true });
 
-  console.log(res);
   return res;
 };
 
-// Export all the functions
-// 42 Oauth 2.0
-
+const changePassword = (current_password: string, new_password: string, confirm_password:string) => {
+  const res = api.put("/users/me/change-password/", {
+    current_password: current_password,
+    new_password: new_password,
+    confirm_password: confirm_password,
+  }, { withCredentials: true });
+  return res;
+}
 const Oauth42 = (code: string) => {
-  const res = api.post("/auth/42/callback/ ", { code: code });
-  console.log(res);
+  const res = api.post("/auth/42/callback/", { code: code });
   return res;
 };
 
+const check_auth = async () => {
+  const res =  await api.get('/auth/test/');
+  return res;
+}
   export const AuthActions = () => {
     return {
       login,
@@ -85,5 +80,7 @@ const Oauth42 = (code: string) => {
       getToken,
       logout,
       Oauth42,
+      changePassword,
+      check_auth,
     };
   };

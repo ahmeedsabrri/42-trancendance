@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Circle, X, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { useGameStore } from '../../store/GameStore';
-import Image from 'next/image';
+import Avatar from '../../components/navbar/profilebar/Avatar';
 
 const MatchmakingInterface = () => {
   const { TicTacOpponent, setTicTacOpponent } = useGameStore();
@@ -31,28 +31,25 @@ const MatchmakingInterface = () => {
         <Circle className="w-8 h-8 text-red-400" />
       </div>
 
-      <div className="relative w-64 h-64 mb-8">
-        {!TicTacOpponent.isFound ? (
+      <div className="relative mb-8 overflow-hidden  w-[300px] h-[300px]">
+        {!TicTacOpponent.isFound
+        ?
+        (
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="w-16 h-16 animate-spin text-blue-400" />
           </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            {TicTacOpponent.avatar ? (
+        )
+        :
+        (
+          <div className="absolute inset-0 flex items-center justify-center w-full h-full px-3">
               <div className="flex flex-col justify-center items-center gap-3">
-                <div className="w-32 h-32 border-4 border-gray-700 rounded-full overflow-hidden">
-                  <Image src={TicTacOpponent.avatar || ""} alt="Opponent Avatar" fill={true} className="object-cover w-full h-full" />
-                </div>
+                <Avatar height={200} width={200} avatar={TicTacOpponent.avatar}/>
                 <h1>{TicTacOpponent.username}</h1>
                 <p className="text-xl font-semibold mt-2">Match starting in {count}</p>
               </div>
-            ) : (
-              <div className="w-32 h-32 border-4 border-gray-700 rounded-full animate-pulse" />
-            )}
           </div>
         )}
       </div>
-
       <div className="text-center mb-8">
         {!TicTacOpponent.isFound && (
           <div>

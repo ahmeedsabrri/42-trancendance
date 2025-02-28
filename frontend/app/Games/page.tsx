@@ -17,8 +17,8 @@ const Games = () => {
 	return (
 		<div className="bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl w-full h-full flex flex-col justify-center items-center rounded-3xl overflow-hidden px-2 border border-white/10">
 			<main className="w-full h-full flex justify-center items-center gap-x-3 p-2 relative overflow-hidden">
-				<GamePanel gameType="pingpong" />
-				<GamePanel gameType="tictactoe" />
+				<GamePanel gameType="pingpong" dashboard={false}/>
+				<GamePanel gameType="tictactoe" dashboard={false}/>
 			</main>
 			
 			<div className="flex justify-center items-center gap-x-2 content-center mb-1">

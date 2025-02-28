@@ -4,21 +4,45 @@ import { useUserStore } from "@/app/store/store";
 import SearchBar from "./SeachBar";
 import Profile from "./profilebar/Profile";
 import { useChatStore } from "@/app/store/chatStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useChatSocket from "@/hooks/useChatSocket";
+import { useUserFriendsStore } from "@/app/store/UserFriendsStrore";
 
 const NavBar = () => {
-    const {user} = useUserStore();
+    const {user, fetchUser, fetchUsers} = useUserStore();
+    const [userIsReady, setUserIsReady] = useState(false);
     const setUserId = useChatStore((state) => state.setUserId);
-
-    useEffect(() => {
-        if (user?.id)
-            setUserId(user.id);
-        		// eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [user?.id]);
+    const fetchOwnFriends = useUserFriendsStore((state) => state.fetchOwnFriends);
     
-    useChatSocket(user?.id || 0);
+    useEffect(() => {
+        const initializeUser = async () => {
+            if (!user) {
+                await fetchUser();
+                setUserIsReady(true);
+            } else {
+                setUserIsReady(true);
+            }
+        };
+        
+        initializeUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    
+    useEffect(() => {
+        if (user) {
+            setUserId(user.id);
+            fetchUsers();
+            fetchOwnFriends();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, userIsReady]);
+    
+    useChatSocket(user?.id ?? 0);
 
+
+    if (!userIsReady) {
+        return null;
+    } 
 
     return (
         <div className="flex justify-center items-center w-full h-[90px] ">

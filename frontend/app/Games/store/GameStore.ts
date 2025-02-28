@@ -9,7 +9,7 @@ interface GameContent {
   tournament: string
 }
 
-interface TicTacOpponent{
+interface TicTacOpponent {
   isFound: boolean,
   username: string | null,
   avatar: string | null
@@ -30,7 +30,7 @@ interface GameState {
   is_tournament: boolean
   tournament_players: Array<string | null>
   tournament_match: string | null
-  tournament_match_winner:string | null
+  tournament_match_winner: string | null
   TicTacOpponent: TicTacOpponent
   invited_id: string | null
   inviter_id: string | null
@@ -47,12 +47,12 @@ interface GameState {
   getGamePath: () => string
   handleGameSwitch: () => void
   handleCurrentState: () => void,
-  setTournamentPlayers: (username:string| null, index:number)=> void,
-  setIsTournament: (is_tournament:boolean) => void,
-  setTournamentMatch: (match:string|null) => void,
+  setTournamentPlayers: (username: string | null, index: number) => void,
+  setIsTournament: (is_tournament: boolean) => void,
+  setTournamentMatch: (match: string | null) => void,
   resetTournamentPlayer: () => void,
   setGameBoardColor: (Color: string) => void,
-  setTicTacOpponent: (flag:boolean, opponentName: string | null, opponentAvatar: string | null) => void
+  setTicTacOpponent: (flag: boolean, opponentName: string | null, opponentAvatar: string | null) => void
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -86,7 +86,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   tournament_match: null,
   tournament_match_winner: null,
-  TicTacOpponent: { isFound: false ,username: null, avatar: null },
+  TicTacOpponent: { isFound: false, username: null, avatar: null },
 
   switchGame: () => set((state) => ({
     currentGame: state.currentGame === 'pingpong' ? 'tictactoe' : 'pingpong',
@@ -101,17 +101,17 @@ export const useGameStore = create<GameState>((set, get) => ({
     return `${gamePath}/${state.selectedMode}`;
   },
   //set tournament players
-  setTournamentPlayers: (username, index) => 
+  setTournamentPlayers: (username, index) =>
     set((state) => {
       const updatedPlayers = [...state.tournament_players];
       updatedPlayers[index] = username;
       return { tournament_players: updatedPlayers };
     }),
-    //here i set this var as true to mark that im in a tournament(to not use 'player1 and player2' and use the values in tournament_players)
-    setIsTournament: (flag) => set({is_tournament: flag}),
-    setTournamentMatch: (match) => set({tournament_match: match}),
-    resetTournamentPlayer: ()=> set({tournament_players: Array(7).fill(null)}),
-    handleGameSwitch: () => {
+  //here i set this var as true to mark that im in a tournament(to not use 'player1 and player2' and use the values in tournament_players)
+  setIsTournament: (flag) => set({ is_tournament: flag }),
+  setTournamentMatch: (match) => set({ tournament_match: match }),
+  resetTournamentPlayer: () => set({ tournament_players: Array(7).fill(null) }),
+  handleGameSwitch: () => {
     const { setShowContent, toggleReverse, toggleDots, switchGame } = get();
     setShowContent(false);
     setTimeout(() => {
@@ -130,27 +130,28 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   )),
   setGameBoardColor: (color) => {
-    set({GameBoardColor: color})
+    set({ GameBoardColor: color })
   },
-  setTicTacOpponent: (flag:boolean ,opponentUsername: null | string, opponentAvatar: null | string) => set({TicTacOpponent: {
-          isFound: flag,
-          username: opponentUsername,
-          avatar: opponentAvatar
-        }
-      }
-    ),
-    setInvitedId: (id) => {
-      set({invited_id: id})
-    },
-    setInviterId: (id) => {
-      set({inviter_id: id})
-    },
-    resetInvitedId: () => {
-      set({invited_id: null})
-    },
-    resetInviterId: () => {
-      set({inviter_id: null})
+  setTicTacOpponent: (flag: boolean, opponentUsername: null | string, opponentAvatar: null | string) => set({
+    TicTacOpponent: {
+      isFound: flag,
+      username: opponentUsername,
+      avatar: opponentAvatar
     }
-    
+  }
+  ),
+  setInvitedId: (id) => {
+    set({ invited_id: id })
+  },
+  setInviterId: (id) => {
+    set({ inviter_id: id })
+  },
+  resetInvitedId: () => {
+    set({ invited_id: null })
+  },
+  resetInviterId: () => {
+    set({ inviter_id: null })
+  }
+
 
 }))

@@ -11,13 +11,13 @@ interface AvatarProps {
 
 const Avatar: React.FC<AvatarProps> = ({width, height,avatar}) => {
     return (
-        <Image
-            src={avatar ? avatar : IMAGES.profile}
-            alt="Profile Picture"
-            width={width}
-            height={height}
-            className="rounded-full cursor-pointer object-cover"
-        />
+            <Image
+                src={avatar ? avatar : IMAGES.profile}
+                alt="Profile Picture"
+                width={width}
+                height={height}
+                className="rounded-full cursor-pointer object-cover"
+                />
     )
 }
 

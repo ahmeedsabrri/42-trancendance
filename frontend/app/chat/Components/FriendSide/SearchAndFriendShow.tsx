@@ -9,6 +9,7 @@ import { useUserStore } from "@/app/store/store";
 import { UserFriendsData, useUserFriendsStore } from "@/app/store/UserFriendsStrore";
 import React from "react";
 import FriendsSkeleton from "../utils/FriendsSkeleton";
+import { useEffect } from "react";
 
 const Inputcomponent = () => {
     const setSearch = useChatStore((state) => state.setSearch);
@@ -40,38 +41,29 @@ const FriendShow = () => {
     const setConversationSelected = useChatStore((state) => state.setConversationSelected);
     const conversationSelected = useChatStore((state) => state.conversationSelected);
     const search = useChatStore((state) => state.search);
-    const { fetchOwnFriends, UserOwnfriends} = useUserFriendsStore();
-    const friends: UserFriendsData[] = UserOwnfriends || [];
+    const { UserOwnfriends} = useUserFriendsStore();
+    const [friends, setFriends] = React.useState<UserFriendsData[] | null>(UserOwnfriends);
     const [IsLoading] = React.useState(false);
-    
-    React.useEffect(() => {
-      fetchOwnFriends();
-    }, [UserOwnfriends, fetchOwnFriends]);
+
+    useEffect(() => {
+        setFriends(UserOwnfriends);
+    }, [UserOwnfriends]);
 
     const handleNewConversation = async ( currentUser: UserFriendsData ) => {
 
-        console.log("currentUser", currentUser);
-
         if (!currentUser || !user)
             return;
-        try
-        {
-            const conversation: Conversation | null = findConversation(currentUser.id, user.id, conversations);
 
-            if (conversation)
-                setConversationSelected(conversation);
-            else
-            {
-                const newConversationCreated: Conversation = await newConversation(currentUser.id);
-                if (!newConversationCreated)
-                    return;
-                setConversationSelected(newConversationCreated);
-                queryClient.setQueryData<Conversation[]>(["conversations"], [newConversationCreated, ...conversations]);
-            }
-        }
-        catch (err)
+        const conversation: Conversation | null = findConversation(currentUser.id, user.id, conversations);
+        if (conversation)
+            setConversationSelected(conversation);
+        else
         {
-            console.error("Error creating new conversation:", err);
+            const newConversationCreated: Conversation = await newConversation(currentUser.id);
+            if (!newConversationCreated)
+                return;
+            setConversationSelected(newConversationCreated);
+            queryClient.setQueryData<Conversation[]>(["conversations"], [newConversationCreated, ...conversations]);
         }
     };
    

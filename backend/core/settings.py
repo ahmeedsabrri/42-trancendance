@@ -1,22 +1,27 @@
 from datetime import timedelta
-from core.env import env, BASE_DIR
-import os
+from pathlib import Path
+import environ, os
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangocore.com/en/4.2/howto/deployment/checklist/
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
+env = environ.Env()
+
+DOMAIN_NAME = env("DOMAIN_NAME")
+
 SECRET_KEY = env("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# CORS
-CORS_ALLOWED_ORIGINS = ["https://localhost"]
+
+DEBUG = False
+
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+
+
+CORS_ALLOWED_ORIGINS = [DOMAIN_NAME]
+
 CORS_ALLOW_CREDENTIALS = True
-# CORS_EXPOSE_HEADERS = ["Set-Cookie"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://localhost",
+    DOMAIN_NAME,
 ]
 
 INSTALLED_APPS = [
@@ -62,7 +67,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
+        'DIRS': [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -78,39 +83,22 @@ TEMPLATES = [
 ASGI_APPLICATION = "core.asgi.application"
 
 
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [('redis', 6379)],
-#         },
-#     },
-# }
-
-CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-AUTH_USER_MODEL = "users.User"
-
-# Database
-# https://docs.djangocore.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {"default": env.db("DB_URL", default="sqlite:///db.sqlite3")}
-
-DATABASES = {
+CHANNEL_LAYERS = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('SQL_DB'),
-        'USER': os.environ.get('SQL_USER'),
-        'PASSWORD': os.environ.get('SQL_PASSWORD'),
-        'HOST': os.environ.get('SQL_HOST'),
-        'PORT': os.environ.get('SQL_PORT'),
-    }
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    },
 }
 
+AUTH_USER_MODEL = "users.User"
 
-# Password validation
-# https://docs.djangocore.com/en/4.2/ref/settings/#auth-password-validators
+
+DATABASES = {
+    'default': env.db()
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -144,6 +132,7 @@ USE_TZ = True
 # https://docs.djangocore.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/backend_staticfiles/"
+
 STATIC_ROOT = BASE_DIR / "static"
 
 # Default primary key field type
@@ -179,19 +168,23 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 # Frontend URL for verification link
-FRONTEND_URL = 'http://localhost:3000'
 
 OAUTH_CLIENT_ID = env("42_OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("42_OAUTH_CLIENT_SECRET")
 OAUTH_REDIRECT_URI = env("42_OAUTH_REDIRECT_URI")
+OAUTH_GET_INFO_URL = env("42_GET_INFO_URL")
+OAUTH_TOKEN_URL = env("42_TOKEN_URL")
 
+
+
+EMAIL_VERIFICATION_URL = env("EMAIL_VERIFICATION_URL")
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sabriahmeed1@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'kmoudscyrfclewus'  # Use the generated App Password here
-DEFAULT_FROM_EMAIL = 'your-email@gmail.com'  # Default sender email
-
-IMGBB_API_KEY = '053f132b8b449609833ef0da83ad84fa'
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+IMGBB_API_URL = env("IMGBB_API_URL")
+IMGBB_API_KEY = env("IMGBB_API_KEY")

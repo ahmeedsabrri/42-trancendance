@@ -38,25 +38,21 @@ export default function SignInForm() {
   const onSubmit = () => {
     login(formData.username, formData.password)
       .then(() => {
-        console.log("Logged in successfully");
-          router.push("/"); // Redirect on successful login
+          router.push("/dashboard");
       })
       .catch((error) => {
-        console.log(error);
         if (error.response && error.response.status === 400) {
         const errorData = error.response.data;
         if (errorData.otp_code) {
           setOtpFormOpen(true);
           notifToast("OTP code required");
         } else {
-          // Handle other validation errors
           setError("root", {
             type: "manual",
             message: errorData || "An error occurred",
           });
         }
       } else {
-        // console.error(error.response.data);
         setError("root", {
           type: "manual",
           message: error.response.data.detail
@@ -68,12 +64,9 @@ export default function SignInForm() {
   const onOtpSubmit = (otp_code:string) => {
     loginWithOtp(formData.username, formData.password, otp_code)
       .then(() => {
-        console.log("Logged in successfully");
-        router.push("/"); // Redirect on successful login
-        notifToast("Logged in successfully");
+        router.push("/");
       })
       .catch((error) => {
-        console.log(error);
         setError("root", {
           type: "manual",
           message: error.response?.data.message || "Invalid OTP code", // Handle other validation errors

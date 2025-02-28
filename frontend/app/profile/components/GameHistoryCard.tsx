@@ -2,6 +2,7 @@ import React from 'react';
 // import { GameHistory } from '../types';
 import { Trophy, X, Circle } from 'lucide-react';
 import { MatchData } from '@/app/store/store';
+import { timeHandle } from '@/app/chat/Components/utils/utils';
 
 interface GameHistoryCardProps {
   game: MatchData;
@@ -30,7 +31,7 @@ export function GameHistoryCard({ game }: GameHistoryCardProps) {
           )}
           <div>
             <p className="text-white font-medium">vs {game.opponent}</p>
-            <p className="text-sm text-white/50">{game.played_at}</p>
+            <p className="text-sm text-white/50">{timeHandle(game.played_at)}</p>
             <p className='text-sm text-white/50'>{game.status}</p>
 
           </div>

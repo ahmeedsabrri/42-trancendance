@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
-
-// Axios instance with base URL and credentials
-const api = axios.create({
-  baseURL: 'https://localhost/api/',
-  withCredentials: true,
-});
+import api from '@/app/auth/utils';
 
 interface User {
   id: number;
@@ -54,7 +49,7 @@ export const useSearchStore = create<SearchState>((set) => ({
       } else {
         set({ error: 'An unknown error occurred' });
       }
-      console.error('Failed to mark notification as read:', error);
+
     }
     // } catch (error: any) {
     //   set({ error: error.message, isLoading: false, results: [] });

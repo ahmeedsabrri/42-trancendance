@@ -20,7 +20,6 @@ const UserComp = () => {
                     <div className="w-fit h-full p-1 transition-all">
                         <div className="size-fit h-full m-1 p-2">
                             <h1 className="font-bold text-white">{conversationSelected?.userTarget?.username}</h1>
-                            {/* <p>{conversationSelected?.userTarget.status ? "Online": "Offline"}</p> */}
                         </div>
                     </div>
                     : <div className="transition-all"></div>

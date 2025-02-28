@@ -11,7 +11,6 @@ export default function Settings() {
   React.useEffect(() => {
     userRef.current = user;    
   }, [user]);
-  // Only fetch user data once when component mounts
   React.useEffect(() => {
       fetchUser();
   }, [isInitialized, fetchUser]);

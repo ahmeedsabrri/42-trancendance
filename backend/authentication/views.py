@@ -22,10 +22,9 @@ User = get_user_model()
 class VerifyEmailView(APIView):
     permission_classes = []
     def post(self, request):
-        print(request.data)
-        uid = request.data.get('uid')
-        token = request.data.get('token')
         try:
+            uid = request.data.get('uid')
+            token = request.data.get('token')
             uid = force_str(urlsafe_base64_decode(uid))
             user = User.objects.get(pk=uid);
             if default_token_generator.check_token(user, token):
@@ -101,7 +100,7 @@ class RegisterView(APIView):
                 error_message = "An error occurred during registration."
             return Response({"message": error_message}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"message": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": e}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OauthCallBackView(APIView):
@@ -149,17 +148,3 @@ class Enable2FAView(TwoFaBaseView):
 
 class Disable2FAView(TwoFaBaseView):
     context = {"action": "disable"}
-
-
-
-# class ChangePasswordView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-#     def post(self, request):
-#         user = request.user
-#         old_password = request.data.get("current_password")
-#         new_password = request.data.get("new_password")
-#         if not user.check_password(old_password):
-#             return Response({"message": "Old password is incorrect"}, status=400)
-#         user.set_password(new_password)
-#         user.save()
-#         return Response({"message": "Password changed successfully"}, status=200)

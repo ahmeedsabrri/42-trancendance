@@ -31,6 +31,8 @@ interface ChatStore {
     setUserId: (user_id: number) => void;
     socket: WebSocket | null;
     setSocket: (socket: WebSocket) => void;
+    freindUpdate: boolean;
+    setFreindUpdate: (freindUpdate: boolean) => void;
 
     eventMessage: MessageEvent;
     setEventMessage: (eventMessage: MessageEvent) => void;
@@ -49,6 +51,8 @@ const useChatStore = create<ChatStore>((set, get) => ({
     setUserId: (user_id: number) => set({ user_id }),
     socket: null,
     setSocket: (socket: WebSocket) => set({socket}),
+    freindUpdate: false,
+    setFreindUpdate: (freindUpdate: boolean) => set({ freindUpdate }),
 
     eventMessage: new MessageEvent(""),
     setEventMessage: (eventMessage: MessageEvent) => set({ eventMessage }),
@@ -81,7 +85,7 @@ const useChatStore = create<ChatStore>((set, get) => ({
     friends: [],
     setFriends: (friends: UserData[]) => {
         set({ friends });
-    }
+    },
 
 }));
 

@@ -18,25 +18,28 @@ const Canvas = () => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { player1, player2, ball } = useGameStateStore();
-    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, resetCountdown, resetInvitedCountdown, setPlayer1info, setPlayer2info, resetPlayersInfo, game_status, countdown, invitedCountdown } = useGameStateStore();
+    const { setKeyPressed, updatePaddles, updateBall, setWinner, setGameStatus, setPlayer1info, setPlayer2info, game_status, countdown, invitedCountdown } = useGameStateStore();
 
     const mode = useParams().mode;
     const currentStateRef = useRef(currentState);
-    const socketUrl = `wss://localhost/ws/game/${mode}Game/${invited_id ? invited_id : ''}`;
+    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+    if (!base_wws_url) {
+        throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
+    }
+    const socketUrl = `${base_wws_url.replace(/\/$/, '')}/game/${mode}Game/${invited_id ? invited_id : ''}`;
 
     const {
         sendJsonMessage,
         lastJsonMessage,
     } = useWebSocket<GameState>(socketUrl, {
         shouldReconnect: () => false,
-        onError: (event) => console.log('WebSocket error:', event),
-        onOpen: () => console.log('WebSocket connected'),
-        onClose: () => console.log('WebSocket disconnected'),
+        onError: () => {},
+        onOpen: () => {},
+        onClose: () => {},
     });
 
     useEffect(() => {
         if (!countdown && mode === "online") {
-            console.log("send the game to be updated");
             handleCurrentState();
             sendJsonMessage({ "Action": "StartGame" });
         }
@@ -50,7 +53,6 @@ const Canvas = () => {
 
                 if (lastJsonMessage.PLAYERS) {
                     const PLAYERS = lastJsonMessage.PLAYERS;
-                    console.log(PLAYERS);
 
                     if (PLAYERS.PLAYER1)
                         setPlayer1info(PLAYERS.PLAYER1 || '');
@@ -109,10 +111,7 @@ const Canvas = () => {
         return () => {
             document.removeEventListener('keydown', keydownHandler);
             document.removeEventListener('keyup', keyupHandler);
-            resetCountdown();
-            resetInvitedCountdown();
-            resetPlayersInfo();
-        };  // eslint-disable-next-line react-hooks/exhaustive-deps
+        };
     }, [sendJsonMessage, setKeyPressed]);
 
     useEffect(() => {
@@ -148,17 +147,12 @@ const Canvas = () => {
     }, [game_status, invited_id, invitedCountdown, router]);
 
     if (mode === "online") {
-        if (game_status === "waiting" && invited_id && invitedCountdown > 0) {
-            console.log("waiting for fro", invited_id, mode);
+        if (game_status === "waiting" && invited_id && invitedCountdown > 0)
             return <WaitingForPlayer />
-        }
-        else if (game_status === "waiting") {
-            console.log("wainting", invited_id, mode);
+        else if (game_status === "waiting")
             return <WaitingForPlayer />
-        }
-        else if (game_status === "ready" && countdown > 0) {
+        else if (game_status === "ready" && countdown > 0)
             return <WaitingForPlayer />
-        }
     }
 
 

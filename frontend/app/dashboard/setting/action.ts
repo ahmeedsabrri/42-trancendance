@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import api from '@/app/auth/utils';
 export interface TwoFAError {
   otp_code?: string[];
   error?: string[];
@@ -28,11 +28,6 @@ interface TwoFAResponse {
   status: string;
 }
 
-// Base API instance
-const api = axios.create({
-  baseURL: 'https://localhost/api',
-  withCredentials: true,
-});
 
 // Change password function
 export async function changePassword(data: PasswordChangeFormData) {
@@ -80,7 +75,6 @@ const handleTwoFactorEnable = async (otpCode: string) => {
   }
 };
 
-// Disable 2FA function
 const handleTwoFactorDisable = async (otpCode: string) => {
   try {
     const response = await api.post<TwoFAResponse>('/auth/2fa/disable/', {

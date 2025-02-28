@@ -15,12 +15,16 @@ function CallbackContent() {
 
   useEffect(() => {
     const code = searchParams.get('code');
+    const error = searchParams.get('error');
+    // const errorDescription = searchParams.get('error_description');
+
+    if (error === 'access_denied') {
+      redirect('/auth');
+      return;
+    }
     const handleCallback = () => {
-      console.log("Code: ", code);
       Oauth42(code as string)
-        .then((res) => {
-          console.log(res.data.message);
-          console.log("Logged in successfully");
+        .then(() => {
           router.push('/dashboard');
         })
         .catch((error) => {

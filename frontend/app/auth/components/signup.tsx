@@ -49,6 +49,13 @@ export default function SignUpForm() {
   const { register: registerUser } = AuthActions(); // Note: Renamed to avoid naming conflict with useForm's register
 
   const onSubmit = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError("root", {
+        type: "manual",
+        message: "Passwords do not match",
+      });
+      return;
+    }
     registerUser(
       formData.firstName,
       formData.lastName,
@@ -57,11 +64,9 @@ export default function SignUpForm() {
       formData.password
     )
       .then((res) => {
-        console.log("Registered successfully");
         toastup(res.data.message);
       })
       .catch((err) => {
-        console.log("Error registering user", err.response?.data);
         setError("root", {
           type: "manual",
           message: err.response?.data.message,

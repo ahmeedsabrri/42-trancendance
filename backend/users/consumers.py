@@ -44,12 +44,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         # Handle incoming WebSocket messages (optional)
-        text_data_json = json.loads(text_data)
-        action = text_data_json.get('action')
+        try:
+            text_data_json = json.loads(text_data)
+            action = text_data_json.get('action')
 
-        if action == 'mark_as_read':
-            notification_id = text_data_json.get('notification_id')
-            await self.mark_notification_as_read(notification_id)
+            if action == 'mark_as_read':
+                notification_id = text_data_json.get('notification_id')
+                await self.mark_notification_as_read(notification_id)
+        except json.JSONDecodeError:
+            print('Invalid JSON format')
     
     async def send_notification(self, event):
         # Send the notification to the WebSocket
@@ -67,6 +70,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             notification.read_notification()
         except Notification.DoesNotExist:
             pass
+
     @sync_to_async
     def update_user_status(self, user_id, is_online):
         User.objects.filter(id=user_id).update(is_online=is_online)

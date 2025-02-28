@@ -10,7 +10,6 @@ export default function Logout() {
             window.location.href = "/auth/login";
           })
           .catch(() => {
-            console.error("Logout failed");
             });
         };
 

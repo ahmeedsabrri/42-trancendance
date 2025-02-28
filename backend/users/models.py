@@ -11,7 +11,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     twofa_enabled = models.BooleanField(default=False)
     otp_base32 = models.CharField(max_length=32, default=pyotp.random_base32)
-    level = models.PositiveIntegerField(default=0)
+    level = models.PositiveIntegerField(default=1)
+    xp = models.IntegerField(default=0)
     status = models.CharField(max_length=20, default="offline")
     is_online = models.BooleanField(default=False)
     
@@ -94,7 +95,7 @@ class Notification(models.Model):
     message = models.TextField(blank=True)
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=now)
-    
+
     def __str__(self):
         return f"Notification for {self.recipient.username} ({self.notification_type})"
 

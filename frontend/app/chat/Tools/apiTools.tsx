@@ -2,92 +2,73 @@
 
 import axios, {AxiosResponse} from "axios";
 import { sortConversationsByDate } from "../Components/utils/utils";
-
-const api = axios.create({
-    baseURL: 'https://localhost/api/',
-    withCredentials: true,
-});
-
+import api from "@/app/auth/utils";
 const source = axios.CancelToken.source();
 
 const getNotifications = async () => {
     try {
-        const response = await api.get(`/notifications/`);
-
+        const response = await api.get(`/notifications/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
-    }
-    source.cancel('Operation canceled by the user.');
+    catch {}
 }
 
 const newConversation = async (user: number) => {
     try {
-        const response = await api.post(`chat/new_conversation/${user}`);
-        // console.log(response.data);
+        const response = await api.post(`/chat/new_conversation/${user}/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
-    }
-    source.cancel('Operation canceled by the user.');
+    catch {}
 }
 
 const fetchConversations = async () => {
     try {
-        const response : AxiosResponse = await api.get(`chat/conversations`);
+        const response : AxiosResponse = await api.get(`/chat/conversations/`,{
+            withCredentials: true,
+          });
         if (!response.data) {
             return [];
         }
         return sortConversationsByDate(response.data);
     }
-    catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
-    }
-    source.cancel('Operation canceled by the user.');
+    catch {}
 };
 
 const fetchMessages = async (conversation_id: number) => {
     try {
-        const response : AxiosResponse = await api.get(`chat/conversation/${conversation_id}/messages`);
+        const response : AxiosResponse = await api.get(`/chat/conversation/${conversation_id}/messages/`,{
+            withCredentials: true,
+          });
         return response.data;
     }
-    catch (error) {
-        if (axios.isCancel(error)) {
-            console.log('Request canceled', error.message);
-        }
-        else {
-            console.log('Error', error);
-        }
-    }
-    source.cancel('Operation canceled by the user.');
+    catch  {}
 }
 
 const getMatcheHistory = async (id: number) => {
-    const response = await api.get(`match_history/${id}`);
-    console.log(response.data);
-    return response.data.matches;
+    try {
+        const response = await api.get(`match_history/${id}`,{
+            withCredentials: true,
+          });
+        return response.data.matches;    
+    }
+    catch  {}
 }
 
 const handleRequestGames = async (username:string, type:string) => {
-    const response = await api.get(`users/request/${type}/${username}/`);
-    return response;
+    
+    try {
+        const response: AxiosResponse = await api.get(`users/request/${type}/${username}/`,{
+            withCredentials: true,
+          });
+        return response;
+    }
+    catch {}
 }
+
+source.cancel('Operation canceled by the user.');
 
 export { fetchConversations, fetchMessages, newConversation, getNotifications, handleRequestGames, getMatcheHistory };

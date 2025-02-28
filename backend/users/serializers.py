@@ -19,6 +19,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class UpdateUsernameSerializer(serializers.ModelSerializer):
     
     password = serializers.CharField(write_only=True, required=True)
+    username = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
@@ -27,6 +28,17 @@ class UpdateUsernameSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         username = data.get('username')
+        password = data.get('password')
+
+        if not password or password.strip() == "":
+            raise serializers.ValidationError({
+                'message': 'Password cannot be empty.'
+            })
+        if not username:
+            print('username', username)
+            raise serializers.ValidationError({
+                'message': 'Username cannot be empty.'
+            })
         if User.objects.filter(username=username).exists():
             raise serializers.ValidationError({
                 'message': 'This username is already taken.'
@@ -43,6 +55,7 @@ class UpdateUsernameSerializer(serializers.ModelSerializer):
         instance.username = validated_data.get('username', instance.username)
         instance.save()
         return instance
+
     def to_representation(self, instance):
         return { 'message': 'Username updated successfully' } 
 

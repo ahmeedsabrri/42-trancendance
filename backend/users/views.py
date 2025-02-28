@@ -5,11 +5,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import SearchUserSerializer, UpdateUsernameSerializer, UserInfoSerializer, PasswordUpdateSerializer,ProfileSerializer,NotificationSerializer,FriendsSerializer,UserProfileSerializer
 from rest_framework import status,  permissions
-from rest_framework.generics import GenericAPIView
 from rest_framework import generics
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from .utils.utils import send_notification 
+from django.http import Http404
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from PIL import Image as PilImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import requests
 
 User = get_user_model()
 
@@ -44,9 +50,6 @@ class PasswordUpdateView(generics.UpdateAPIView):
         self.perform_update(serializer)
         return Response({
             'message': 'Password successfully updated.',
-            'status': 'success',
-            'user_id': instance.id,
-            'username': instance.username
         }, status=status.HTTP_200_OK)
 
 
@@ -104,6 +107,22 @@ class SendGameInviteView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if Connection.objects.filter( Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_200_OK
+                )
+            if not Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is not your friend."
+                    },
+                    status=status.HTTP_200_OK
+                )
              # Create a notification using the `create_notification` method
             notification = Notification.create_notification(
                 sender=sender,
@@ -135,7 +154,7 @@ class SendGameInviteView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class SendRequestView(APIView):
@@ -206,7 +225,7 @@ class SendRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 class AcceptRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -276,7 +295,7 @@ class AcceptRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class AcceptInviteRequestView(APIView):
@@ -286,10 +305,15 @@ class AcceptInviteRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.accept(sender)
-            
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return Response(
+                    {
+                        "error": "Invalid receiver",
+                        "message": "User is blocked and cannot receive game invites."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -327,7 +351,7 @@ class AcceptInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineInviteRequestView(APIView):
@@ -338,9 +362,8 @@ class DeclineInviteRequestView(APIView):
         try:
             sender = User.objects.get(username=username)
             receiver = request.user
-            if Connection.objects.filter(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)).exists():
-                connection = Connection.objects.get(Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender))
-                connection.decline()
+            if Connection.objects.filter(Q(sender=sender, receiver=receiver, status="blocked") | Q(sender=receiver, receiver=sender, status="blocked")).exists():
+                return 
             notification = Notification.create_notification(
                 sender=receiver,
                 recipient=sender,
@@ -378,7 +401,7 @@ class DeclineInviteRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class DeclineRequestView(APIView):
@@ -432,7 +455,7 @@ class DeclineRequestView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class BlockRequestView(APIView):
@@ -441,7 +464,7 @@ class BlockRequestView(APIView):
         try:
             receiver = User.objects.get(username=username)
             sender = request.user
-            connection = Connection.objects.get(sender=sender, receiver=receiver)
+            connection = Connection.objects.get(Q(sender=sender,receiver=receiver) | Q(receiver=sender,sender=receiver))
             if connection.status == "blocked" or connection.status == "rejected":
                 return Response(
                     {
@@ -450,8 +473,21 @@ class BlockRequestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if connection.status == "accepted":
-                connection.block()
+            if connection.status != "blocked":
+                connection.sender = sender
+                connection.receiver = receiver
+                connection.status = "blocked"
+                connection.save()
+
+            notification = Notification.create_notification(
+                sender=sender,
+                recipient=receiver,
+                notification_type='block',
+                message=f'{sender.username} blocked you.'
+            )
+            notification_data  = NotificationSerializer(notification).data
+            send_notification(receiver.id, notification_data)
+
             return Response(
                 {
                     "message": "Friend blocked successfully."
@@ -477,10 +513,10 @@ class BlockRequestView(APIView):
         except Exception as e:
             return Response(
                 {
-                    "error": "Server error",
+                    "error": "Error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -521,58 +557,8 @@ class ListUserNotificationView(generics.ListAPIView):
         user = self.request.user
         notifications = Notification.objects.filter(recipient=user).select_related('sender').order_by('-created_at')
         return notifications
-    
-    
-class ListBlockedUsersView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    def get(self, request):
-        blocked_users = self.get_queryset()
-        serializer = self.serializer_class(blocked_users, many=True)
-        return Response(serializer.data)
 
-    def get_queryset(self):
-        user = self.request.user
-        blocked_users = Connection.objects.filter(
-            Q(sender=user, status="blocked") | Q(receiver=user, status="blocked")
-        ).select_related('sender', 'receiver')
-        
-        # Collect the users who are blocked (excluding the current user)
-        blocked_user_list = []
-        for connection in blocked_users:
-            if connection.sender != user:
-                blocked_user_list.append(connection.sender)
-            else:
-                blocked_user_list.append(connection.receiver)
-        return blocked_user_list
-    
-    
-class ListConnectionsUsersView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ProfileSerializer
-    
-    def get(self, request):
-        connections = self.get_queryset()
-        serializer = self.serializer_class(connections, many=True)
-        return Response(serializer.data)
 
-    def get_queryset(self):
-        user = self.request.user
-        connections = Connection.objects.filter(
-            Q(sender=user) | Q(receiver=user)
-        ).select_related('sender', 'receiver')
-        
-        connection_users = []
-        for connection in connections:
-            if connection.sender != user:
-                connection_users.append(connection.sender)
-            else:
-                connection_users.append(connection.receiver)
-        return connection_users
-    
-
-# list of friends by username
 class FriendsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FriendsSerializer
@@ -594,6 +580,56 @@ class FriendsListView(generics.ListAPIView):
         return friend_users
 
 
+class CancelRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, username):
+        try:
+            sender = request.user
+            receiver = User.objects.get(username=username)
+            connection = Connection.objects.get(
+                Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
+            )
+            if connection and  connection.status == "accepted":
+                return Response(
+                    {
+                        "error": "Invalid request",
+                        "message": "You are already friends."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            connection.delete()
+            return Response(
+                {
+                    "message": "Request cancelled successfully."
+                },
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid receiver",
+                    "message": f"No user found with username: {username}"
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Connection.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid request",
+                    "message": "No friend request found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Server error",
+                    "message": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 class UnFriendView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -606,6 +642,14 @@ class UnFriendView(APIView):
                 Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
             )
             connection.delete()
+            notification = Notification.create_notification(
+                sender=user,
+                recipient=friend,
+                notification_type='unfriend',
+                message=f'{user.username} unfriended you.'
+            )
+            notification_data  = NotificationSerializer(notification).data
+            send_notification(friend.id, notification_data)
             return Response(
                 {
                     "message": "Friend removed successfully."
@@ -634,7 +678,7 @@ class UnFriendView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 class UnBlockUserView(APIView):
@@ -676,7 +720,7 @@ class UnBlockUserView(APIView):
                     "error": "Server error",
                     "message": str(e)
                 },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
             
 
@@ -686,9 +730,6 @@ class UserSearchView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        # Get all users blocked by the current user
-        
-        # Get all users who have blocked the current user
         blocked_by_users = Connection.objects.filter(
             receiver=user, status='blocked'
         ).values_list('sender', flat=True)
@@ -713,20 +754,22 @@ class UserSearchView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
+    
 
 class DeleteNotificationView(APIView):
     permissions_classes = [permissions.IsAuthenticated]
     
-    def get(self, request, pk):
-        notification = get_object_or_404(Notification, id=pk)
-        notification.delete()
+    def delete(self, request, pk):
+        try:
+            Notification.objects.filter(recipient=request.user).get(id=pk).delete()
+        except Notification.DoesNotExist:
+            raise Http404("Notification does not exist")
         return Response(
             {
                 "message": "Notification deleted successfully."
             },
             status=status.HTTP_200_OK
         )
-        
 
 
 class UpdateUserView(generics.UpdateAPIView):
@@ -742,17 +785,8 @@ class UpdateUserView(generics.UpdateAPIView):
         
 
 
-# views.py
-from rest_framework.generics import UpdateAPIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from django.conf import settings
-from PIL import Image as PilImage
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
-import requests
 
-class ImageUploadView(UpdateAPIView):
+class ImageUploadView(generics.UpdateAPIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [permissions.IsAuthenticated]
     def get_object(self):
@@ -766,6 +800,10 @@ class ImageUploadView(UpdateAPIView):
             return Response({'error': 'No file uploaded'}, status=400)
         print(f"Uploaded file: {uploaded_file.name}, Size: {uploaded_file.size} bytes")
         try:
+            avatar_format = uploaded_file.content_type
+            valid_formats = ['image/png', 'image/jpeg', 'image/jpg']
+            if avatar_format not in valid_formats:
+                return Response({'error': 'Invalid file format. Only PNG and JPEG are allowed.'}, status=400)
             resized_file = self.resize_image(uploaded_file, 128, 128)
             print("Image resized successfully")
             image_url = self.upload_to_imgbb(resized_file)
@@ -773,8 +811,7 @@ class ImageUploadView(UpdateAPIView):
             user.save()
             return Response({'message': 'Upload happened successfully'}, status=200)
         except Exception as e:
-            print(f"Error: {e}")
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': "invalid format or large file, only .png, .jpeg, .jpg that are allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
     def resize_image(self, file, width, height):
         """Resize the uploaded image to the specified dimensions."""
@@ -811,7 +848,7 @@ class ImageUploadView(UpdateAPIView):
             import base64
             encoded_file = base64.b64encode(file_data).decode('utf-8')
             response = requests.post(
-                'https://api.imgbb.com/1/upload',
+                settings.IMGBB_API_URL,
                 data={
                     'key': settings.IMGBB_API_KEY,
                     'image': encoded_file,

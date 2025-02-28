@@ -40,23 +40,29 @@ const TicTac = () => {
     }
 
     interface WebSocketMessage {
-        action: 'identify_players' | 'game_started' | 'score_update' | 'player_won' | 'board_update' |'draw'; 
+        action: 'identify_players' | 'game_started' | 'score_update' | 'player_won' | 'board_update' | 'draw';
         username: string | null;
         opponent_username: string | null;
         user_avatar: string | null;
         opponent_avatar: string | null;
-        mark: 'X' | 'O'; 
+        mark: 'X' | 'O'| null;
         turn: boolean;
-        position: number; 
+        position: number;
         board: CellValue[];
         score: number;
         opponent_score: number;
-        reason: 'GAME FINISHED' | 'OPPONENT DISCONNECTED'; 
+        reason: 'GAME FINISHED' | 'OPPONENT DISCONNECTED';
         sender: string;
         avatar: string;
+        my_turn: boolean;
+        opponent_turn: boolean;
+    }
+    const base_wws_url = process.env.NEXT_PUBLIC_WSS_URL
+    if (!base_wws_url) {
+        throw new Error("NEXT_PUBLIC_NOTIFICATION_WSS_URL is not defined");
     }
 
-    const WS_URL = "wss://localhost/ws/TicTac/remote/";
+    const WS_URL = `${base_wws_url.replace(/\/$/, '')}/TicTac/remote/`;
 
     const websocket = useRef<WebSocket | null>(null)
 
@@ -72,10 +78,9 @@ const TicTac = () => {
         onClose: () => console.log('WebSocket disconnected'),
     });
 
-    const { GameBoardColor, setTicTacOpponent} = useGameStore()
-    const [isInGame, setIsInGame] = useState<boolean>(false);
+    const { GameBoardColor, setTicTacOpponent } = useGameStore()
     const [isMyTurn, setIsMyTurn] = useState<boolean>(false);
-    const [board, setBoard] = useState<CellValue[]>(Array(9).fill(''));
+    const [board, setBoard] = useState<CellValue[]>(Array(9).fill(null));
     const [gameOver, setGameOver] = useState<boolean>(false);
     const [isWaiting, setIsWaiting] = useState<boolean>(true);
     const [scores, setScores] = useState<Scores>({
@@ -91,19 +96,18 @@ const TicTac = () => {
         mark: null,
         winner: { username: null, avatar: null, reason: null }
     });
-    const updateBoard = useRef<CellValue[]>(board);
 
     useEffect(() => {
-        if (isWaiting && !isInGame) {
+        if (gameOver) {
             websocket.current?.close();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [gameOver, setGameOver])
 
 
     useEffect(() => {
         if (!lastJsonMessage) return;
         const handleMessage = async () => {
+            console.log('message : ', lastJsonMessage)
             switch (lastJsonMessage.action) {
                 case 'identify_players':
                     user.current.username = lastJsonMessage.username;
@@ -116,23 +120,17 @@ const TicTac = () => {
 
                 case 'game_started':
                     await new Promise(resolve => setTimeout(resolve, 3000));
-                    setIsInGame(true);
                     setIsWaiting(false);
-                    if (lastJsonMessage.turn)
-                        setIsMyTurn(true)
-                    else
-                        setIsMyTurn(false)
+                    setIsMyTurn(lastJsonMessage.turn ? true : false)
                     break;
 
                 case 'score_update':
                     const scoreObj: Scores = { score: 0, opponent_score: 0 };
-                    if (lastJsonMessage.sender === user.current.username)
-                    {
+                    if (lastJsonMessage.sender === user.current.username) {
                         scoreObj.score = lastJsonMessage.score;
                         scoreObj.opponent_score = lastJsonMessage.opponent_score;
                     }
-                    else
-                    {
+                    else {
                         scoreObj.score = lastJsonMessage.opponent_score;
                         scoreObj.opponent_score = lastJsonMessage.score
                     }
@@ -142,7 +140,9 @@ const TicTac = () => {
 
                 case 'board_update':
                     setBoard([...lastJsonMessage.board]);
-                    setIsMyTurn(true);
+                    setIsMyTurn(lastJsonMessage.sender === user.current.username
+                                ? lastJsonMessage.my_turn
+                                : lastJsonMessage.opponent_turn)
                     break;
 
                 case 'player_won':
@@ -154,8 +154,8 @@ const TicTac = () => {
                     }
                     user.current.winner.username = lastJsonMessage.sender;
                     user.current.winner.avatar = lastJsonMessage.avatar;
-                    user.current.winner.reason = lastJsonMessage.reason;
                     setGameOver(true);
+                    user.current.winner.reason = lastJsonMessage.reason;
                     break;
 
                 case 'draw':
@@ -164,39 +164,22 @@ const TicTac = () => {
         }
         handleMessage()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         , [lastJsonMessage])
 
 
     function resetGame() {
-        const resetBoard = Array(9).fill('');
+        const resetBoard = Array(9).fill(null);
         setBoard([...resetBoard]);
-        if (user.current.mark === 'X')
-            setIsMyTurn(true);
-        else
-            setIsMyTurn(false);
     }
 
     function handleClick(index: number): void {
-        if (!isMyTurn)
+        if (!isMyTurn || board[index] !== null)
             return;
-        if (board[index] !== '')
-            return;
-        const newBoard: CellValue[] = [...board];
-        if ( user.current.mark === 'X')
-            newBoard[index] = IMAGES.X
-        else
-            newBoard[index] = IMAGES.O
-        setBoard(newBoard);
-        updateBoard.current = [...newBoard];
         const data = {
-            "action": "board_update",
             "position": index,
-            "board": updateBoard.current,
-            "mark": user.current.mark
         }
         sendJsonMessage(data);
-        setIsMyTurn(false);
     }
 
     if (isWaiting)
@@ -242,24 +225,32 @@ const TicTac = () => {
                                 </div>
                             </div>
                         </div>
-                        {gameOver ?
-                            <>
-                                <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} reason={user.current.winner.reason} />
-                                <ExitButton />
-                            </>
+                        {gameOver ? <Winner winner={user.current.winner.username} winner_avatar={user.current.winner.avatar} reason={user.current.winner.reason} />
+
                             : (
                                 <div className='h-full w-full flex items-center justify-center flex-col'>
                                     <div className={` ${GameBoardColor} h-full w-2/6 rounded-[46px] shadow-[0_4px_0_rgba(0,0,0,0.25)] flex items-center justify-center select-none`}>
                                         <div className="grid grid-cols-3 grid-rows-3 overflow-hidden border border-white/50 rounded-[46px] w-[96%] h-[96%]">
                                             {board.map((cell, index) =>
-                                                <div key={index} className="flex justify-center items-center object-contain border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
-                                                    <Image src={board[index as number] !== '' ? board[index as number] : ''} alt="cell" fill={true} />
+                                                <div key={index} className="flex justify-center items-center border border-white/50 transition-all duration-500 hover:cursor-pointer" onClick={() => handleClick(index)}>
+                                                    {cell !== null ?
+                                                        (
+                                                        <Image
+                                                            src={cell === 'X' ? IMAGES.X : IMAGES.O}
+                                                            alt="cell"
+                                                            height={100}
+                                                            width={100}
+                                                        />)
+                                                        :
+                                                        ''
+                                                    }
                                                 </div>)}
                                         </div>
                                     </div>
-                                    <ExitButton />
                                 </div>
-                                )}
+                            )}
+                        <ExitButton />
+
                     </div>
                 </div>
             </main >

@@ -1,5 +1,6 @@
 import json
 import asyncio
+from users.models import User
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
@@ -10,8 +11,6 @@ class LocalGameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             await self.accept()
-
-            # self.invite = self.scope["url"]["kwargs"][""]
 
             print("SERVER CONNECTED SUCCESSFULLY...")
             self.user = self.scope["user"]
@@ -101,13 +100,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
             self.user = self.scope["user"]
             self.invite_id = self.scope["url_route"]["kwargs"].get("invite_id", None)
 
-            # if (self.invite_id):
-                # self.invite_id = int(self.invite_id)
-            print(self.invite_id)
-
             self.game_engine = OnlineGameEngine()
 
-            self.group_id = self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
+            self.group_id = await self.game_engine.join_group_or_add_one(self.user, self.channel_name, self.invite_id)
 
             self.room_group_name = f'online_game_{self.group_id}'
 
@@ -117,7 +112,9 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
 
             print("SERVER CONNECTED SUCCESSFULLY...")
 
+            self.p_key = "PLAYER2"
             if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
+                self.p_key = "PLAYER1"
                 self.task = asyncio.create_task(self.game_loop())
         except Exception as e:
             print("Error connecting to server: <error> ", e)
@@ -150,6 +147,7 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "send.message",
                             "game": {
+                                "PLAYERS": group["PLAYERS"],
                                 "WINNER": self.winner,
                             }
                     }
@@ -164,7 +162,6 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 group["status"] = "Finished"
 
             elif (group["status"] == "Abandoned"):
-                print("then here")
                 group["status"] = "Finished"
     
             await self.channel_layer.group_discard(
@@ -183,19 +180,14 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 key_event = json.loads(text_data)
                 key = key_event["key"]
                 is_pressed = key_event["isPressed"]
+                
+                assert key in ["ArrowUp", "ArrowDown"]
 
-                OnlineGameEngine.groups[self.group_id]["channel_name"] = self.channel_name
-        
-                if key in OnlineGameEngine.groups[self.group_id]["key_states"]:
-                    OnlineGameEngine.groups[self.group_id]["key_states"][key] = is_pressed
+                OnlineGameEngine.groups[self.group_id]["PLAYERS"][self.p_key]["key_states"][key] = is_pressed
 
             if self.action == "StartGame" and OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name:
                 OnlineGameEngine.groups[self.group_id]["running"] = True
-
-            # if self.action == "PLAY":
-            #     self.game_engine.running = True
-            # elif self.action == "PAUSE":
-            #     self.game_engine.running = False
+    
         except Exception as e:
             print("Error processing input:", e)
 
@@ -251,54 +243,63 @@ class OnlineGameConsumer(AsyncWebsocketConsumer):
                 "PLAYERS": OnlineGameEngine.groups[self.group_id]["PLAYERS"],
             }
         ))
-    async def close_task(self):
-        if (OnlineGameEngine.groups[self.group_id]["game_leader"] == self.channel_name):
-            if hasattr(self, 'task') and not self.task.done():
-                self.task.cancel()
-                try:
-                    await self.task
-                except asyncio.CancelledError:
-                    print("Task cancelled successfully.")
-                print("game abondoned")
 
 @database_sync_to_async
 def save_match_history(winner, loser, winner_score, loser_score, game_type, status):
-    match_history = MatchHistory.objects.create(
-        winner=winner,
-        loser=loser,
-        score=f"{winner_score}-{loser_score}",
-        game_type=game_type,
-        status=status
-    )
+    try:
+        W_user = User.objects.get(id=winner.id)
+        L_user = User.objects.get(id=loser.id)
 
-    winner_stats, created = PlayerStats.objects.get_or_create(
-        user=winner, 
-        game_type=game_type,
-        defaults={
-            'total_matches': 1,
-            'wins': 1,
-            'win_rate': 100.00
-        }
-    )
+        match_history = MatchHistory.objects.create(
+            winner=winner,
+            loser=loser,
+            score=f"{winner_score}-{loser_score}",
+            game_type=game_type,
+            status=status
+        )
 
-    if not created:
-        winner_stats.total_matches += 1
-        winner_stats.wins += 1
-        winner_stats.win_rate = (winner_stats.wins / winner_stats.total_matches) * 100
-        winner_stats.save()
+        winner_stats, created = PlayerStats.objects.get_or_create(
+            user=winner, 
+            game_type=game_type,
+            defaults={
+                'total_matches': 1,
+                'wins': 1,
+                'win_rate': 100.00
+            }
+        )
 
-    loser_stats, created = PlayerStats.objects.get_or_create(
-        user=loser, 
-        game_type=game_type,
-        defaults={
-            'total_matches': 1,
-            'losses': 1,
-            'win_rate': 0.00
-        }
-    )
+        if not created:
+            winner_stats.total_matches += 1
+            winner_stats.wins += 1
+            winner_stats.win_rate = (winner_stats.wins / winner_stats.total_matches) * 100
+            W_user.xp += 20
+            if W_user.xp >= 100:
+                reminder = W_user.xp % 100
+                W_user.xp = reminder
+                W_user.level += 1
+            winner_stats.save()
+            W_user.save()
 
-    if not created:
-        loser_stats.total_matches += 1
-        loser_stats.losses += 1
-        loser_stats.win_rate = (loser_stats.wins / loser_stats.total_matches) * 100
-        loser_stats.save()
+        loser_stats, created = PlayerStats.objects.get_or_create(
+            user=loser, 
+            game_type=game_type,
+            defaults={
+                'total_matches': 1,
+                'losses': 1,
+                'win_rate': 0.00
+            }
+        )
+
+        if not created:
+            loser_stats.total_matches += 1
+            loser_stats.losses += 1
+            loser_stats.win_rate = (loser_stats.wins / loser_stats.total_matches) * 100
+            L_user.xp += 10
+            if L_user.xp >= 100:
+                reminder = L_user.xp % 100
+                L_user.xp = reminder
+                L_user.level += 1
+            loser_stats.save()
+            L_user.save()
+    except Exception as e:
+            print(f"Error raised while creating player stats: {e}")

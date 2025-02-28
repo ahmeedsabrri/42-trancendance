@@ -7,17 +7,18 @@ import { FriendCard } from '../components/FriendCard';
 import { MonthlyStats } from '../components/MonthlyStats';
 import { GameChart } from '../components/GameChart';
 import { MatchData, useUserStore } from '../../store/store';
-import { useUserFriendsStore } from '../../store/UserFriendsStrore';
+import { UserFriendsData, useUserFriendsStore } from '../../store/UserFriendsStrore';
 import { UserData } from '../../store/store';
 import { useParams } from 'next/navigation';
 import { UserFriendsActions } from '../utils/actions';
 import { Bounce, toast } from 'react-toastify';
 
 export default function Profile() {
-  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory} = useUserStore();
+  const { fetchFriend, user, viewedProfile, loading ,  MatchHistory, fetchUser} = useUserStore();
   const { Userfriends, fetchUserFriends, fetchOwnFriends } = useUserFriendsStore();
   const { username } = useParams();
   const { handleRequest } = UserFriendsActions();
+  const [friends, setFriends] = useState<UserFriendsData[] | null>(Userfriends);
   const [profileState, setProfileState] = useState<UserData| null>(null);
 
   const notifyAdd = (message: string) =>
@@ -84,21 +85,24 @@ export default function Profile() {
   useEffect(() => {
     fetchFriend(username as string);
     fetchUserFriends(username as string);
-    fetchOwnFriends();
+    fetchUser();
+    // eslint-disable-next-line
   }, [username, fetchFriend, fetchUserFriends, fetchOwnFriends]);
 
   useEffect(() => {
+    setFriends(Userfriends);
+  }, [Userfriends]);
+
+  useEffect(() => {
     const profileToShow = username !== user?.username ? viewedProfile : user;
-    console.log("username of profileToShow his id : ", profileToShow?.username, profileToShow?.id);
     setProfileState(profileToShow);
   }, [user, viewedProfile, username]);
 
   if (!user)
     return ;
-  const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend') => {
+  const handleAction = (action: 'accept' | 'decline' | 'block' | 'unblock' | 'send' | 'unfriend' | 'cancel') => {
     handleRequest(username as string, action)
       .then((response) => {
-        console.log(response);
         switch (action) {
           case 'accept':
             notifyAdd(response.data.message);
@@ -111,7 +115,6 @@ export default function Profile() {
           case 'block':
             notifyBlock(response.data.message);
             setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'blocked' } : null);
-            console.log("Blocked");
             break;
           case 'unblock':
             notifyUnblock(response.data.message);
@@ -123,12 +126,16 @@ export default function Profile() {
             break;
           case 'unfriend':
             notifyCancel(response.data.message);
+            fetchOwnFriends();
+            setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'not_connected' } : null);
+            break;
+          case 'cancel':
+            notifyCancel(response.data.message);
             setProfileState((prevState) => prevState ? { ...prevState, connection_type: 'not_connected' } : null);
             break;
         }
       })
       .catch((err) => {
-        console.log(err);
         notifyErr(err.response.data.message);
       });
   };
@@ -141,7 +148,7 @@ export default function Profile() {
     return <div>Profile not found</div>;
   }
   return (
-    <div className="w-full h-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-1 border border-white/10">
+    <div className="size-full hide-scrollbar overflow-y-scroll bg-gray-500 py-1 bg-opacity-30 backdrop-blur-xl rounded-3xl overflow-hidden px-1 border border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProfileHeader
           userProfile={profileState}
@@ -150,6 +157,7 @@ export default function Profile() {
           addFriend={() => handleAction('send')}
           onAccepte={() => handleAction('accept')}
           onDecline={() => handleAction('decline')}
+          onCancel={() => handleAction('cancel')}
         />
         {profileState.connection_type !== 'blocked' ? (
           <div>
@@ -167,7 +175,7 @@ export default function Profile() {
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-white mb-6 font-orbitron">Friends</h2>
-                {Userfriends?.map((friend) => (
+                {friends?.map((friend) => (
                   <FriendCard
                     key={friend.id}
                     friend={friend}

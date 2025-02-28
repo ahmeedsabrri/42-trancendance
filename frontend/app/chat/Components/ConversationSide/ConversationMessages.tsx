@@ -21,6 +21,7 @@ const ConversationMessages = () => {
     });
 
     useEffect(() => {
+
         const handleWindowFocus = () => {
             if (conversationRef.current) {
                 conversationRef.current.scrollTo({
