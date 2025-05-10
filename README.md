@@ -177,8 +177,5 @@ The project includes a Makefile with several useful commands:
 
 ## Contributors
 
-- [Your Team Members]
+- [ahmed sabri, Khalid Zerri, Anas Raji Afoua, Tariq Ben Dallah]
 
-## License
-
-[Your License Information]
