@@ -63,7 +63,7 @@ This project is a modern web platform that combines:
 ## Project Structure
 
 ```
-intra-uuid-dc08e2df-3018-47c9-98c6-c4ca83b712a8-6350877-kzerri/
+42-trancendance/
 ├── docker-compose.yml    # Docker composition configuration
 ├── Makefile              # Development and deployment commands
 ├── backend/              # Django backend application
@@ -93,7 +93,7 @@ intra-uuid-dc08e2df-3018-47c9-98c6-c4ca83b712a8-6350877-kzerri/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd intra-uuid-dc08e2df-3018-47c9-98c6-c4ca83b712a8-6350877-kzerri
+   cd 42-trancendance
    ```
 
 2. **Create environment files**
